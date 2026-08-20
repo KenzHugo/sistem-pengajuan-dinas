@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SiPaDin — Laporan & Rekapitulasi Dinas</title>
+    <meta name="description" content="Laporan & Rekapitulasi Perjalanan Dinas PT Adiprima Suraprinta." />
+
+    <!-- TAILWIND CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- PHOSPHOR ICONS STYLESHEETS -->
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" />
+
+    <!-- CUSTOM STYLES -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="bg-[#090d16] text-slate-100 min-h-screen flex antialiased selection:bg-purple-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[99999] space-y-3 w-80 max-w-[calc(100vw-2.5rem)] pointer-events-none"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="atasan-sidebar-overlay" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-40 hidden lg:hidden" onclick="closeMobileSidebar()"></div>
+
+    <!-- SIDEBAR ATASAN -->
+    <aside id="atasan-mobile-sidebar" class="w-64 bg-[#0f172a] border-r border-[#1e293b] flex flex-col justify-between flex-shrink-0 z-50">
+        
+        <div>
+            <!-- Sidebar Header / Logo -->
+            <div class="flex items-center justify-between px-6 py-5 border-b border-[#1e293b]">
+                <a href="dashboard-atasan.html" class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                        <i class="ph-fill ph-airplane-tilt text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="text-white font-extrabold text-base tracking-tight block">SiPaDin</span>
+                        <span class="text-[9px] text-purple-400 font-bold uppercase tracking-wider">Manager Portal</span>
+                    </div>
+                </a>
+                <button onclick="closeMobileSidebar()" class="lg:hidden text-slate-400 hover:text-white">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Manager Profile Info -->
+            <div class="p-4 mx-3 my-3 rounded-2xl bg-[#141e33] border border-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                        BP
+                    </div>
+                    <div class="overflow-hidden min-w-0">
+                        <p class="text-xs font-bold text-white truncate">Budi Pratama</p>
+                        <p class="text-[11px] text-purple-300/80 truncate">IT &amp; Ops Manager</p>
+                        <span class="inline-flex items-center gap-1 text-[9px] text-emerald-400 font-semibold mt-0.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Otoritas Approval
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="px-3 space-y-1 mt-2">
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider px-3 mb-2">Menu Utama</p>
+                
+                <a href="dashboard-atasan.html" class="sidebar-link">
+                    <i class="ph-bold ph-clipboard-text text-base"></i>
+                    <span>Verifikasi Pengajuan</span>
+                </a>
+
+                <a href="laporan-atasan.html" class="sidebar-link active">
+                    <i class="ph-bold ph-chart-bar text-base"></i>
+                    <span>Laporan &amp; Rekap</span>
+                </a>
+
+            </nav>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-[#1e293b]">
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all">
+                <i class="ph-bold ph-sign-out text-base"></i>
+                <span>Keluar Aplikasi</span>
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="flex-1 flex flex-col min-w-0 min-h-screen">
+
+        <!-- Top Header Bar -->
+        <header class="sticky top-0 z-30 bg-[#090d16]/90 backdrop-blur-md border-b border-[#1e293b] px-4 md:px-8 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button onclick="openMobileSidebar()" class="lg:hidden text-slate-400 hover:text-white p-2 rounded-xl bg-[#141e33] border border-white/5">
+                    <i class="ph-bold ph-list text-lg"></i>
+                </button>
+                <div>
+                    <h1 class="text-base md:text-lg font-bold text-white">Laporan &amp; Rekapitulasi Anggaran</h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">Analisis pengeluaran, durasi, dan sebaran tujuan dinas divisi</p>
+                </div>
+            </div>
+
+            <!-- Export Buttons -->
+            <div class="flex items-center gap-2">
+                <button onclick="exportToCSV()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#141e33] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
+                    <i class="ph-bold ph-file-csv text-emerald-400"></i> Export CSV
+                </button>
+                <button onclick="window.print()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-sm transition-all">
+                    <i class="ph-bold ph-printer"></i> Cetak Laporan
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Page Body -->
+        <main class="flex-1 p-4 md:p-8 space-y-6 max-w-7xl w-full mx-auto">
+
+            <!-- Summary KPI 4-Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <div class="stat-card-modern">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-400">Total Realisasi</span>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base">
+                            <i class="ph-fill ph-money"></i>
+                        </div>
+                    </div>
+                    <p class="text-lg md:text-2xl font-extrabold text-emerald-400 font-mono truncate" id="rep-total-budget">Rp 0</p>
+                    <span class="text-[11px] text-emerald-400/70 mt-1 block">Anggaran disetujui</span>
+                </div>
+
+                <div class="stat-card-modern">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-400">Total SPPD Terbit</span>
+                        <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center text-base">
+                            <i class="ph-fill ph-file-text"></i>
+                        </div>
+                    </div>
+                    <p class="text-2xl md:text-3xl font-extrabold text-white font-mono" id="rep-total-sppd">0</p>
+                    <span class="text-[11px] text-slate-500 mt-1 block">Dokumen resmi terbit</span>
+                </div>
+
+                <div class="stat-card-modern">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-400">Rata-rata Durasi</span>
+                        <div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center text-base">
+                            <i class="ph-fill ph-calendar-check"></i>
+                        </div>
+                    </div>
+                    <p class="text-2xl md:text-3xl font-extrabold text-white font-mono" id="rep-avg-duration">3.8 Hari</p>
+                    <span class="text-[11px] text-slate-500 mt-1 block">Durasi per perjalanan</span>
+                </div>
+
+                <div class="stat-card-modern">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-400">Destinasi Teratas</span>
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-base">
+                            <i class="ph-fill ph-map-pin"></i>
+                        </div>
+                    </div>
+                    <p class="text-lg md:text-2xl font-extrabold text-amber-400 font-mono truncate" id="rep-top-destination">Jakarta</p>
+                    <span class="text-[11px] text-amber-400/70 mt-1 block">Kota paling sering</span>
+                </div>
+
+            </div>
+
+            <!-- Breakdown Charts / Progress Columns -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- Department Budget Distribution -->
+                <div class="app-card p-5 space-y-3.5">
+                    <div class="flex items-center justify-between pb-3 border-b border-white/5">
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="ph-bold ph-chart-pie-slice text-purple-400 text-sm"></i> Distribusi Anggaran per Divisi
+                        </h4>
+                        <span class="text-[11px] text-slate-400">Tahun 2026</span>
+                    </div>
+
+                    <div class="space-y-3 text-xs" id="dept-distribution-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Transport Mode Composition -->
+                <div class="app-card p-5 space-y-3.5">
+                    <div class="flex items-center justify-between pb-3 border-b border-white/5">
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="ph-bold ph-airplane text-brand-400 text-sm"></i> Komposisi Moda Transportasi
+                        </h4>
+                        <span class="text-[11px] text-slate-400">Seluruh Divisi</span>
+                    </div>
+
+                    <div class="space-y-3 text-xs" id="transport-distribution-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Detailed Rekapitulasi Table Card -->
+            <div class="app-card overflow-hidden">
+                
+                <div class="p-5 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="ph-bold ph-table text-purple-400 text-base"></i> Rekapitulasi Seluruh Pengajuan
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Arsip riwayat perjalanan dinas karyawan PT Adiprima Suraprinta</p>
+                    </div>
+
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <select id="rep-filter-status" onchange="renderLaporanTable()" class="form-control-custom text-xs max-w-[170px]">
+                            <option value="">Semua Status</option>
+                            <option value="approved">Disetujui (Approved)</option>
+                            <option value="pending">Menunggu (Pending)</option>
+                            <option value="rejected">Ditolak (Rejected)</option>
+                        </select>
+
+                        <div class="relative min-w-[200px]">
+                            <span class="absolute inset-y-0 left-3 flex items-center text-slate-500 pointer-events-none">
+                                <i class="ph-bold ph-magnifying-glass text-xs"></i>
+                            </span>
+                            <input type="text" id="inp-search-rep" placeholder="Cari karyawan / kota..." oninput="renderLaporanTable()"
+                                class="form-control-custom text-xs pl-8" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="custom-table-container">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>No. SPPD</th>
+                                <th>Pegawai &amp; Divisi</th>
+                                <th>Rute Tujuan</th>
+                                <th>Periode Tanggal</th>
+                                <th>Transportasi</th>
+                                <th>Total Biaya</th>
+                                <th>Status</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-laporan-body">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderLaporanTable();
+        });
+
+        function renderLaporanTable() {
+            const list = getPengajuanData();
+            const statusFilter = document.getElementById('rep-filter-status').value;
+            const searchVal = document.getElementById('inp-search-rep').value.toLowerCase().trim();
+
+            const approvedList = list.filter(p => p.status === 'approved');
+            const totalApprovedBudget = approvedList.reduce((acc, curr) => acc + (curr.totalBiaya || 0), 0);
+
+            document.getElementById('rep-total-budget').textContent = formatRupiah(totalApprovedBudget);
+            document.getElementById('rep-total-sppd').textContent = approvedList.length;
+
+            renderAnalytics(list);
+
+            let filtered = list;
+            if (statusFilter) {
+                filtered = filtered.filter(p => p.status === statusFilter);
+            }
+            if (searchVal) {
+                filtered = filtered.filter(p =>
+                    p.nama.toLowerCase().includes(searchVal) ||
+                    p.tujuan.toLowerCase().includes(searchVal) ||
+                    (p.dept && p.dept.toLowerCase().includes(searchVal)) ||
+                    (p.nomorSurat && p.nomorSurat.toLowerCase().includes(searchVal))
+                );
+            }
+
+            const tbody = document.getElementById('table-laporan-body');
+            tbody.innerHTML = filtered.map(item => {
+                let badgeClass = 'badge-status pending';
+                let badgeText = 'Pending';
+                if (item.status === 'approved') {
+                    badgeClass = 'badge-status approved';
+                    badgeText = 'Approved';
+                } else if (item.status === 'rejected') {
+                    badgeClass = 'badge-status rejected';
+                    badgeText = 'Rejected';
+                }
+
+                return `
+                    <tr>
+                        <td class="font-mono font-bold text-xs text-brand-300">
+                            ${item.nomorSurat || 'SPPD-' + item.id}
+                        </td>
+                        <td>
+                            <p class="font-bold text-white text-xs">${item.nama}</p>
+                            <p class="text-[10px] text-slate-400">${item.dept}</p>
+                        </td>
+                        <td>
+                            <span class="font-semibold text-slate-200 text-xs">${item.asal} ➔ ${item.tujuan}</span>
+                            <span class="text-[11px] text-slate-400 block mt-0.5">${item.keperluan}</span>
+                        </td>
+                        <td class="text-xs text-slate-300">
+                            ${formatDate(item.mulai)} - ${formatDate(item.selesai)}
+                            <span class="text-brand-400 block font-mono font-medium text-[10px]">${item.durasi || 3} Hari</span>
+                        </td>
+                        <td class="text-xs text-slate-300">
+                            ${item.transportasi}
+                        </td>
+                        <td class="font-mono text-xs font-bold text-emerald-400">
+                            ${formatRupiah(item.totalBiaya)}
+                        </td>
+                        <td>
+                            <span class="${badgeClass}">
+                                ${badgeText}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <button onclick="openDetailModal(${item.id})" class="px-2.5 py-1 rounded-lg bg-[#090d16] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
+                                Detail
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderAnalytics(list) {
+            const depts = {};
+            list.forEach(p => {
+                const d = p.dept || 'Lainnya';
+                depts[d] = (depts[d] || 0) + (p.totalBiaya || 0);
+            });
+
+            const totalAll = Object.values(depts).reduce((a, b) => a + b, 0) || 1;
+            const deptContainer = document.getElementById('dept-distribution-list');
+            
+            deptContainer.innerHTML = Object.entries(depts).map(([deptName, amount]) => {
+                const pct = Math.round((amount / totalAll) * 100);
+                return `
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-slate-300 text-xs">
+                            <span>${deptName}</span>
+                            <span class="font-mono text-white font-bold">${formatRupiah(amount)} (${pct}%)</span>
+                        </div>
+                        <div class="w-full h-1.5 rounded-full bg-[#090d16] overflow-hidden">
+                            <div class="h-full rounded-full bg-gradient-to-r from-purple-500 to-indigo-500" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const transports = {
+                'Pesawat Terbang': 0,
+                'Kereta Api': 0,
+                'Mobil Dinas': 0,
+                'Lainnya': 0
+            };
+
+            list.forEach(p => {
+                const t = p.transportasi || '';
+                if (t.includes('Pesawat')) transports['Pesawat Terbang']++;
+                else if (t.includes('Kereta')) transports['Kereta Api']++;
+                else if (t.includes('Mobil')) transports['Mobil Dinas']++;
+                else transports['Lainnya']++;
+            });
+
+            const totalTrips = list.length || 1;
+            const transContainer = document.getElementById('transport-distribution-list');
+
+            transContainer.innerHTML = Object.entries(transports).map(([mode, count]) => {
+                const pct = Math.round((count / totalTrips) * 100);
+                return `
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-slate-300 text-xs">
+                            <span>${mode}</span>
+                            <span class="font-mono text-white font-bold">${count} Perjalanan (${pct}%)</span>
+                        </div>
+                        <div class="w-full h-1.5 rounded-full bg-[#090d16] overflow-hidden">
+                            <div class="h-full rounded-full bg-gradient-to-r from-brand-500 to-emerald-500" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function exportToCSV() {
+            const list = getPengajuanData();
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nomor SPPD,Nama,NIP,Departemen,Tujuan,Instansi,Mulai,Selesai,Durasi Hari,Keperluan,Transportasi,Akomodasi,Total Biaya,Status\n";
+
+            list.forEach(item => {
+                const row = [
+                    `"${item.nomorSurat || ''}"`,
+                    `"${item.nama || ''}"`,
+                    `"${item.nip || ''}"`,
+                    `"${item.dept || ''}"`,
+                    `"${item.tujuan || ''}"`,
+                    `"${item.instansi || ''}"`,
+                    `"${item.mulai || ''}"`,
+                    `"${item.selesai || ''}"`,
+                    `"${item.durasi || 3}"`,
+                    `"${item.keperluan || ''}"`,
+                    `"${item.transportasi || ''}"`,
+                    `"${item.akomodasi || ''}"`,
+                    `"${item.totalBiaya || 0}"`,
+                    `"${item.status || ''}"`
+                ].join(',');
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Rekapitulasi_Dinas_Adiprima_${today.toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            showToast('success', 'Export Berhasil', 'File Rekapitulasi CSV telah diunduh.');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SiPaDin — Portal Login Sistem Pengajuan Dinas</title>
+    <meta name="description" content="Sistem Pengajuan dan Pengelolaan Perjalanan Dinas Terintegrasi PT Adiprima Suraprinta." />
+
+    <!-- TAILWIND CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- PHOSPHOR ICONS STYLESHEETS -->
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" />
+
+    <!-- CUSTOM STYLES -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="bg-[#090d16] text-slate-100 min-h-screen flex items-center justify-center p-4 md:p-8 relative overflow-x-hidden selection:bg-brand-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[99999] space-y-3 w-80 max-w-[calc(100vw-2.5rem)] pointer-events-none"></div>
+
+    <!-- Background Ambience -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="absolute -top-32 -left-32 w-96 h-96 bg-brand-600/15 rounded-full blur-[140px]"></div>
+        <div class="absolute top-1/2 -right-32 w-96 h-96 bg-purple-600/15 rounded-full blur-[140px]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-30"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="relative z-10 w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+
+        <!-- Left Column: Branding Info -->
+        <div class="lg:col-span-6 space-y-6 text-center lg:text-left">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#141e33] border border-white/5 text-xs font-semibold text-brand-300">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> PT Adiprima Suraprinta
+            </div>
+
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-center lg:justify-start gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-gradient flex items-center justify-center shadow-lg shadow-brand-500/30">
+                        <i class="ph-fill ph-airplane-tilt text-2xl text-white"></i>
+                    </div>
+                    <div class="text-left">
+                        <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">SiPaDin</h1>
+                        <p class="text-xs text-brand-300 font-semibold">Sistem Pengajuan Dinas</p>
+                    </div>
+                </div>
+                <h2 class="text-xl md:text-2xl font-bold text-white leading-snug">
+                    Otomasi Pengajuan &amp; Penerbitan SPPD Digital
+                </h2>
+                <p class="text-xs md:text-sm text-slate-400 leading-relaxed max-w-md mx-auto lg:mx-0">
+                    Kelola alur persetujuan dinas, estimasi anggaran transportasi, dan cetak dokumen resmi secara terintegrasi.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <div class="p-3 rounded-xl bg-[#141e33] border border-white/5 text-left">
+                    <i class="ph-bold ph-lightning text-brand-400 text-lg"></i>
+                    <h4 class="text-xs font-bold text-white mt-1">Approval Cepat</h4>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Notifikasi otomatis &amp; review instan.</p>
+                </div>
+                <div class="p-3 rounded-xl bg-[#141e33] border border-white/5 text-left">
+                    <i class="ph-bold ph-file-text text-emerald-400 text-lg"></i>
+                    <h4 class="text-xs font-bold text-white mt-1">SPPD Resmi</h4>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Format standar siap cetak A4.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Login Card -->
+        <div class="lg:col-span-6 max-w-md w-full mx-auto">
+            <div class="app-card p-6 sm:p-7 space-y-5">
+                
+                <div class="text-center space-y-1">
+                    <h3 class="text-xl font-bold text-white">Masuk ke Portal</h3>
+                    <p class="text-xs text-slate-400">Pilih role dan masukkan kredensial akun</p>
+                </div>
+
+                <!-- Role Selector Tabs -->
+                <div class="space-y-1.5">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Akses Sebagai</label>
+                    <div class="grid grid-cols-2 gap-2 p-1 bg-[#090d16] border border-white/5 rounded-xl">
+                        <button type="button" id="tab-btn-karyawan" onclick="selectRole('karyawan')"
+                            class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all bg-brand-gradient text-white shadow-sm">
+                            <i class="ph-bold ph-user"></i> Karyawan
+                        </button>
+                        <button type="button" id="tab-btn-atasan" onclick="selectRole('atasan')"
+                            class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white">
+                            <i class="ph-bold ph-shield-check"></i> Atasan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" onsubmit="handleLoginSubmit(event)" class="space-y-3.5" novalidate>
+                    <input type="hidden" id="login-role" value="karyawan" />
+
+                    <div class="space-y-1">
+                        <label for="login-email" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Perusahaan</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-3 flex items-center text-slate-500 pointer-events-none">
+                                <i class="ph-bold ph-envelope text-sm"></i>
+                            </span>
+                            <input id="login-email" type="email" required placeholder="nama@adiprima.co.id"
+                                value="karyawan@sipadin.com"
+                                class="form-control-custom text-xs pl-9" />
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between">
+                            <label for="login-password" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kata Sandi</label>
+                            <a href="javascript:void(0)" onclick="showToast('info', 'Demo Mode', 'Kredensial otomatis terisi untuk demo.')" class="text-[10px] text-brand-400 hover:underline">Bantuan?</a>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-3 flex items-center text-slate-500 pointer-events-none">
+                                <i class="ph-bold ph-lock-key text-sm"></i>
+                            </span>
+                            <input id="login-password" type="password" required placeholder="••••••••" value="password123"
+                                class="form-control-custom text-xs pl-9 pr-9" />
+                            <button type="button" onclick="togglePasswordVisibility()"
+                                class="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-brand-400"
+                                tabindex="-1">
+                                <i id="eye-icon" class="ph-bold ph-eye text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-login"
+                        class="w-full flex items-center justify-center gap-2 bg-brand-gradient hover:opacity-95 active:scale-95 text-white font-bold py-2.5 rounded-xl shadow-md shadow-brand-500/30 transition-all text-xs mt-2">
+                        <i class="ph-bold ph-sign-in text-sm"></i>
+                        <span>Masuk ke Dashboard</span>
+                    </button>
+                </form>
+
+                <!-- Quick Demo Buttons -->
+                <div class="pt-3 border-t border-white/5 space-y-2">
+                    <p class="text-center text-[10px] font-semibold text-slate-400">⚡ Akses Cepat Demo:</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="quickLogin('karyawan')" class="flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-[#090d16] border border-white/5 hover:border-brand-500/40 text-slate-300 hover:text-white text-xs font-medium transition-all">
+                            <i class="ph-bold ph-user text-brand-400"></i> Karyawan
+                        </button>
+                        <button onclick="quickLogin('atasan')" class="flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-[#090d16] border border-white/5 hover:border-purple-500/40 text-slate-300 hover:text-white text-xs font-medium transition-all">
+                            <i class="ph-bold ph-shield-check text-purple-400"></i> Atasan
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script>
+        function selectRole(role) {
+            const roleInput = document.getElementById('login-role');
+            const btnKaryawan = document.getElementById('tab-btn-karyawan');
+            const btnAtasan = document.getElementById('tab-btn-atasan');
+            const emailInp = document.getElementById('login-email');
+
+            roleInput.value = role;
+
+            if (role === 'karyawan') {
+                btnKaryawan.className = 'flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all bg-brand-gradient text-white shadow-sm';
+                btnAtasan.className = 'flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white';
+                emailInp.value = 'karyawan@sipadin.com';
+            } else {
+                btnAtasan.className = 'flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all bg-purple-600 text-white shadow-sm';
+                btnKaryawan.className = 'flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white';
+                emailInp.value = 'manager@sipadin.com';
+            }
+        }
+
+        function togglePasswordVisibility() {
+            const inp = document.getElementById('login-password');
+            const icon = document.getElementById('eye-icon');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                icon.className = 'ph-bold ph-eye-slash text-sm';
+            } else {
+                inp.type = 'password';
+                icon.className = 'ph-bold ph-eye text-sm';
+            }
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const role = document.getElementById('login-role').value;
+            const btn = document.getElementById('btn-login');
+
+            btn.innerHTML = '<i class="ph-bold ph-circle-notch text-xs animate-spin"></i> Memverifikasi...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                if (role === 'karyawan') {
+                    setCurrentUser({
+                        name: 'Rizky Darmawan',
+                        role: 'karyawan',
+                        dept: 'IT & Infrastructure',
+                        nip: 'EMP-2022091',
+                        email: 'karyawan@sipadin.com',
+                        avatar: 'RD'
+                    });
+                    showToast('success', 'Login Berhasil', 'Selamat datang kembali, Rizky!');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard-karyawan.html';
+                    }, 400);
+                } else {
+                    setCurrentUser({
+                        name: 'Budi Pratama',
+                        role: 'atasan',
+                        dept: 'IT & Operations Manager',
+                        nip: 'MGR-2018004',
+                        email: 'manager@sipadin.com',
+                        avatar: 'BP'
+                    });
+                    showToast('success', 'Login Berhasil', 'Selamat datang, Manager Budi Pratama!');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard-atasan.html';
+                    }, 400);
+                }
+            }, 500);
+        }
+
+        function quickLogin(role) {
+            selectRole(role);
+            const btn = document.getElementById('btn-login');
+            btn.click();
+        }
+    </script>
+</body>
+
+</html>

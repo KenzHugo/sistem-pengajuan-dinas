@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SiPaDin — Formulir Pengajuan Dinas</title>
+    <meta name="description" content="Formulir Pengajuan Perjalanan Dinas Online PT Adiprima Suraprinta." />
+
+    <!-- TAILWIND CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- PHOSPHOR ICONS STYLESHEETS -->
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" />
+
+    <!-- CUSTOM STYLES -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="bg-[#090d16] text-slate-100 min-h-screen flex antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[99999] space-y-3 w-80 max-w-[calc(100vw-2.5rem)] pointer-events-none"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-40 hidden lg:hidden" onclick="closeMobileSidebar()"></div>
+
+    <!-- SIDEBAR KARYAWAN -->
+    <aside id="mobile-sidebar" class="w-64 bg-[#0f172a] border-r border-[#1e293b] flex flex-col justify-between flex-shrink-0 z-50">
+        
+        <div>
+            <!-- Sidebar Header / Logo -->
+            <div class="flex items-center justify-between px-6 py-5 border-b border-[#1e293b]">
+                <a href="dashboard-karyawan.html" class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-brand-gradient flex items-center justify-center shadow-lg shadow-brand-500/30">
+                        <i class="ph-fill ph-airplane-tilt text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="text-white font-extrabold text-base tracking-tight block">SiPaDin</span>
+                        <span class="text-[9px] text-brand-300 font-bold uppercase tracking-wider">Adiprima Suraprinta</span>
+                    </div>
+                </a>
+                <button onclick="closeMobileSidebar()" class="lg:hidden text-slate-400 hover:text-white">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <!-- User Profile Info -->
+            <div class="p-4 mx-3 my-3 rounded-2xl bg-[#141e33] border border-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-brand-500/20 text-brand-300 border border-brand-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                        RD
+                    </div>
+                    <div class="overflow-hidden min-w-0">
+                        <p class="text-xs font-bold text-white truncate">Rizky Darmawan</p>
+                        <p class="text-[11px] text-brand-300/80 truncate">IT &amp; Infrastructure</p>
+                        <span class="inline-flex items-center gap-1 text-[9px] text-emerald-400 font-semibold mt-0.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Akun Karyawan
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="px-3 space-y-1 mt-2">
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider px-3 mb-2">Menu Utama</p>
+                
+                <a href="dashboard-karyawan.html" class="sidebar-link">
+                    <i class="ph-bold ph-squares-four text-base"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="pengajuan-dinas.html" class="sidebar-link active">
+                    <i class="ph-bold ph-paper-plane-tilt text-base"></i>
+                    <span>Pengajuan Dinas</span>
+                </a>
+
+                <a href="riwayat-pengajuan.html" class="sidebar-link">
+                    <i class="ph-bold ph-clock-counter-clockwise text-base"></i>
+                    <span>Riwayat &amp; SPPD</span>
+                </a>
+
+            </nav>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-[#1e293b]">
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all">
+                <i class="ph-bold ph-sign-out text-base"></i>
+                <span>Keluar Aplikasi</span>
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="flex-1 flex flex-col min-w-0 min-h-screen">
+
+        <!-- Top Header Bar -->
+        <header class="sticky top-0 z-30 bg-[#090d16]/90 backdrop-blur-md border-b border-[#1e293b] px-4 md:px-8 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button onclick="openMobileSidebar()" class="lg:hidden text-slate-400 hover:text-white p-2 rounded-xl bg-[#141e33] border border-white/5">
+                    <i class="ph-bold ph-list text-lg"></i>
+                </button>
+                <div>
+                    <h1 class="text-base md:text-lg font-bold text-white">Formulir Pengajuan Dinas</h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">Lengkapi data rute perjalanan, jadwal, akomodasi, dan estimasi biaya</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="dashboard-karyawan.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 text-slate-300 hover:text-white text-xs font-semibold transition-all">
+                    <i class="ph-bold ph-arrow-left"></i> Dashboard
+                </a>
+            </div>
+        </header>
+
+        <!-- Form Body Content -->
+        <main class="flex-1 p-4 md:p-8 space-y-6 max-w-6xl w-full mx-auto">
+
+            <!-- Step Progress Indicator -->
+            <div class="app-card p-5">
+                <div class="flex items-center justify-between max-w-2xl mx-auto">
+                    <!-- Step 1 -->
+                    <div class="step-item">
+                        <div class="step-circle active">1</div>
+                        <span class="text-[11px] font-bold text-white mt-1.5">Tujuan</span>
+                    </div>
+
+                    <div class="step-line active"></div>
+
+                    <!-- Step 2 -->
+                    <div class="step-item">
+                        <div class="step-circle active">2</div>
+                        <span class="text-[11px] font-bold text-white mt-1.5">Jadwal</span>
+                    </div>
+
+                    <div class="step-line active"></div>
+
+                    <!-- Step 3 -->
+                    <div class="step-item">
+                        <div class="step-circle active">3</div>
+                        <span class="text-[11px] font-bold text-white mt-1.5">Biaya</span>
+                    </div>
+
+                    <div class="step-line active"></div>
+
+                    <!-- Step 4 -->
+                    <div class="step-item">
+                        <div class="step-circle active">4</div>
+                        <span class="text-[11px] font-bold text-white mt-1.5">Lampiran</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid: Form & Live Sticky Summary -->
+            <form id="main-pengajuan-form" onsubmit="handlePengajuanSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                <!-- Left Column: Form Fields -->
+                <div class="lg:col-span-8 space-y-5">
+
+                    <!-- Section 1: Informasi Dasar & Tujuan -->
+                    <div class="app-card p-5 space-y-4">
+                        <div class="flex items-center gap-2.5 pb-3 border-b border-white/5">
+                            <div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center text-base">
+                                <i class="ph-bold ph-map-pin"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-white">1. Rute &amp; Instansi Tujuan</h3>
+                                <p class="text-[11px] text-slate-400">Tentukan kota asal, kota tujuan, dan instansi yang dikunjungi</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <!-- Kota Asal -->
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kota Keberangkatan (Asal)</label>
+                                <input type="text" id="inp-asal" value="Surabaya (Head Office)" readonly
+                                    class="form-control-custom text-xs text-slate-400 cursor-not-allowed bg-[#090d16]" />
+                            </div>
+
+                            <!-- Kota Tujuan -->
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kota Tujuan Dinas <span class="text-rose-400">*</span></label>
+                                <input type="text" id="inp-tujuan" required placeholder="Contoh: Jakarta Pusat, DKI Jakarta"
+                                    oninput="updateLiveSummary()"
+                                    class="form-control-custom text-xs" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <!-- Instansi / Klien Tujuan -->
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Instansi / Rekanan <span class="text-rose-400">*</span></label>
+                                <input type="text" id="inp-instansi" required placeholder="Contoh: PT Mitra Digital Nusantara"
+                                    oninput="updateLiveSummary()"
+                                    class="form-control-custom text-xs" />
+                            </div>
+
+                            <!-- Jenis Keperluan -->
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Keperluan Dinas <span class="text-rose-400">*</span></label>
+                                <select id="inp-keperluan" required onchange="updateLiveSummary()"
+                                    class="form-control-custom text-xs">
+                                    <option value="Rapat / Meeting Klien" selected>Rapat / Meeting Klien</option>
+                                    <option value="Pelatihan / Training SDM">Pelatihan / Training SDM</option>
+                                    <option value="Survey Lapangan / Venue">Survey Lapangan / Venue</option>
+                                    <option value="Audit Internal Cabang">Audit Internal Cabang</option>
+                                    <option value="Maintenance & Proyek">Maintenance &amp; Proyek</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Jadwal & Durasi -->
+                    <div class="app-card p-5 space-y-4">
+                        <div class="flex items-center gap-2.5 pb-3 border-b border-white/5">
+                            <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center text-base">
+                                <i class="ph-bold ph-calendar"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-white">2. Jadwal &amp; Durasi Waktu</h3>
+                                <p class="text-[11px] text-slate-400">Tentukan tanggal keberangkatan dan kepulangan</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tanggal Berangkat <span class="text-rose-400">*</span></label>
+                                <input type="date" id="inp-mulai" required onchange="handleDateChange()"
+                                    class="form-control-custom text-xs"
+                                    style="color-scheme: dark;" />
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tanggal Kembali <span class="text-rose-400">*</span></label>
+                                <input type="date" id="inp-selesai" required onchange="handleDateChange()"
+                                    class="form-control-custom text-xs"
+                                    style="color-scheme: dark;" />
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-[#090d16] border border-white/5 flex items-center justify-between text-xs">
+                            <span class="text-slate-400">Total Durasi Perjalanan:</span>
+                            <span class="font-bold text-brand-300 font-mono bg-brand-500/20 px-2.5 py-0.5 rounded-lg" id="durasi-badge">1 Hari</span>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Transportasi & Biaya -->
+                    <div class="app-card p-5 space-y-4">
+                        <div class="flex items-center gap-2.5 pb-3 border-b border-white/5">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base">
+                                <i class="ph-bold ph-wallet"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-white">3. Transportasi &amp; Estimasi Biaya</h3>
+                                <p class="text-[11px] text-slate-400">Pilih moda transportasi, akomodasi, dan rincian biaya</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Moda Transportasi <span class="text-rose-400">*</span></label>
+                                <select id="inp-transportasi" required onchange="updateLiveSummary()"
+                                    class="form-control-custom text-xs">
+                                    <option value="Pesawat Terbang (Garuda / Batik Air)">Pesawat Terbang (Garuda / Batik Air)</option>
+                                    <option value="Kereta Api Eksekutif">Kereta Api Eksekutif</option>
+                                    <option value="Mobil Dinas Operasional">Mobil Dinas Operasional</option>
+                                    <option value="Travel / Bus Antar Kota">Travel / Bus Antar Kota</option>
+                                </select>
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Akomodasi Hotel <span class="text-rose-400">*</span></label>
+                                <input type="text" id="inp-akomodasi" placeholder="Contoh: Hotel Santika Premiere" value="Hotel Rekanan Bintang 4"
+                                    oninput="updateLiveSummary()"
+                                    class="form-control-custom text-xs" />
+                            </div>
+                        </div>
+
+                        <!-- 3-Grid Biaya Input -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tiket PP (Rp)</label>
+                                <input type="number" id="inp-biaya-transport" value="1800000" min="0" step="50000" oninput="updateLiveSummary()"
+                                    class="form-control-custom text-xs font-mono" />
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Hotel / Malam (Rp)</label>
+                                <input type="number" id="inp-biaya-hotel" value="650000" min="0" step="50000" oninput="updateLiveSummary()"
+                                    class="form-control-custom text-xs font-mono" />
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Uang Saku / Hari (Rp)</label>
+                                <input type="number" id="inp-biaya-harian" value="300000" min="0" step="50000" oninput="updateLiveSummary()"
+                                    class="form-control-custom text-xs font-mono" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Keterangan & Dokumen -->
+                    <div class="app-card p-5 space-y-4">
+                        <div class="flex items-center gap-2.5 pb-3 border-b border-white/5">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-base">
+                                <i class="ph-bold ph-paperclip"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-white">4. Keterangan &amp; Dokumen Pendukung</h3>
+                                <p class="text-[11px] text-slate-400">Deskripsikan output yang diharapkan dari perjalanan dinas</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Deskripsi Rencana Kegiatan <span class="text-rose-400">*</span></label>
+                            <textarea id="inp-keterangan" rows="3" required placeholder="Jelaskan secara ringkas maksud, agenda, dan output yang diharapkan dari perjalanan dinas ini..."
+                                class="form-control-custom text-xs resize-none"></textarea>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lampiran Dokumen / Surat Undangan</label>
+                            <div class="flex flex-col items-center justify-center p-4 border border-dashed border-white/10 hover:border-brand-500/50 rounded-xl cursor-pointer bg-[#090d16] transition-all">
+                                <i class="ph-bold ph-upload-simple text-2xl text-slate-400"></i>
+                                <p class="text-xs font-medium text-slate-300 mt-1.5">Pilih file surat tugas / undangan</p>
+                                <p class="text-[10px] text-slate-500">PDF, DOCX, JPG (Maks 5MB)</p>
+                                <input type="file" id="inp-file" class="hidden" onchange="handleFileSelected(event)" />
+                            </div>
+                            <div id="file-preview-badge" class="hidden items-center gap-2 p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-medium mt-2">
+                                <i class="ph-bold ph-file-text"></i>
+                                <span id="file-name-text">Surat_Undangan_Resmi.pdf</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Live Sticky Summary (4 cols) -->
+                <div class="lg:col-span-4 space-y-4">
+                    
+                    <div class="sticky top-20 app-card p-5 border-brand-500/40 space-y-4">
+                        <div class="flex items-center gap-2 pb-3 border-b border-white/5">
+                            <div class="w-7 h-7 rounded-lg bg-brand-gradient flex items-center justify-center text-white text-sm">
+                                <i class="ph-fill ph-calculator"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Ringkasan Estimasi</h4>
+                                <p class="text-[10px] text-brand-300">Kalkulasi Otomatis</p>
+                            </div>
+                        </div>
+
+                        <!-- Live Trip Overview -->
+                        <div class="space-y-2.5 text-xs">
+                            <div class="p-3 rounded-xl bg-[#090d16] border border-white/5 space-y-1.5">
+                                <div class="flex justify-between text-slate-400">
+                                    <span>Tujuan:</span>
+                                    <span class="text-white font-bold" id="sum-tujuan">Jakarta Pusat</span>
+                                </div>
+                                <div class="flex justify-between text-slate-400">
+                                    <span>Keperluan:</span>
+                                    <span class="text-white font-semibold truncate max-w-[130px]" id="sum-keperluan">Rapat / Meeting</span>
+                                </div>
+                                <div class="flex justify-between text-slate-400">
+                                    <span>Durasi:</span>
+                                    <span class="text-brand-300 font-bold" id="sum-durasi">3 Hari</span>
+                                </div>
+                            </div>
+
+                            <!-- Financial Breakdown -->
+                            <div class="space-y-1.5 pt-1">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rincian Anggaran</p>
+                                
+                                <div class="flex justify-between text-slate-400">
+                                    <span>Biaya Transport:</span>
+                                    <span class="text-slate-200 font-mono" id="sum-transport">Rp 1.800.000</span>
+                                </div>
+
+                                <div class="flex justify-between text-slate-400">
+                                    <span id="sum-hotel-label">Hotel (2 mlm):</span>
+                                    <span class="text-slate-200 font-mono" id="sum-hotel">Rp 1.300.000</span>
+                                </div>
+
+                                <div class="flex justify-between text-slate-400">
+                                    <span id="sum-harian-label">Uang Saku (3 hr):</span>
+                                    <span class="text-slate-200 font-mono" id="sum-harian">Rp 900.000</span>
+                                </div>
+
+                                <div class="border-t border-white/5 pt-2.5 flex items-center justify-between">
+                                    <span class="text-xs font-bold text-white">Total Estimasi:</span>
+                                    <span class="text-sm font-extrabold text-emerald-400 font-mono" id="sum-total">Rp 4.000.000</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Submit Button -->
+                        <div class="pt-2 space-y-2">
+                            <button type="submit" id="btn-submit-pengajuan"
+                                class="w-full flex items-center justify-center gap-2 bg-brand-gradient hover:opacity-95 active:scale-95 text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-md shadow-brand-500/30">
+                                <i class="ph-bold ph-paper-plane-right text-sm"></i>
+                                <span>Kirimkan Pengajuan</span>
+                            </button>
+
+                            <a href="dashboard-karyawan.html" class="w-full flex items-center justify-center py-2 rounded-xl border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white text-xs font-semibold transition-all">
+                                Batal
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+            </form>
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mulaiInp = document.getElementById('inp-mulai');
+            const selesaiInp = document.getElementById('inp-selesai');
+            
+            const startDef = daysFromNow(3);
+            const endDef = daysFromNow(5);
+
+            mulaiInp.min = daysFromNow(0);
+            mulaiInp.value = startDef;
+            
+            selesaiInp.min = startDef;
+            selesaiInp.value = endDef;
+
+            updateLiveSummary();
+        });
+
+        function handleDateChange() {
+            const mulaiInp = document.getElementById('inp-mulai');
+            const selesaiInp = document.getElementById('inp-selesai');
+
+            if (mulaiInp.value) {
+                selesaiInp.min = mulaiInp.value;
+                if (selesaiInp.value && new Date(selesaiInp.value) < new Date(mulaiInp.value)) {
+                    selesaiInp.value = mulaiInp.value;
+                }
+            }
+            updateLiveSummary();
+        }
+
+        function updateLiveSummary() {
+            const tujuan = document.getElementById('inp-tujuan').value.trim() || 'Jakarta Pusat';
+            const keperluan = document.getElementById('inp-keperluan').value || 'Rapat / Meeting Klien';
+            const mulai = document.getElementById('inp-mulai').value;
+            const selesai = document.getElementById('inp-selesai').value;
+
+            const durasi = calculateDuration(mulai, selesai);
+            const nights = durasi > 1 ? durasi - 1 : 1;
+
+            const bTransport = Number(document.getElementById('inp-biaya-transport').value) || 0;
+            const bHotelPerNight = Number(document.getElementById('inp-biaya-hotel').value) || 0;
+            const bHarianPerDay = Number(document.getElementById('inp-biaya-harian').value) || 0;
+
+            const totalHotel = bHotelPerNight * nights;
+            const totalHarian = bHarianPerDay * durasi;
+            const total = bTransport + totalHotel + totalHarian;
+
+            document.getElementById('durasi-badge').textContent = durasi + ' Hari';
+            document.getElementById('sum-tujuan').textContent = tujuan;
+            document.getElementById('sum-keperluan').textContent = keperluan;
+            document.getElementById('sum-durasi').textContent = durasi + ' Hari';
+
+            document.getElementById('sum-transport').textContent = formatRupiah(bTransport);
+            document.getElementById('sum-hotel-label').textContent = `Hotel (${nights} mlm):`;
+            document.getElementById('sum-hotel').textContent = formatRupiah(totalHotel);
+            document.getElementById('sum-harian-label').textContent = `Uang Saku (${durasi} hr):`;
+            document.getElementById('sum-harian').textContent = formatRupiah(totalHarian);
+            document.getElementById('sum-total').textContent = formatRupiah(total);
+        }
+
+        function handleFileSelected(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const badge = document.getElementById('file-preview-badge');
+                document.getElementById('file-name-text').textContent = file.name;
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
+                showToast('success', 'File Terpilih', file.name + ' siap dilampirkan.');
+            }
+        }
+
+        function handlePengajuanSubmit(e) {
+            e.preventDefault();
+            const tujuan = document.getElementById('inp-tujuan').value.trim();
+            const instansi = document.getElementById('inp-instansi').value.trim();
+            const keperluan = document.getElementById('inp-keperluan').value;
+            const mulai = document.getElementById('inp-mulai').value;
+            const selesai = document.getElementById('inp-selesai').value;
+            const transportasi = document.getElementById('inp-transportasi').value;
+            const akomodasi = document.getElementById('inp-akomodasi').value.trim();
+            const keterangan = document.getElementById('inp-keterangan').value.trim();
+
+            if (!tujuan || !instansi || !keperluan || !mulai || !selesai || !keterangan) {
+                showToast('error', 'Form Belum Lengkap', 'Mohon lengkapi seluruh field yang bertanda merah.');
+                return;
+            }
+
+            const durasi = calculateDuration(mulai, selesai);
+            const nights = durasi > 1 ? durasi - 1 : 1;
+
+            const bTransport = Number(document.getElementById('inp-biaya-transport').value) || 0;
+            const bHotel = (Number(document.getElementById('inp-biaya-hotel').value) || 0) * nights;
+            const bHarian = (Number(document.getElementById('inp-biaya-harian').value) || 0) * durasi;
+            const total = bTransport + bHotel + bHarian;
+
+            const btn = document.getElementById('btn-submit-pengajuan');
+            btn.innerHTML = '<i class="ph-bold ph-circle-notch text-sm animate-spin"></i> Mengirim...';
+            btn.disabled = true;
+
+            const newId = Date.now();
+            const newItem = {
+                id: newId,
+                nomorSurat: `SPPD/IT/2026/08/${String(newId).slice(-3)}`,
+                nama: 'Rizky Darmawan',
+                nip: 'EMP-2022091',
+                dept: 'IT & Infrastructure',
+                jabatan: 'Senior Web Developer',
+                asal: 'Surabaya',
+                tujuan: tujuan,
+                instansi: instansi,
+                mulai: mulai,
+                selesai: selesai,
+                durasi: durasi,
+                transportasi: transportasi,
+                akomodasi: akomodasi,
+                keperluan: keperluan,
+                keterangan: keterangan,
+                biayaTransport: bTransport,
+                biayaPenginapan: bHotel,
+                uangHarian: bHarian,
+                totalBiaya: total,
+                lampiran: 'Surat_Tugas_Resmi.pdf',
+                status: 'pending',
+                tanggalPengajuan: daysFromNow(0),
+                catatanAtasan: '',
+                disetujuiOleh: '',
+                tanggalDisetujui: ''
+            };
+
+            const data = getPengajuanData();
+            data.unshift(newItem);
+            savePengajuanData(data);
+
+            setTimeout(() => {
+                showToast('success', 'Pengajuan Terkirim!', `Pengajuan dinas ke ${tujuan} berhasil dibuat.`);
+                setTimeout(() => {
+                    window.location.href = 'riwayat-pengajuan.html';
+                }, 700);
+            }, 500);
+        }
+    </script>
+</body>
+
+</html>

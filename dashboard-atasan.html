@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SiPaDin — Dashboard Atasan & Approval</title>
+    <meta name="description" content="Dashboard Verifikasi & Persetujuan Pengajuan Dinas PT Adiprima Suraprinta." />
+
+    <!-- TAILWIND CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- PHOSPHOR ICONS STYLESHEETS -->
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" />
+
+    <!-- CUSTOM STYLES -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="bg-[#090d16] text-slate-100 min-h-screen flex antialiased selection:bg-purple-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[99999] space-y-3 w-80 max-w-[calc(100vw-2.5rem)] pointer-events-none"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="atasan-sidebar-overlay" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-40 hidden lg:hidden" onclick="closeMobileSidebar()"></div>
+
+    <!-- SIDEBAR ATASAN -->
+    <aside id="atasan-mobile-sidebar" class="w-64 bg-[#0f172a] border-r border-[#1e293b] flex flex-col justify-between flex-shrink-0 z-50">
+        
+        <div>
+            <!-- Sidebar Header / Logo -->
+            <div class="flex items-center justify-between px-6 py-5 border-b border-[#1e293b]">
+                <a href="dashboard-atasan.html" class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                        <i class="ph-fill ph-airplane-tilt text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="text-white font-extrabold text-base tracking-tight block">SiPaDin</span>
+                        <span class="text-[9px] text-purple-400 font-bold uppercase tracking-wider">Manager Portal</span>
+                    </div>
+                </a>
+                <button onclick="closeMobileSidebar()" class="lg:hidden text-slate-400 hover:text-white">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Manager Profile Info -->
+            <div class="p-4 mx-3 my-3 rounded-2xl bg-[#141e33] border border-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                        BP
+                    </div>
+                    <div class="overflow-hidden min-w-0">
+                        <p class="text-xs font-bold text-white truncate">Budi Pratama</p>
+                        <p class="text-[11px] text-purple-300/80 truncate">IT &amp; Ops Manager</p>
+                        <span class="inline-flex items-center gap-1 text-[9px] text-emerald-400 font-semibold mt-0.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Otoritas Approval
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="px-3 space-y-1 mt-2">
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider px-3 mb-2">Menu Utama</p>
+                
+                <a href="dashboard-atasan.html" class="sidebar-link active">
+                    <i class="ph-bold ph-clipboard-text text-base"></i>
+                    <span>Verifikasi Pengajuan</span>
+                </a>
+
+                <a href="laporan-atasan.html" class="sidebar-link">
+                    <i class="ph-bold ph-chart-bar text-base"></i>
+                    <span>Laporan &amp; Rekap</span>
+                </a>
+
+            </nav>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-[#1e293b]">
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all">
+                <i class="ph-bold ph-sign-out text-base"></i>
+                <span>Keluar Aplikasi</span>
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="flex-1 flex flex-col min-w-0 min-h-screen">
+
+        <!-- Top Header Bar -->
+        <header class="sticky top-0 z-30 bg-[#090d16]/90 backdrop-blur-md border-b border-[#1e293b] px-4 md:px-8 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button onclick="openMobileSidebar()" class="lg:hidden text-slate-400 hover:text-white p-2 rounded-xl bg-[#141e33] border border-white/5">
+                    <i class="ph-bold ph-list text-lg"></i>
+                </button>
+                <div>
+                    <h1 class="text-base md:text-lg font-bold text-white">Dashboard Atasan &amp; Persetujuan</h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">Kelola dan evaluasi pengajuan dinas tim operasional</p>
+                </div>
+            </div>
+
+            <!-- Right Controls -->
+            <div class="flex items-center gap-3">
+                <button onclick="showToast('warning', 'Peringatan H-3', 'Terdapat pengajuan dinas yang mendekati batas waktu.')" class="w-9 h-9 rounded-xl bg-[#141e33] border border-white/5 text-slate-400 hover:text-white flex items-center justify-center transition-colors relative">
+                    <i class="ph-bold ph-bell text-base"></i>
+                    <span id="header-notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center">0</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Page Body -->
+        <main class="flex-1 p-4 md:p-8 space-y-6 max-w-7xl w-full mx-auto">
+
+            <!-- Urgent Warning Banner -->
+            <div id="urgent-warning-banner" class="hidden rounded-2xl bg-rose-950/40 border border-rose-500/40 p-4 md:p-5 shadow-lg">
+                <div class="flex items-start gap-3.5">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center text-xl flex-shrink-0 badge-pulse">
+                        <i class="ph-fill ph-warning-octagon"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-bold text-rose-300">Peringatan Batas Waktu Dinas (H-3)</h3>
+                        <p class="text-xs text-rose-200/80 mt-0.5 leading-relaxed">
+                            Terdapat <strong id="urgent-count-text" class="text-white font-bold">2</strong> pengajuan yang keberangkatannya kurang dari 3 hari dan belum disetujui. Segera evaluasi untuk penerbitan tiket dan akomodasi.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats 4-Grid -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <div class="stat-card-modern">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-400">Total Masuk</span>
+                        <div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center text-base">
+                            <i class="ph-fill ph-inbox"></i>
+                        </div>
+                    </div>
+                    <p class="text-2xl md:text-3xl font-extrabold text-white font-mono" id="mgr-stat-total">0</p>
+                    <span class="text-[11px] text-slate-500 mt-1 block">Semua pengajuan tim</span>
+                </div>
+
+                <div class="stat-card-modern">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-400">Menunggu Review</span>
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-base">
+                            <i class="ph-fill ph-hourglass-high"></i>
+                        </div>
+                    </div>
+                    <p class="text-2xl md:text-3xl font-extrabold text-amber-400 font-mono" id="mgr-stat-pending">0</p>
+                    <span class="text-[11px] text-amber-400/70 mt-1 block">Perlu keputusan</span>
+                </div>
+
+                <div class="stat-card-modern">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-400">Telah Disetujui</span>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base">
+                            <i class="ph-fill ph-check-circle"></i>
+                        </div>
+                    </div>
+                    <p class="text-2xl md:text-3xl font-extrabold text-emerald-400 font-mono" id="mgr-stat-approved">0</p>
+                    <span class="text-[11px] text-emerald-400/70 mt-1 block">SPPD diterbitkan</span>
+                </div>
+
+                <div class="stat-card-modern border-rose-500/30">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-400">Mendesak (&le; H-3)</span>
+                        <div class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center text-base">
+                            <i class="ph-fill ph-warning"></i>
+                        </div>
+                    </div>
+                    <p class="text-2xl md:text-3xl font-extrabold text-rose-400 font-mono" id="mgr-stat-urgent">0</p>
+                    <span class="text-[11px] text-rose-400/70 mt-1 block">Prioritas verifikasi</span>
+                </div>
+
+            </div>
+
+            <!-- Table Card -->
+            <div class="app-card overflow-hidden">
+                
+                <!-- Table Header Controls -->
+                <div class="p-5 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="ph-bold ph-list-checks text-purple-400 text-base"></i> Daftar Pengajuan Dinas Karyawan
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Tinjau rincian perjalanan dinas sebelum menyetujui anggaran</p>
+                    </div>
+
+                    <!-- Search & Filter Controls -->
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <select id="filter-dept" onchange="renderAtasanTable()" class="form-control-custom text-xs max-w-[180px]">
+                            <option value="">Semua Departemen</option>
+                            <option value="IT & Infrastructure">IT &amp; Infrastructure</option>
+                            <option value="Marketing & Sales">Marketing &amp; Sales</option>
+                            <option value="Finance & Accounting">Finance &amp; Accounting</option>
+                            <option value="Human Resources">Human Resources</option>
+                        </select>
+
+                        <div class="relative min-w-[200px]">
+                            <span class="absolute inset-y-0 left-3 flex items-center text-slate-500 pointer-events-none">
+                                <i class="ph-bold ph-magnifying-glass text-xs"></i>
+                            </span>
+                            <input type="text" id="inp-search-mgr" placeholder="Cari nama / tujuan..." oninput="renderAtasanTable()"
+                                class="form-control-custom text-xs pl-8" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="custom-table-container">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Karyawan &amp; Divisi</th>
+                                <th>Tujuan &amp; Keperluan</th>
+                                <th>Keberangkatan</th>
+                                <th>Estimasi Biaya</th>
+                                <th>Status</th>
+                                <th class="text-center">Aksi Keputusan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-atasan-body">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="atasan-empty-state" class="hidden py-14 text-center space-y-2">
+                    <i class="ph-bold ph-check-circle text-4xl text-emerald-400"></i>
+                    <p class="text-sm font-bold text-white">Semua pengajuan telah diproses!</p>
+                    <p class="text-xs text-slate-500">Tidak ada pengajuan baru yang menunggu keputusan.</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL REVIEW & APPROVAL -->
+    <div id="modal-review-mgr" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="w-full max-w-lg bg-[#0f172a] border border-[#232f48] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            
+            <div class="px-6 py-4 border-b border-white/5 bg-[#141e33] flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                        <i class="ph-bold ph-shield-check text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white">Review &amp; Keputusan Dinas</h3>
+                        <p class="text-[11px] text-slate-400" id="modal-review-subtitle">Evaluasi kelayakan pengajuan dinas</p>
+                    </div>
+                </div>
+                <button onclick="closeReviewModal()" class="text-slate-400 hover:text-white p-1">
+                    <i class="ph-bold ph-x text-base"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-4 flex-1 text-xs text-slate-300">
+                <!-- Employee Box -->
+                <div class="p-3.5 rounded-xl bg-[#141e33] border border-white/5 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-bold text-white" id="m-review-name">Rizky Darmawan</p>
+                        <p class="text-[11px] text-slate-400" id="m-review-dept">IT &amp; Infrastructure</p>
+                    </div>
+                    <span class="text-brand-300 font-mono font-bold text-xs" id="m-review-sppd">SPPD/IT/2026/08/001</span>
+                </div>
+
+                <!-- Destination & Details -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 rounded-xl bg-[#090d16] border border-white/5">
+                        <span class="text-slate-500 block text-[10px] uppercase font-semibold">Tujuan Dinas</span>
+                        <span class="text-white font-bold text-xs mt-0.5 block" id="m-review-tujuan">Jakarta Pusat</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-[#090d16] border border-white/5">
+                        <span class="text-slate-500 block text-[10px] uppercase font-semibold">Jadwal &amp; Durasi</span>
+                        <span class="text-white font-bold text-xs mt-0.5 block" id="m-review-jadwal">12 Aug - 15 Aug (4 Hari)</span>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-[#090d16] border border-white/5">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">Keperluan &amp; Uraian Tugas</span>
+                    <span class="text-white font-semibold block mt-0.5" id="m-review-keperluan">Rapat / Meeting Klien</span>
+                    <p class="text-slate-400 mt-1 italic text-[11px] leading-relaxed" id="m-review-keterangan">Presentasi sistem ERP.</p>
+                </div>
+
+                <!-- Budget Summary -->
+                <div class="p-3.5 rounded-xl bg-[#141e33] border border-white/5 space-y-2">
+                    <div class="flex justify-between font-bold text-xs">
+                        <span class="text-white">Total Estimasi Anggaran:</span>
+                        <span class="text-emerald-400 font-mono text-sm" id="m-review-total">Rp 5.400.000</span>
+                    </div>
+                    <div class="space-y-1 text-slate-400 border-t border-white/5 pt-2 text-[11px]">
+                        <div class="flex justify-between">
+                            <span>Biaya Transportasi:</span>
+                            <span id="m-review-transport" class="text-slate-200 font-mono">Rp 2.400.000</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Akomodasi Hotel:</span>
+                            <span id="m-review-hotel" class="text-slate-200 font-mono">Rp 1.800.000</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Uang Harian:</span>
+                            <span id="m-review-harian" class="text-slate-200 font-mono">Rp 1.200.000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manager Note Field -->
+                <div class="space-y-1.5">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Catatan / Arahan Atasan (Opsional)</label>
+                    <textarea id="inp-catatan-atasan" rows="2" placeholder="Tuliskan arahan tugas atau alasan bila ditolak..."
+                        class="form-control-custom text-xs resize-none"></textarea>
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="px-6 py-4 border-t border-white/5 bg-[#141e33] flex items-center justify-between gap-3">
+                <button onclick="closeReviewModal()" class="px-4 py-2 rounded-xl border border-white/10 text-slate-400 hover:text-white text-xs font-semibold">
+                    Batal
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="submitDecision('rejected')" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-bold transition-all">
+                        <i class="ph-bold ph-x"></i> Tolak
+                    </button>
+                    <button onclick="submitDecision('approved')" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-600/30">
+                        <i class="ph-bold ph-check"></i> Setujui Pengajuan
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script>
+        let currentReviewId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAtasanTable();
+        });
+
+        function renderAtasanTable() {
+            const list = getPengajuanData();
+            const deptFilter = document.getElementById('filter-dept').value;
+            const searchVal = document.getElementById('inp-search-mgr').value.toLowerCase().trim();
+
+            let urgentCount = 0;
+            let pendingCount = 0;
+            let approvedCount = 0;
+
+            list.forEach(item => {
+                if (item.status === 'pending') {
+                    pendingCount++;
+                    const diff = daysUntil(item.mulai);
+                    if (diff <= 3 && diff >= 0) urgentCount++;
+                } else if (item.status === 'approved') {
+                    approvedCount++;
+                }
+            });
+
+            document.getElementById('mgr-stat-total').textContent = list.length;
+            document.getElementById('mgr-stat-pending').textContent = pendingCount;
+            document.getElementById('mgr-stat-approved').textContent = approvedCount;
+            document.getElementById('mgr-stat-urgent').textContent = urgentCount;
+            document.getElementById('header-notif-badge').textContent = urgentCount;
+
+            const banner = document.getElementById('urgent-warning-banner');
+            if (urgentCount > 0) {
+                banner.classList.remove('hidden');
+                document.getElementById('urgent-count-text').textContent = urgentCount;
+            } else {
+                banner.classList.add('hidden');
+            }
+
+            // Filter List
+            let filtered = list;
+            if (deptFilter) {
+                filtered = filtered.filter(p => p.dept === deptFilter);
+            }
+            if (searchVal) {
+                filtered = filtered.filter(p => 
+                    p.nama.toLowerCase().includes(searchVal) ||
+                    p.tujuan.toLowerCase().includes(searchVal) ||
+                    p.keperluan.toLowerCase().includes(searchVal)
+                );
+            }
+
+            const tbody = document.getElementById('table-atasan-body');
+            const emptyState = document.getElementById('atasan-empty-state');
+
+            if (!filtered.length) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            tbody.innerHTML = filtered.map(item => {
+                const diff = daysUntil(item.mulai);
+                const isH3 = item.status === 'pending' && diff <= 3 && diff >= 0;
+
+                const rowBg = isH3 ? 'bg-rose-500/[0.03]' : '';
+
+                let statusBadge = '';
+                if (item.status === 'approved') {
+                    statusBadge = `<span class="badge-status approved"><i class="ph-fill ph-check-circle"></i> Disetujui</span>`;
+                } else if (item.status === 'rejected') {
+                    statusBadge = `<span class="badge-status rejected"><i class="ph-fill ph-x-circle"></i> Ditolak</span>`;
+                } else {
+                    statusBadge = `<span class="badge-status pending"><i class="ph-fill ph-clock"></i> Menunggu</span>`;
+                }
+
+                const urgentBadge = isH3 
+                    ? `<span class="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 badge-pulse ml-1"><i class="ph-bold ph-warning"></i> H-${diff}</span>` 
+                    : '';
+
+                const initials = item.nama.split(' ').map(n=>n[0]).join('').slice(0,2);
+
+                return `
+                    <tr class="${rowBg}">
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-300 font-bold text-xs flex items-center justify-center flex-shrink-0">
+                                    ${initials}
+                                </div>
+                                <div>
+                                    <p class="font-bold text-white text-xs">${item.nama}</p>
+                                    <p class="text-[10px] text-slate-400">${item.dept}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="flex items-center gap-1.5 font-bold text-white text-xs">
+                                <i class="ph-bold ph-map-pin text-brand-400"></i> ${item.tujuan}
+                            </div>
+                            <span class="text-[11px] text-slate-400 block mt-0.5">${item.keperluan}</span>
+                        </td>
+                        <td>
+                            <div class="flex items-center gap-1">
+                                <span class="text-xs font-semibold text-slate-200">${formatDate(item.mulai)}</span>
+                                ${urgentBadge}
+                            </div>
+                            <span class="text-[11px] text-slate-400 block mt-0.5">s/d ${formatDate(item.selesai)} (${item.durasi || calculateDuration(item.mulai, item.selesai)} Hari)</span>
+                        </td>
+                        <td class="font-mono text-xs font-bold text-emerald-400">
+                            ${formatRupiah(item.totalBiaya)}
+                        </td>
+                        <td>
+                            ${statusBadge}
+                        </td>
+                        <td class="text-center">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button onclick="openDetailModal(${item.id})" class="px-2.5 py-1.5 rounded-lg bg-[#141e33] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
+                                    Detail
+                                </button>
+                                ${item.status === 'pending' ? `
+                                    <button onclick="openReviewModal(${item.id})" class="px-3 py-1.5 rounded-lg ${isH3 ? 'bg-rose-500 hover:bg-rose-400 text-white' : 'bg-purple-600 hover:bg-purple-500 text-white'} text-xs font-bold transition-all shadow-sm">
+                                        Review
+                                    </button>
+                                ` : `
+                                    <span class="text-xs text-slate-500 font-medium">Selesai</span>
+                                `}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openReviewModal(id) {
+            currentReviewId = id;
+            const list = getPengajuanData();
+            const item = list.find(p => p.id === id);
+            if (!item) return;
+
+            document.getElementById('m-review-name').textContent = item.nama;
+            document.getElementById('m-review-dept').textContent = item.dept + ' · ' + (item.nip || 'EMP-2022091');
+            document.getElementById('m-review-sppd').textContent = item.nomorSurat || 'SPPD-' + item.id;
+            document.getElementById('m-review-tujuan').textContent = item.asal + ' ➔ ' + item.tujuan;
+            document.getElementById('m-review-jadwal').textContent = `${formatDate(item.mulai)} - ${formatDate(item.selesai)} (${item.durasi || 3} Hari)`;
+            document.getElementById('m-review-keperluan').textContent = item.keperluan;
+            document.getElementById('m-review-keterangan').textContent = `"${item.keterangan}"`;
+
+            document.getElementById('m-review-total').textContent = formatRupiah(item.totalBiaya);
+            document.getElementById('m-review-transport').textContent = formatRupiah(item.biayaTransport || 0);
+            document.getElementById('m-review-hotel').textContent = formatRupiah(item.biayaPenginapan || 0);
+            document.getElementById('m-review-harian').textContent = formatRupiah(item.uangHarian || 0);
+
+            document.getElementById('inp-catatan-atasan').value = item.catatanAtasan || '';
+
+            const modal = document.getElementById('modal-review-mgr');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeReviewModal() {
+            const modal = document.getElementById('modal-review-mgr');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            currentReviewId = null;
+        }
+
+        function submitDecision(decision) {
+            if (!currentReviewId) return;
+            const list = getPengajuanData();
+            const item = list.find(p => p.id === currentReviewId);
+            if (!item) return;
+
+            const note = document.getElementById('inp-catatan-atasan').value.trim();
+
+            if (decision === 'rejected' && !note) {
+                showToast('error', 'Catatan Diperlukan', 'Harap isi alasan penolakan di kolom catatan.');
+                return;
+            }
+
+            item.status = decision;
+            item.catatanAtasan = note || (decision === 'approved' ? 'Disetujui untuk dilaksanakan sesuai SOP.' : 'Pengajuan ditolak.');
+            item.disetujuiOleh = 'Budi Pratama (IT & Ops Manager)';
+            item.tanggalDisetujui = daysFromNow(0);
+
+            savePengajuanData(list);
+
+            if (decision === 'approved') {
+                showToast('success', 'Pengajuan Disetujui!', `Pengajuan dinas ${item.nama} ke ${item.tujuan} berhasil disetujui. SPPD telah terbit.`);
+            } else {
+                showToast('warning', 'Pengajuan Ditolak', `Pengajuan dinas ${item.nama} telah ditolak dengan catatan.`);
+            }
+
+            closeReviewModal();
+            renderAtasanTable();
+        }
+    </script>
+</body>
+
+</html>

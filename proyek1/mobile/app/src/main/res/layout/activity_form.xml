@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvFormTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Form Pengajuan Dinas"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="24dp" />
+
+        <EditText
+            android:id="@+id/etTujuan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Tujuan Dinas"
+            android:background="@android:color/darker_gray"
+            android:padding="12dp"
+            android:textColor="@android:color/white" />
+
+        <EditText
+            android:id="@+id/etStart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Tanggal Mulai (YYYY-MM-DD)"
+            android:inputType="date"
+            android:background="@android:color/darker_gray"
+            android:padding="12dp"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/etEnd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Tanggal Selesai (YYYY-MM-DD)"
+            android:inputType="date"
+            android:background="@android:color/darker_gray"
+            android:padding="12dp"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/etDeskripsi"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:hint="Deskripsi"
+            android:background="@android:color/darker_gray"
+            android:padding="12dp"
+            android:textColor="@android:color/white"
+            android:gravity="top"
+            android:layout_marginTop="12dp" />
+
+        <Button
+            android:id="@+id/btnSubmit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Submit"
+            android:backgroundTint="#3B82F6"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="24dp" />
+
+        <TextView
+            android:id="@+id/tvResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#90EE90"
+            android:layout_marginTop="12dp" />
+
+    </LinearLayout>
+</ScrollView>

@@ -360,7 +360,7 @@
                     pendingCount++;
                     const diff = daysUntil(item.mulai);
                     if (diff <= 3 && diff >= 0) urgentCount++;
-                } else if (item.status === 'approved') {
+                } else if (['approved', 'verified_hrga', 'notified_direksi'].includes(item.status)) {
                     approvedCount++;
                 }
             });
@@ -405,17 +405,8 @@
             tbody.innerHTML = filtered.map(item => {
                 const diff = daysUntil(item.mulai);
                 const isH3 = item.status === 'pending' && diff <= 3 && diff >= 0;
-
                 const rowBg = isH3 ? 'bg-rose-500/[0.03]' : '';
-
-                let statusBadge = '';
-                if (item.status === 'approved') {
-                    statusBadge = `<span class="badge-status approved"><i class="ph-fill ph-check-circle"></i> Disetujui</span>`;
-                } else if (item.status === 'rejected') {
-                    statusBadge = `<span class="badge-status rejected"><i class="ph-fill ph-x-circle"></i> Ditolak</span>`;
-                } else {
-                    statusBadge = `<span class="badge-status pending"><i class="ph-fill ph-clock"></i> Menunggu</span>`;
-                }
+                const statusBadge = getStatusBadge(item.status, 'xs');
 
                 const urgentBadge = isH3 
                     ? `<span class="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 badge-pulse ml-1"><i class="ph-bold ph-warning"></i> H-${diff}</span>` 
@@ -509,10 +500,6 @@
 
         function submitDecision(decision) {
             if (!currentReviewId) return;
-            const list = getPengajuanData();
-            const item = list.find(p => p.id === currentReviewId);
-            if (!item) return;
-
             const note = document.getElementById('inp-catatan-atasan').value.trim();
 
             if (decision === 'rejected' && !note) {
@@ -520,17 +507,10 @@
                 return;
             }
 
-            item.status = decision;
-            item.catatanAtasan = note || (decision === 'approved' ? 'Disetujui untuk dilaksanakan sesuai SOP.' : 'Pengajuan ditolak.');
-            item.disetujuiOleh = 'Budi Pratama (IT & Ops Manager)';
-            item.tanggalDisetujui = daysFromNow(0);
-
-            savePengajuanData(list);
-
             if (decision === 'approved') {
-                showToast('success', 'Pengajuan Disetujui!', `Pengajuan dinas ${item.nama} ke ${item.tujuan} berhasil disetujui. SPPD telah terbit.`);
+                approveByAtasan(currentReviewId, note);
             } else {
-                showToast('warning', 'Pengajuan Ditolak', `Pengajuan dinas ${item.nama} telah ditolak dengan catatan.`);
+                rejectByAtasan(currentReviewId, note);
             }
 
             closeReviewModal();

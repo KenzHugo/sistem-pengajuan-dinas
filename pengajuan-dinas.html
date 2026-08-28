@@ -215,37 +215,64 @@
                         </div>
                     </div>
 
-                    <!-- Section 2: Jadwal & Durasi -->
+                    <!-- Section 2: Jadwal & Durasi Parameter -->
                     <div class="app-card p-5 space-y-4">
                         <div class="flex items-center gap-2.5 pb-3 border-b border-white/5">
                             <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center text-base">
                                 <i class="ph-bold ph-calendar"></i>
                             </div>
                             <div>
-                                <h3 class="text-sm font-bold text-white">2. Jadwal &amp; Durasi Waktu</h3>
-                                <p class="text-[11px] text-slate-400">Tentukan tanggal keberangkatan dan kepulangan</p>
+                                <h3 class="text-sm font-bold text-white">2. Jadwal, Jarak &amp; Durasi Waktu</h3>
+                                <p class="text-[11px] text-slate-400">Tentukan rincian waktu, estimasi jarak (KM), dan status menginap</p>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                             <div class="space-y-1">
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tanggal Berangkat <span class="text-rose-400">*</span></label>
-                                <input type="date" id="inp-mulai" required onchange="handleDateChange()"
-                                    class="form-control-custom text-xs"
-                                    style="color-scheme: dark;" />
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tanggal &amp; Jam Berangkat <span class="text-rose-400">*</span></label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="date" id="inp-mulai" required onchange="handleDateChange()"
+                                        class="form-control-custom text-xs" style="color-scheme: dark;" />
+                                    <input type="time" id="inp-jam-berangkat" value="08:00" required onchange="updateLiveSummary()"
+                                        class="form-control-custom text-xs" style="color-scheme: dark;" />
+                                </div>
                             </div>
 
                             <div class="space-y-1">
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tanggal Kembali <span class="text-rose-400">*</span></label>
                                 <input type="date" id="inp-selesai" required onchange="handleDateChange()"
-                                    class="form-control-custom text-xs"
-                                    style="color-scheme: dark;" />
+                                    class="form-control-custom text-xs" style="color-scheme: dark;" />
                             </div>
                         </div>
 
-                        <div class="p-3 rounded-xl bg-[#090d16] border border-white/5 flex items-center justify-between text-xs">
-                            <span class="text-slate-400">Total Durasi Perjalanan:</span>
-                            <span class="font-bold text-brand-300 font-mono bg-brand-500/20 px-2.5 py-0.5 rounded-lg" id="durasi-badge">1 Hari</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Estimasi Jarak (KM) <span class="text-rose-400">*</span></label>
+                                <input type="number" id="inp-jarak" value="450" min="1" required oninput="updateLiveSummary()"
+                                    class="form-control-custom text-xs font-mono" placeholder="450" />
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lama Perjalanan (Jam) <span class="text-rose-400">*</span></label>
+                                <input type="number" id="inp-lama-jam" value="96" min="1" required oninput="updateLiveSummary()"
+                                    class="form-control-custom text-xs font-mono" placeholder="96" />
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status Menginap <span class="text-rose-400">*</span></label>
+                                <select id="inp-status-menginap" required onchange="updateLiveSummary()" class="form-control-custom text-xs">
+                                    <option value="Ya" selected>Ya (Menginap)</option>
+                                    <option value="Tidak">Tidak (Pulang Pergi)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-[#090d16] border border-white/5 flex flex-wrap items-center justify-between text-xs gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-slate-400">Determinasi Kriteria Fasilitas:</span>
+                                <span class="font-bold text-amber-300 font-mono bg-amber-500/20 px-2.5 py-0.5 rounded-lg" id="kriteria-badge">4. Menginap</span>
+                            </div>
+                            <span class="font-bold text-brand-300 font-mono bg-brand-500/20 px-2.5 py-0.5 rounded-lg" id="durasi-badge">4 Hari</span>
                         </div>
                     </div>
 
@@ -453,25 +480,39 @@
             const keperluan = document.getElementById('inp-keperluan').value || 'Rapat / Meeting Klien';
             const mulai = document.getElementById('inp-mulai').value;
             const selesai = document.getElementById('inp-selesai').value;
+            const jarak = Number(document.getElementById('inp-jarak').value) || 0;
+            const lamaJam = Number(document.getElementById('inp-lama-jam').value) || 0;
+            const statusMenginap = document.getElementById('inp-status-menginap').value;
 
             const durasi = calculateDuration(mulai, selesai);
-            const nights = durasi > 1 ? durasi - 1 : 1;
+            const nights = statusMenginap === 'Ya' ? (durasi > 1 ? durasi - 1 : 1) : 0;
+
+            // Determinasi Kriteria Fasilitas (PerjalananDinas_Fasilitas)
+            let kriteria = '1. < 200 KM & < 8 Jam';
+            if (statusMenginap === 'Ya') {
+                kriteria = '4. Menginap';
+            } else if (jarak > 200 || lamaJam > 12) {
+                kriteria = '3. > 200 KM atau > 12 Jam';
+            } else if (jarak < 200 && lamaJam >= 8 && lamaJam <= 12) {
+                kriteria = '2. < 200 KM & 8 - 12 Jam';
+            }
 
             const bTransport = Number(document.getElementById('inp-biaya-transport').value) || 0;
             const bHotelPerNight = Number(document.getElementById('inp-biaya-hotel').value) || 0;
             const bHarianPerDay = Number(document.getElementById('inp-biaya-harian').value) || 0;
 
-            const totalHotel = bHotelPerNight * nights;
+            const totalHotel = statusMenginap === 'Ya' ? (bHotelPerNight * nights) : 0;
             const totalHarian = bHarianPerDay * durasi;
             const total = bTransport + totalHotel + totalHarian;
 
+            document.getElementById('kriteria-badge').textContent = kriteria;
             document.getElementById('durasi-badge').textContent = durasi + ' Hari';
             document.getElementById('sum-tujuan').textContent = tujuan;
             document.getElementById('sum-keperluan').textContent = keperluan;
-            document.getElementById('sum-durasi').textContent = durasi + ' Hari';
+            document.getElementById('sum-durasi').textContent = durasi + ' Hari (' + lamaJam + ' Jam)';
 
             document.getElementById('sum-transport').textContent = formatRupiah(bTransport);
-            document.getElementById('sum-hotel-label').textContent = `Hotel (${nights} mlm):`;
+            document.getElementById('sum-hotel-label').textContent = statusMenginap === 'Ya' ? `Hotel (${nights} mlm):` : 'Hotel (0 mlm):';
             document.getElementById('sum-hotel').textContent = formatRupiah(totalHotel);
             document.getElementById('sum-harian-label').textContent = `Uang Saku (${durasi} hr):`;
             document.getElementById('sum-harian').textContent = formatRupiah(totalHarian);
@@ -496,6 +537,10 @@
             const keperluan = document.getElementById('inp-keperluan').value;
             const mulai = document.getElementById('inp-mulai').value;
             const selesai = document.getElementById('inp-selesai').value;
+            const jamBerangkat = document.getElementById('inp-jam-berangkat').value;
+            const jarak = Number(document.getElementById('inp-jarak').value) || 0;
+            const lamaJam = Number(document.getElementById('inp-lama-jam').value) || 0;
+            const statusMenginap = document.getElementById('inp-status-menginap').value;
             const transportasi = document.getElementById('inp-transportasi').value;
             const akomodasi = document.getElementById('inp-akomodasi').value.trim();
             const keterangan = document.getElementById('inp-keterangan').value.trim();
@@ -505,8 +550,19 @@
                 return;
             }
 
+            // Determinasi Kriteria Fasilitas
+            let kriteria = '1. < 200 KM & < 8 Jam';
+            if (statusMenginap === 'Ya') {
+                kriteria = '4. Menginap';
+            } else if (jarak > 200 || lamaJam > 12) {
+                kriteria = '3. > 200 KM atau > 12 Jam';
+            } else if (jarak < 200 && lamaJam >= 8 && lamaJam <= 12) {
+                kriteria = '2. < 200 KM & 8 - 12 Jam';
+            }
+
+            const user = getCurrentUser();
             const durasi = calculateDuration(mulai, selesai);
-            const nights = durasi > 1 ? durasi - 1 : 1;
+            const nights = statusMenginap === 'Ya' ? (durasi > 1 ? durasi - 1 : 1) : 0;
 
             const bTransport = Number(document.getElementById('inp-biaya-transport').value) || 0;
             const bHotel = (Number(document.getElementById('inp-biaya-hotel').value) || 0) * nights;
@@ -520,16 +576,21 @@
             const newId = Date.now();
             const newItem = {
                 id: newId,
-                nomorSurat: `SPPD/IT/2026/08/${String(newId).slice(-3)}`,
-                nama: 'Rizky Darmawan',
-                nip: 'EMP-2022091',
-                dept: 'IT & Infrastructure',
-                jabatan: 'Senior Web Developer',
+                nomorSurat: generateNomorSurat(user.dept || 'IT & Infrastructure'),
+                nama: user.name || 'Karyawan',
+                nip: user.nip || 'EMP-2026001',
+                dept: user.dept || 'IT & Infrastructure',
+                jabatan: user.jabatan || 'Staff Professional',
                 asal: 'Surabaya',
                 tujuan: tujuan,
                 instansi: instansi,
                 mulai: mulai,
                 selesai: selesai,
+                jamBerangkat: jamBerangkat,
+                jarak: jarak,
+                lamaJam: lamaJam,
+                statusMenginap: statusMenginap,
+                kriteria: kriteria,
                 durasi: durasi,
                 transportasi: transportasi,
                 akomodasi: akomodasi,
@@ -544,7 +605,12 @@
                 tanggalPengajuan: daysFromNow(0),
                 catatanAtasan: '',
                 disetujuiOleh: '',
-                tanggalDisetujui: ''
+                tanggalDisetujui: '',
+                catatanHRGA: '',
+                diverifikasiOleh: '',
+                tanggalVerifikasiHRGA: '',
+                tanggalNotifikasiDireksi: '',
+                pesanWA: '',
             };
 
             const data = getPengajuanData();
@@ -552,7 +618,7 @@
             savePengajuanData(data);
 
             setTimeout(() => {
-                showToast('success', 'Pengajuan Terkirim!', `Pengajuan dinas ke ${tujuan} berhasil dibuat.`);
+                showToast('success', 'Pengajuan Terkirim!', `Pengajuan SPPD ${newItem.nomorSurat} ke ${tujuan} berhasil diajukan.`);
                 setTimeout(() => {
                     window.location.href = 'riwayat-pengajuan.html';
                 }, 700);

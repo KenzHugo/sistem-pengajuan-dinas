@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SiPaDin — Laporan & Rekap HRGA</title>
+    <meta name="description" content="Laporan & Rekapitulasi Perjalanan Dinas HRGA PT Adiprima Suraprinta." />
+
+    <!-- TAILWIND CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- PHOSPHOR ICONS STYLESHEETS -->
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" />
+
+    <!-- CUSTOM STYLES -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="bg-[#090d16] text-slate-100 min-h-screen flex antialiased selection:bg-amber-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[99999] space-y-3 w-80 max-w-[calc(100vw-2.5rem)] pointer-events-none"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="hrga-sidebar-overlay" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-40 hidden lg:hidden" onclick="closeMobileSidebar()"></div>
+
+    <!-- SIDEBAR HRGA -->
+    <aside id="hrga-mobile-sidebar" class="w-64 bg-[#0f172a] border-r border-[#1e293b] flex flex-col justify-between flex-shrink-0 z-50">
+        
+        <div>
+            <!-- Sidebar Header / Logo -->
+            <div class="flex items-center justify-between px-6 py-5 border-b border-[#1e293b]">
+                <a href="dashboard-hrga.html" class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                        <i class="ph-fill ph-buildings text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="text-white font-extrabold text-base tracking-tight block">SiPaDin</span>
+                        <span class="text-[9px] text-amber-400 font-bold uppercase tracking-wider">HRGA Control Center</span>
+                    </div>
+                </a>
+                <button onclick="closeMobileSidebar()" class="lg:hidden text-slate-400 hover:text-white">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <!-- HRGA Profile Info -->
+            <div class="p-4 mx-3 my-3 rounded-2xl bg-[#141e33] border border-white/5">
+                <div class="flex items-center gap-3">
+                    <div data-user-avatar class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                        DR
+                    </div>
+                    <div class="overflow-hidden min-w-0">
+                        <p data-user-name class="text-xs font-bold text-white truncate">Dewi Rahayu</p>
+                        <p data-user-dept class="text-[11px] text-amber-300/80 truncate">HRGA Supervisor</p>
+                        <span class="inline-flex items-center gap-1 text-[9px] text-amber-400 font-semibold mt-0.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Otoritas Kontrol HRD
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="px-3 space-y-1 mt-2">
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider px-3 mb-2">Menu Utama HRGA</p>
+                
+                <a href="dashboard-hrga.html" class="sidebar-link">
+                    <i class="ph-bold ph-shield-check text-base"></i>
+                    <span>Kontrol &amp; Verifikasi</span>
+                </a>
+
+                <a href="laporan-hrga.html" class="sidebar-link active">
+                    <i class="ph-bold ph-file-text text-base"></i>
+                    <span>Laporan &amp; Rekap Dinas</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-[#1e293b]">
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all">
+                <i class="ph-bold ph-sign-out text-base"></i>
+                <span>Keluar Aplikasi</span>
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="flex-1 flex flex-col min-w-0 min-h-screen">
+
+        <!-- TOPBAR NAVBAR -->
+        <header class="h-16 border-b border-[#1e293b] bg-[#090d16]/80 backdrop-blur-md sticky top-0 z-30 px-4 md:px-8 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button onclick="openMobileSidebar()" class="lg:hidden p-2 rounded-xl bg-[#141e33] text-slate-300 hover:text-white">
+                    <i class="ph-bold ph-list text-lg"></i>
+                </button>
+                <div>
+                    <h2 class="text-sm font-bold text-white">Laporan &amp; Rekapituasi Dinas HRGA</h2>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">Rekapitulasi Pengajuan, Anggaran, &amp; Status Pipeline Seluruh Departemen</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button onclick="exportToCSV()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-all shadow-md">
+                    <i class="ph-bold ph-download-simple"></i>
+                    <span>Export CSV Rekap</span>
+                </button>
+                <button onclick="logout()" class="p-2 rounded-xl bg-[#141e33] text-slate-400 hover:text-rose-400 transition-colors" title="Keluar">
+                    <i class="ph-bold ph-power text-base"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTAINER CONTENT -->
+        <main class="p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
+
+            <!-- STATS CARDS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="app-card p-5 space-y-2">
+                    <span class="text-xs font-semibold text-slate-400">Total Pengajuan Perjalanan</span>
+                    <p id="stat-total-hrga" class="text-2xl font-extrabold text-white font-mono">0</p>
+                    <p class="text-[11px] text-slate-400">Seluruh departemen</p>
+                </div>
+                <div class="app-card p-5 space-y-2">
+                    <span class="text-xs font-semibold text-slate-400">Terverifikasi &amp; Direksi Notified</span>
+                    <p id="stat-approved-hrga" class="text-2xl font-extrabold text-emerald-400 font-mono">0</p>
+                    <p class="text-[11px] text-emerald-400">Lolos kontrol HRGA</p>
+                </div>
+                <div class="app-card p-5 space-y-2">
+                    <span class="text-xs font-semibold text-slate-400">Total Anggaran Terkontrol</span>
+                    <p id="stat-budget-hrga" class="text-lg font-extrabold text-amber-300 font-mono">Rp 0</p>
+                    <p class="text-[11px] text-slate-400">Total Cash Advance (CA)</p>
+                </div>
+                <div class="app-card p-5 space-y-2">
+                    <span class="text-xs font-semibold text-slate-400">Rata-rata Durasi Tugas</span>
+                    <p id="stat-avg-duration" class="text-2xl font-extrabold text-brand-300 font-mono">0 Hari</p>
+                    <p class="text-[11px] text-slate-400">Per pengajuan dinas</p>
+                </div>
+            </div>
+
+            <!-- SEARCH & FILTER BAR -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface-card border border-surface-border p-4 rounded-2xl">
+                <div class="flex items-center gap-3 w-full sm:w-auto flex-wrap">
+                    <select id="filter-dept-hrga" onchange="renderHRGALaporanView()" class="form-control-custom text-xs w-full sm:w-48">
+                        <option value="">Semua Departemen</option>
+                        <option value="IT & Infrastructure">IT &amp; Infrastructure</option>
+                        <option value="Marketing & Sales">Marketing &amp; Sales</option>
+                        <option value="Finance & Accounting">Finance &amp; Accounting</option>
+                        <option value="Human Resources">Human Resources</option>
+                        <option value="Production">Production</option>
+                    </select>
+
+                    <select id="filter-status-hrga" onchange="renderHRGALaporanView()" class="form-control-custom text-xs w-full sm:w-48">
+                        <option value="">Semua Status Pipeline</option>
+                        <option value="pending">Menunggu Atasan (Tahap 1)</option>
+                        <option value="approved">Pending Kontrol HRGA (Tahap 2)</option>
+                        <option value="verified_hrga">Terverifikasi HRGA (Tahap 3)</option>
+                        <option value="notified_direksi">Diinformasikan ke Direksi (Tahap 4)</option>
+                        <option value="rejected">Ditolak</option>
+                    </select>
+                </div>
+
+                <div class="relative w-full sm:w-64">
+                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-500 pointer-events-none">
+                        <i class="ph-bold ph-magnifying-glass text-xs"></i>
+                    </span>
+                    <input type="text" id="inp-search-hrga" oninput="renderHRGALaporanView()" placeholder="Cari nama / tujuan / nomor..." class="form-control-custom text-xs pl-9" />
+                </div>
+            </div>
+
+            <!-- TABLE REKAPITULASI -->
+            <div class="app-card overflow-hidden">
+                <div class="p-4 border-b border-surface-border flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="ph-bold ph-file-text text-amber-400"></i>
+                        Rekapitulasi Perjalanan Dinas Seluruh Karyawan
+                    </h3>
+                    <button onclick="exportToCSV()" class="text-xs font-semibold text-amber-400 hover:underline">
+                        Download CSV
+                    </button>
+                </div>
+
+                <div class="custom-table-container">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>No. SPPD</th>
+                                <th>Karyawan &amp; Departemen</th>
+                                <th>Rute &amp; Keperluan</th>
+                                <th>Jadwal &amp; Durasi</th>
+                                <th>Total Biaya (CA)</th>
+                                <th>Status Pipeline</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-laporan-hrga-body">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHRGALaporanView();
+        });
+
+        function renderHRGALaporanView() {
+            const list = getPengajuanData();
+            const deptFilter = document.getElementById('filter-dept-hrga').value;
+            const statusFilter = document.getElementById('filter-status-hrga').value;
+            const searchVal = document.getElementById('inp-search-hrga').value.toLowerCase().trim();
+
+            const total = list.length;
+            const approved = list.filter(p => ['verified_hrga', 'notified_direksi'].includes(p.status)).length;
+            const totalBudget = list.reduce((acc, curr) => acc + (curr.totalBiaya || 0), 0);
+            const avgDur = list.length ? Math.round(list.reduce((acc, curr) => acc + (curr.durasi || 1), 0) / list.length) : 0;
+
+            document.getElementById('stat-total-hrga').textContent = total;
+            document.getElementById('stat-approved-hrga').textContent = approved;
+            document.getElementById('stat-budget-hrga').textContent = formatRupiah(totalBudget);
+            document.getElementById('stat-avg-duration').textContent = avgDur + ' Hari';
+
+            let filtered = list;
+            if (deptFilter) filtered = filtered.filter(p => p.dept === deptFilter);
+            if (statusFilter) filtered = filtered.filter(p => p.status === statusFilter);
+            if (searchVal) {
+                filtered = filtered.filter(p => 
+                    p.nama.toLowerCase().includes(searchVal) ||
+                    p.tujuan.toLowerCase().includes(searchVal) ||
+                    p.dept.toLowerCase().includes(searchVal) ||
+                    (p.nomorSurat && p.nomorSurat.toLowerCase().includes(searchVal))
+                );
+            }
+
+            const tbody = document.getElementById('table-laporan-hrga-body');
+            tbody.innerHTML = filtered.map(item => {
+                const badgeHtml = getStatusBadge(item.status, 'xs');
+                return `
+                    <tr>
+                        <td class="font-mono font-bold text-xs text-amber-300">
+                            ${item.nomorSurat || 'SPPD-' + item.id}
+                        </td>
+                        <td>
+                            <p class="font-bold text-white text-xs">${item.nama}</p>
+                            <p class="text-[10px] text-slate-400">${item.dept}</p>
+                        </td>
+                        <td>
+                            <span class="font-semibold text-slate-200 text-xs">${item.asal || 'Surabaya'} ➔ ${item.tujuan}</span>
+                            <span class="text-[11px] text-slate-400 block mt-0.5">${item.keperluan}</span>
+                        </td>
+                        <td class="text-xs text-slate-300">
+                            ${formatDate(item.mulai)} - ${formatDate(item.selesai)}
+                            <span class="text-amber-400 block font-mono font-medium text-[10px]">${item.durasi || 1} Hari</span>
+                        </td>
+                        <td class="font-mono text-xs font-bold text-emerald-400">
+                            ${formatRupiah(item.totalBiaya)}
+                        </td>
+                        <td>
+                            ${badgeHtml}
+                        </td>
+                        <td class="text-center">
+                            <button onclick="openDetailModal(${item.id})" class="px-2.5 py-1 rounded-lg bg-[#090d16] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
+                                Detail
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function exportToCSV() {
+            const list = getPengajuanData();
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nomor SPPD,Nama,NIP,Departemen,Tujuan,Instansi,Mulai,Selesai,Durasi Hari,Keperluan,Transportasi,Akomodasi,Total Biaya,Status\n";
+
+            list.forEach(item => {
+                const row = [
+                    `"${item.nomorSurat || ''}"`,
+                    `"${item.nama || ''}"`,
+                    `"${item.nip || ''}"`,
+                    `"${item.dept || ''}"`,
+                    `"${item.tujuan || ''}"`,
+                    `"${item.instansi || ''}"`,
+                    `"${item.mulai || ''}"`,
+                    `"${item.selesai || ''}"`,
+                    `"${item.durasi || 1}"`,
+                    `"${item.keperluan || ''}"`,
+                    `"${item.transportasi || ''}"`,
+                    `"${item.akomodasi || ''}"`,
+                    `"${item.totalBiaya || 0}"`,
+                    `"${item.status || ''}"`
+                ].join(',');
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Rekapitulasi_HRGA_Adiprima_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            showToast('success', 'Export CSV Berhasil', 'File rekapitulasi HRGA telah diunduh.');
+        }
+    </script>
+</body>
+
+</html>

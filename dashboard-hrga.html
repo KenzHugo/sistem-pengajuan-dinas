@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SiPaDin — Modul Kontrol HRGA & Notifikasi Direksi</title>
+    <meta name="description" content="Portal Kontrol HRGA dan Notifikasi Digital Direksi PT Adiprima Suraprinta." />
+
+    <!-- TAILWIND CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- PHOSPHOR ICONS STYLESHEETS -->
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" />
+
+    <!-- CUSTOM STYLES -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="bg-[#090d16] text-slate-100 min-h-screen flex antialiased selection:bg-amber-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"
+        class="fixed top-5 right-5 z-[99999] space-y-3 w-80 max-w-[calc(100vw-2.5rem)] pointer-events-none"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="hrga-sidebar-overlay" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-40 hidden lg:hidden"
+        onclick="closeMobileSidebar()"></div>
+
+    <!-- SIDEBAR HRGA -->
+    <aside id="hrga-mobile-sidebar"
+        class="w-64 bg-[#0f172a] border-r border-[#1e293b] flex flex-col justify-between flex-shrink-0 z-50">
+
+        <div>
+            <!-- Sidebar Header / Logo -->
+            <div class="flex items-center justify-between px-6 py-5 border-b border-[#1e293b]">
+                <a href="dashboard-hrga.html" class="flex items-center gap-3">
+                    <div
+                        class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                        <i class="ph-fill ph-buildings text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="text-white font-extrabold text-base tracking-tight block">SiPaDin</span>
+                        <span class="text-[9px] text-amber-400 font-bold uppercase tracking-wider">HRGA Control
+                            Center</span>
+                    </div>
+                </a>
+                <button onclick="closeMobileSidebar()" class="lg:hidden text-slate-400 hover:text-white">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <!-- HRGA Profile Info -->
+            <div class="p-4 mx-3 my-3 rounded-2xl bg-[#141e33] border border-white/5">
+                <div class="flex items-center gap-3">
+                    <div data-user-avatar
+                        class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                        DR
+                    </div>
+                    <div class="overflow-hidden min-w-0">
+                        <p data-user-name class="text-xs font-bold text-white truncate">Dewi Rahayu</p>
+                        <p data-user-dept class="text-[11px] text-amber-300/80 truncate">HRGA Supervisor</p>
+                        <span class="inline-flex items-center gap-1 text-[9px] text-amber-400 font-semibold mt-0.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Otoritas Kontrol HRD
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="px-3 space-y-1 mt-2">
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider px-3 mb-2">Menu Utama HRGA</p>
+
+                <a href="dashboard-hrga.html" class="sidebar-link active">
+                    <i class="ph-bold ph-shield-check text-base"></i>
+                    <span>Kontrol &amp; Verifikasi</span>
+                </a>
+
+                <a href="laporan-hrga.html" class="sidebar-link">
+                    <i class="ph-bold ph-file-text text-base"></i>
+                    <span>Laporan &amp; Rekap Dinas</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-[#1e293b]">
+            <button onclick="logout()"
+                class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all">
+                <i class="ph-bold ph-sign-out text-base"></i>
+                <span>Keluar Aplikasi</span>
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="flex-1 flex flex-col min-w-0 min-h-screen">
+
+        <!-- TOPBAR NAVBAR -->
+        <header
+            class="h-16 border-b border-[#1e293b] bg-[#090d16]/80 backdrop-blur-md sticky top-0 z-30 px-4 md:px-8 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button onclick="openMobileSidebar()"
+                    class="lg:hidden p-2 rounded-xl bg-[#141e33] text-slate-300 hover:text-white">
+                    <i class="ph-bold ph-list text-lg"></i>
+                </button>
+                <div>
+                    <h2 class="text-sm font-bold text-white">Modul Kontrol HRD / HRGA</h2>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">Tahap 3 (Verifikasi Kebijakan) &amp; Tahap 4
+                        (Notifikasi Direksi Digital)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div
+                    class="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-semibold hidden md:flex items-center gap-2">
+                    <i class="ph-bold ph-scales text-sm"></i>
+                    <span>Referensi Tarif &amp; Fasilitas SQL Active</span>
+                </div>
+                <button onclick="logout()"
+                    class="p-2 rounded-xl bg-[#141e33] text-slate-400 hover:text-rose-400 transition-colors"
+                    title="Keluar">
+                    <i class="ph-bold ph-power text-base"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTAINER CONTENT -->
+        <main class="p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
+
+            <!-- BANNER INFORMASI PIPELINE HRGA -->
+            <div
+                class="p-5 rounded-3xl bg-gradient-to-r from-amber-950/40 via-surface-card to-surface-card border border-amber-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-start gap-4">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-2xl flex-shrink-0">
+                        <i class="ph-fill ph-git-merge"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Workflow Kontrol 4 Tahap HRGA</h3>
+                        <p class="text-xs text-slate-300 mt-1 leading-relaxed max-w-2xl">
+                            Modul ini mengontrol kesesuaian anggaran pengajuan bawahan yang telah disetujui atasan
+                            (Tahap 2) dengan data referensi <strong
+                                class="text-amber-300">PerjalananDinas_Tarif.sql</strong> &amp; <strong
+                                class="text-amber-300">PerjalananDinas_Fasilitas.sql</strong> (Tahap 3), serta memicu
+                            notifikasi teks resmi ke Direksi (Tahap 4).
+                        </p>
+                    </div>
+                </div>
+                <div
+                    class="flex items-center gap-2 text-xs font-bold text-amber-300 bg-amber-500/10 px-3 py-2 rounded-xl border border-amber-500/20 whitespace-nowrap">
+                    <i class="ph-bold ph-shield-check"></i> Standard Operating Procedure
+                </div>
+            </div>
+
+            <!-- KPI SUMMARY CARDS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+                <!-- Stat 1: Pending Kontrol HRGA -->
+                <div class="app-card p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400">Pending Kontrol HRGA</span>
+                        <div
+                            class="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                            <i class="ph-bold ph-clock text-lg"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p id="hrga-stat-pending" class="text-2xl font-extrabold text-white font-mono">0</p>
+                        <p class="text-[11px] text-blue-400 mt-0.5">Menunggu verifikasi Tahap 3</p>
+                    </div>
+                </div>
+
+                <!-- Stat 2: Terverifikasi HRGA -->
+                <div class="app-card p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400">Siap Notifikasi Direksi</span>
+                        <div
+                            class="w-9 h-9 rounded-xl bg-teal-500/20 border border-teal-500/30 flex items-center justify-center text-teal-400">
+                            <i class="ph-bold ph-shield-check text-lg"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p id="hrga-stat-verified" class="text-2xl font-extrabold text-white font-mono">0</p>
+                        <p class="text-[11px] text-teal-400 mt-0.5">Siap kirim WA Tahap 4</p>
+                    </div>
+                </div>
+
+                <!-- Stat 3: Notified Direksi -->
+                <div class="app-card p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400">Diinformasikan ke Direksi</span>
+                        <div
+                            class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                            <i class="ph-bold ph-paper-plane-tilt text-lg"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p id="hrga-stat-notified" class="text-2xl font-extrabold text-white font-mono">0</p>
+                        <p class="text-[11px] text-emerald-400 mt-0.5">Notifikasi WA terkirim</p>
+                    </div>
+                </div>
+
+                <!-- Stat 4: Total Anggaran Kontrol -->
+                <div class="app-card p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400">Total Biaya Diverifikasi</span>
+                        <div
+                            class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                            <i class="ph-bold ph-currency-dollar text-lg"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p id="hrga-stat-budget" class="text-lg font-extrabold text-amber-300 font-mono">Rp 0</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Total estimasi CA terkontrol</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TABS FILTER UNTUK PIPELINE -->
+            <div
+                class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface-card border border-surface-border p-3 rounded-2xl">
+                <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+                    <button id="hrga-tab-semua" onclick="setHRGAFilter('semua')"
+                        class="px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 text-white shadow-sm transition-all whitespace-nowrap">
+                        Semua Pengajuan
+                    </button>
+                    <button id="hrga-tab-approved" onclick="setHRGAFilter('approved')"
+                        class="px-4 py-2 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
+                        <span>Pending HRGA</span>
+                        <span id="badge-count-pending-hrga"
+                            class="px-1.5 py-0.5 text-[10px] rounded-full bg-blue-500/20 text-blue-300 font-mono">0</span>
+                    </button>
+                    <button id="hrga-tab-verified" onclick="setHRGAFilter('verified_hrga')"
+                        class="px-4 py-2 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
+                        <span>Siap Notifikasi WA</span>
+                        <span id="badge-count-verified-hrga"
+                            class="px-1.5 py-0.5 text-[10px] rounded-full bg-teal-500/20 text-teal-300 font-mono">0</span>
+                    </button>
+                    <button id="hrga-tab-notified" onclick="setHRGAFilter('notified_direksi')"
+                        class="px-4 py-2 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap">
+                        Direksi Notified
+                    </button>
+                </div>
+
+                <div class="relative w-full sm:w-64">
+                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-500 pointer-events-none">
+                        <i class="ph-bold ph-magnifying-glass text-xs"></i>
+                    </span>
+                    <input type="text" id="hrga-inp-search" oninput="handleHRGASearch()"
+                        placeholder="Cari nama / nomor SPPD..." class="form-control-custom text-xs pl-9" />
+                </div>
+            </div>
+
+            <!-- TABLE DATAGRID CONTROLLER -->
+            <div class="app-card overflow-hidden">
+                <div class="p-4 border-b border-surface-border flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="ph-bold ph-table text-amber-400"></i>
+                        Daftar Pengajuan Dalam Pipeline HRGA
+                    </h3>
+                    <span class="text-xs text-slate-400 font-mono" id="table-showing-count">Menampilkan data
+                        pengajuan</span>
+                </div>
+
+                <div class="custom-table-container">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>No. SPPD &amp; Pegawai</th>
+                                <th>Departemen &amp; Jabatan</th>
+                                <th>Rute &amp; Jadwal Perjalanan</th>
+                                <th>Total Estimasi Biaya</th>
+                                <th>Status Pipeline</th>
+                                <th class="text-center">Aksi HRGA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-hrga-body">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty State -->
+                <div id="table-hrga-empty" class="hidden py-14 text-center space-y-2">
+                    <i class="ph-bold ph-folder-open text-4xl text-slate-600"></i>
+                    <p class="text-sm font-bold text-white">Tidak ada data pengajuan dalam kategori ini.</p>
+                    <p class="text-xs text-slate-500">Pilih tab filter lain untuk melihat daftar pengajuan perjalanan
+                        dinas.</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL VERIFIKASI HRGA (Tahap 3) -->
+    <div id="modal-verifikasi-hrga"
+        class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div
+            class="w-full max-w-xl bg-surface-card border border-surface-border rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+
+            <div class="p-6 border-b border-surface-border bg-surface/60 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                        <i class="ph-bold ph-shield-check text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Verifikasi Kontrol HRD / HRGA (Tahap 3)</h3>
+                        <p class="text-xs text-slate-400" id="m-v-sppd">SPPD/IT/2026/08/003</p>
+                    </div>
+                </div>
+                <button onclick="closeVerifikasiModal()" class="text-slate-400 hover:text-white">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-5 text-sm flex-1">
+
+                <!-- Info Ringkas -->
+                <div class="p-4 rounded-2xl bg-surface/50 border border-surface-border space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-slate-400">Pemohon:</span>
+                        <span id="m-v-nama" class="font-bold text-white text-xs">-</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-slate-400">Jabatan &amp; Dept:</span>
+                        <span id="m-v-dept" class="text-slate-200 text-xs font-medium">-</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-slate-400">Tujuan &amp; Jadwal:</span>
+                        <span id="m-v-tujuan" class="text-brand-300 font-semibold text-xs">-</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-surface-border/50">
+                        <span class="text-xs text-slate-400">Total Estimasi Biaya:</span>
+                        <span id="m-v-total" class="text-emerald-400 font-mono font-bold text-sm">-</span>
+                    </div>
+                </div>
+
+                <!-- Checklist Kontrol Kebijakan SQL -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-amber-300 uppercase tracking-wider">
+                        <i class="ph-bold ph-check-square"></i> Checklist Validasi Kebijakan (SQL Reference)
+                    </label>
+                    <div class="space-y-2 p-4 rounded-2xl bg-[#090d16] border border-white/5 text-xs text-slate-300">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked
+                                class="rounded border-slate-700 text-amber-500 focus:ring-amber-500 bg-surface" />
+                            <span>Kesesuaian Tarif Konsumsi &amp; Uang Saku (<strong
+                                    class="text-slate-200">PerjalananDinas_Tarif</strong>)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked
+                                class="rounded border-slate-700 text-amber-500 focus:ring-amber-500 bg-surface" />
+                            <span>Kesesuaian Hak Transport &amp; Hotel (<strong
+                                    class="text-slate-200">PerjalananDinas_Fasilitas</strong>)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked
+                                class="rounded border-slate-700 text-amber-500 focus:ring-amber-500 bg-surface" />
+                            <span>Kelengkapan Dokumen Undangan / Surat Tugas / Proposal Lampiran</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Catatan Verifikasi HRGA -->
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider">Catatan Verifikasi
+                        HRGA</label>
+                    <textarea id="inp-catatan-hrga" rows="3"
+                        placeholder="Masukkan catatan hasil kontrol HRGA (opsional untuk Verifikasi, wajib untuk Tolak)..."
+                        class="form-control-custom text-xs w-full"></textarea>
+                </div>
+
+            </div>
+
+            <div class="p-5 border-t border-surface-border bg-surface/80 flex items-center justify-between gap-3">
+                <button onclick="closeVerifikasiModal()"
+                    class="px-4 py-2 rounded-xl border border-surface-border text-slate-300 hover:text-white text-xs font-semibold">
+                    Batal
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="submitHRGADecision('reject')"
+                        class="px-4 py-2 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 hover:bg-rose-500/30 text-xs font-bold transition-all">
+                        <i class="ph-bold ph-x"></i> Tolak Pengajuan
+                    </button>
+                    <button onclick="submitHRGADecision('verify')"
+                        class="px-5 py-2 rounded-xl bg-teal-gradient hover:opacity-90 text-white text-xs font-bold shadow-md shadow-teal-500/20 transition-all flex items-center gap-1.5">
+                        <i class="ph-bold ph-shield-check"></i> Verifikasi &amp; Teruskan
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL NOTIFIKASI DIREKSI VIA WHATSAPP (Tahap 4) -->
+    <div id="modal-wa-direksi"
+        class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div
+            class="w-full max-w-xl bg-surface-card border border-surface-border rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+
+            <div class="p-6 border-b border-surface-border bg-surface/60 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                        <i class="ph-bold ph-whatsapp-logo text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Notifikasi Direksi via Digital / WA (Tahap 4)</h3>
+                        <p class="text-xs text-slate-400">Format Teks Baku Resmi Perjalanan Dinas</p>
+                    </div>
+                </div>
+                <button onclick="closeWAModal()" class="text-slate-400 hover:text-white">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-4 text-sm flex-1">
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Berikut adalah draf pesan resmi yang dihasilkan otomatis oleh sistem untuk dikirimkan kepada
+                    Direksi:
+                </p>
+
+                <!-- Box Teks Pesan WA Baku -->
+                <div
+                    class="relative p-4 rounded-2xl bg-[#090d16] border border-emerald-500/30 text-emerald-100 font-sans text-xs space-y-2">
+                    <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
+                        <span
+                            class="text-[10px] uppercase font-bold tracking-wider text-emerald-400 flex items-center gap-1">
+                            <i class="ph-bold ph-paper-plane-tilt"></i> Format WhatsApp Direksi
+                        </span>
+                        <button onclick="copyWAText()"
+                            class="text-[11px] font-semibold text-slate-300 hover:text-white flex items-center gap-1 bg-white/5 hover:bg-white/10 px-2 py-1 rounded-lg transition-all">
+                            <i class="ph-bold ph-copy"></i> Salin Teks
+                        </button>
+                    </div>
+                    <pre id="wa-message-preview"
+                        class="whitespace-pre-wrap leading-relaxed font-sans text-slate-200 text-xs"></pre>
+                </div>
+            </div>
+
+            <div class="p-5 border-t border-surface-border bg-surface/80 flex items-center justify-between gap-3">
+                <button onclick="closeWAModal()"
+                    class="px-4 py-2 rounded-xl border border-surface-border text-slate-300 hover:text-white text-xs font-semibold">
+                    Tutup
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="copyWAText()"
+                        class="px-4 py-2 rounded-xl bg-surface-border hover:bg-white/10 text-white text-xs font-bold transition-all flex items-center gap-1.5">
+                        <i class="ph-bold ph-copy"></i> Salin Pesan
+                    </button>
+                    <button onclick="confirmAndOpenWA()"
+                        class="px-5 py-2 rounded-xl bg-emerald-gradient hover:opacity-90 text-white text-xs font-bold shadow-md shadow-emerald-500/20 transition-all flex items-center gap-1.5">
+                        <i class="ph-bold ph-whatsapp-logo text-base"></i> Kirim WhatsApp Web
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script>
+        let currentHRGAFilter = 'semua';
+        let hrgaSearchQuery = '';
+        let currentVerifikasiId = null;
+        let currentWAId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHRGADashboard();
+        });
+
+        function setHRGAFilter(status) {
+            currentHRGAFilter = status;
+            const tabs = ['semua', 'approved', 'verified_hrga', 'notified_direksi'];
+            tabs.forEach(t => {
+                const btn = document.getElementById('hrga-tab-' + (t === 'semua' ? 'semua' : t === 'approved' ? 'approved' : t === 'verified_hrga' ? 'verified' : 'notified'));
+                if (btn) {
+                    if (t === status) {
+                        btn.className = 'px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 text-white shadow-sm transition-all whitespace-nowrap flex items-center gap-1.5';
+                    } else {
+                        btn.className = 'px-4 py-2 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5';
+                    }
+                }
+            });
+            renderHRGADashboard();
+        }
+
+        function handleHRGASearch() {
+            hrgaSearchQuery = document.getElementById('hrga-inp-search').value.toLowerCase().trim();
+            renderHRGADashboard();
+        }
+
+        function renderHRGADashboard() {
+            const list = getPengajuanData();
+
+            const countPending = list.filter(p => p.status === 'approved').length;
+            const countVerified = list.filter(p => p.status === 'verified_hrga').length;
+            const countNotified = list.filter(p => p.status === 'notified_direksi').length;
+            const totalBudgetVerified = list.filter(p => ['verified_hrga', 'notified_direksi'].includes(p.status))
+                .reduce((acc, curr) => acc + (curr.totalBiaya || 0), 0);
+
+            document.getElementById('hrga-stat-pending').textContent = countPending;
+            document.getElementById('hrga-stat-verified').textContent = countVerified;
+            document.getElementById('hrga-stat-notified').textContent = countNotified;
+            document.getElementById('hrga-stat-budget').textContent = formatRupiah(totalBudgetVerified);
+
+            document.getElementById('badge-count-pending-hrga').textContent = countPending;
+            document.getElementById('badge-count-verified-hrga').textContent = countVerified;
+
+            // Filter List
+            let filtered = list;
+            if (currentHRGAFilter !== 'semua') {
+                filtered = filtered.filter(p => p.status === currentHRGAFilter);
+            }
+            if (hrgaSearchQuery) {
+                filtered = filtered.filter(p =>
+                    p.nama.toLowerCase().includes(hrgaSearchQuery) ||
+                    p.tujuan.toLowerCase().includes(hrgaSearchQuery) ||
+                    p.dept.toLowerCase().includes(hrgaSearchQuery) ||
+                    (p.nomorSurat && p.nomorSurat.toLowerCase().includes(hrgaSearchQuery))
+                );
+            }
+
+            document.getElementById('table-showing-count').textContent = `Menampilkan ${filtered.length} pengajuan`;
+
+            const tbody = document.getElementById('table-hrga-body');
+            const emptyState = document.getElementById('table-hrga-empty');
+
+            if (!filtered.length) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            tbody.innerHTML = filtered.map(item => {
+                const statusBadge = getStatusBadge(item.status, 'xs');
+                const initials = item.nama.split(' ').map(n => n[0]).join('').slice(0, 2);
+
+                let actionBtn = '';
+                if (item.status === 'approved') {
+                    // Tahap 3: Verifikasi HRGA
+                    actionBtn = `
+                        <button onclick="openVerifikasiModal(${item.id})" class="px-3 py-1.5 rounded-lg bg-teal-gradient hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1">
+                            <i class="ph-bold ph-shield-check"></i> Verifikasi HRGA
+                        </button>
+                    `;
+                } else if (item.status === 'verified_hrga') {
+                    // Tahap 4: Kirim WA ke Direksi
+                    actionBtn = `
+                        <button onclick="openWAModal(${item.id})" class="px-3 py-1.5 rounded-lg bg-emerald-gradient hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1">
+                            <i class="ph-bold ph-whatsapp-logo"></i> Kirim WA Direksi
+                        </button>
+                    `;
+                } else if (item.status === 'notified_direksi') {
+                    actionBtn = `
+                        <button onclick="openWAModal(${item.id})" class="px-2.5 py-1.5 rounded-lg bg-[#141e33] border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition-all flex items-center gap-1">
+                            <i class="ph-bold ph-eye"></i> Lihat WA
+                        </button>
+                    `;
+                } else {
+                    actionBtn = `<span class="text-xs text-slate-500 font-medium">Selesai</span>`;
+                }
+
+                return `
+                    <tr>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-300 font-bold text-xs flex items-center justify-center flex-shrink-0">
+                                    ${initials}
+                                </div>
+                                <div>
+                                    <p class="font-bold text-white text-xs">${item.nama}</p>
+                                    <span class="text-[10px] font-mono text-slate-400 block">${item.nomorSurat || 'SPPD-' + item.id}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <p class="text-xs font-semibold text-slate-200">${item.dept}</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">${item.jabatan || 'Staf'}</p>
+                        </td>
+                        <td>
+                            <div class="flex items-center gap-1.5 font-bold text-white text-xs">
+                                <i class="ph-bold ph-map-pin text-amber-400"></i> ${item.tujuan}
+                            </div>
+                            <span class="text-[11px] text-slate-400 block mt-0.5">${formatDate(item.mulai)} - ${formatDate(item.selesai)} (${item.durasi || 1} Hari)</span>
+                        </td>
+                        <td class="font-mono text-xs font-bold text-emerald-400">
+                            ${formatRupiah(item.totalBiaya)}
+                        </td>
+                        <td>
+                            ${statusBadge}
+                        </td>
+                        <td class="text-center">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button onclick="openDetailModal(${item.id})" class="px-2.5 py-1.5 rounded-lg bg-[#141e33] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
+                                    Detail
+                                </button>
+                                ${actionBtn}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Modal Verifikasi (Tahap 3)
+        function openVerifikasiModal(id) {
+            currentVerifikasiId = id;
+            const list = getPengajuanData();
+            const item = list.find(p => p.id === id);
+            if (!item) return;
+
+            document.getElementById('m-v-sppd').textContent = item.nomorSurat || 'SPPD-' + item.id;
+            document.getElementById('m-v-nama').textContent = item.nama + ' (' + (item.nip || '-') + ')';
+            document.getElementById('m-v-dept').textContent = item.jabatan + ' · ' + item.dept;
+            document.getElementById('m-v-tujuan').textContent = item.asal + ' ➔ ' + item.tujuan + ' (' + formatDate(item.mulai) + ')';
+            document.getElementById('m-v-total').textContent = formatRupiah(item.totalBiaya);
+            document.getElementById('inp-catatan-hrga').value = item.catatanHRGA || '';
+
+            const modal = document.getElementById('modal-verifikasi-hrga');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeVerifikasiModal() {
+            const modal = document.getElementById('modal-verifikasi-hrga');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            currentVerifikasiId = null;
+        }
+
+        function submitHRGADecision(action) {
+            if (!currentVerifikasiId) return;
+            const note = document.getElementById('inp-catatan-hrga').value.trim();
+
+            if (action === 'reject' && !note) {
+                showToast('error', 'Catatan Wajib', 'Harap masukkan alasan penolakan HRGA di kolom catatan.');
+                return;
+            }
+
+            if (action === 'verify') {
+                verifyByHRGA(currentVerifikasiId, note);
+            } else {
+                rejectByHRGA(currentVerifikasiId, note);
+            }
+
+            closeVerifikasiModal();
+            renderHRGADashboard();
+        }
+
+        // Modal Notifikasi WA Direksi (Tahap 4)
+        function openWAModal(id) {
+            currentWAId = id;
+            const list = getPengajuanData();
+            const item = list.find(p => p.id === id);
+            if (!item) return;
+
+            const pesan = generateWAMessage(item);
+            document.getElementById('wa-message-preview').textContent = pesan;
+
+            const modal = document.getElementById('modal-wa-direksi');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeWAModal() {
+            const modal = document.getElementById('modal-wa-direksi');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            currentWAId = null;
+        }
+
+        function copyWAText() {
+            const text = document.getElementById('wa-message-preview').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('success', 'Teks Tersalin!', 'Pesan WhatsApp telah disalin ke clipboard.');
+            }).catch(() => {
+                showToast('info', 'Pesan WA', 'Silakan blok dan salin teks pesan di atas.');
+            });
+        }
+
+        function confirmAndOpenWA() {
+            if (!currentWAId) return;
+            const result = notifyDireksi(currentWAId);
+            if (result && result.waUrl) {
+                window.open(result.waUrl, '_blank');
+            }
+            closeWAModal();
+            renderHRGADashboard();
+        }
+    </script>
+</body>
+
+</html>

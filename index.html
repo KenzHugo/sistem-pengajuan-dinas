@@ -84,14 +84,18 @@
                 <!-- Role Selector Tabs -->
                 <div class="space-y-1.5">
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Akses Sebagai</label>
-                    <div class="grid grid-cols-2 gap-2 p-1 bg-[#090d16] border border-white/5 rounded-xl">
+                    <div class="grid grid-cols-3 gap-1.5 p-1 bg-[#090d16] border border-white/5 rounded-xl">
                         <button type="button" id="tab-btn-karyawan" onclick="selectRole('karyawan')"
-                            class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all bg-brand-gradient text-white shadow-sm">
+                            class="flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-bold transition-all bg-brand-gradient text-white shadow-sm">
                             <i class="ph-bold ph-user"></i> Karyawan
                         </button>
                         <button type="button" id="tab-btn-atasan" onclick="selectRole('atasan')"
-                            class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white">
+                            class="flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white">
                             <i class="ph-bold ph-shield-check"></i> Atasan
+                        </button>
+                        <button type="button" id="tab-btn-hrga" onclick="selectRole('hrga')"
+                            class="flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white">
+                            <i class="ph-bold ph-buildings"></i> HRGA
                         </button>
                     </div>
                 </div>
@@ -141,12 +145,15 @@
                 <!-- Quick Demo Buttons -->
                 <div class="pt-3 border-t border-white/5 space-y-2">
                     <p class="text-center text-[10px] font-semibold text-slate-400">⚡ Akses Cepat Demo:</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="quickLogin('karyawan')" class="flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-[#090d16] border border-white/5 hover:border-brand-500/40 text-slate-300 hover:text-white text-xs font-medium transition-all">
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button onclick="quickLogin('karyawan')" class="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-[#090d16] border border-white/5 hover:border-brand-500/40 text-slate-300 hover:text-white text-[11px] font-medium transition-all">
                             <i class="ph-bold ph-user text-brand-400"></i> Karyawan
                         </button>
-                        <button onclick="quickLogin('atasan')" class="flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-[#090d16] border border-white/5 hover:border-purple-500/40 text-slate-300 hover:text-white text-xs font-medium transition-all">
+                        <button onclick="quickLogin('atasan')" class="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-[#090d16] border border-white/5 hover:border-purple-500/40 text-slate-300 hover:text-white text-[11px] font-medium transition-all">
                             <i class="ph-bold ph-shield-check text-purple-400"></i> Atasan
+                        </button>
+                        <button onclick="quickLogin('hrga')" class="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-[#090d16] border border-white/5 hover:border-amber-500/40 text-slate-300 hover:text-white text-[11px] font-medium transition-all">
+                            <i class="ph-bold ph-buildings text-amber-400"></i> HRGA
                         </button>
                     </div>
                 </div>
@@ -163,18 +170,26 @@
             const roleInput = document.getElementById('login-role');
             const btnKaryawan = document.getElementById('tab-btn-karyawan');
             const btnAtasan = document.getElementById('tab-btn-atasan');
+            const btnHrga = document.getElementById('tab-btn-hrga');
             const emailInp = document.getElementById('login-email');
 
             roleInput.value = role;
 
+            // Reset tab styles
+            const unactiveClass = 'flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white';
+            btnKaryawan.className = unactiveClass;
+            btnAtasan.className = unactiveClass;
+            btnHrga.className = unactiveClass;
+
             if (role === 'karyawan') {
-                btnKaryawan.className = 'flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all bg-brand-gradient text-white shadow-sm';
-                btnAtasan.className = 'flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white';
+                btnKaryawan.className = 'flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-bold transition-all bg-brand-gradient text-white shadow-sm';
                 emailInp.value = 'karyawan@sipadin.com';
-            } else {
-                btnAtasan.className = 'flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all bg-purple-600 text-white shadow-sm';
-                btnKaryawan.className = 'flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white';
+            } else if (role === 'atasan') {
+                btnAtasan.className = 'flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-bold transition-all bg-purple-600 text-white shadow-sm';
                 emailInp.value = 'manager@sipadin.com';
+            } else if (role === 'hrga') {
+                btnHrga.className = 'flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-bold transition-all bg-amber-600 text-white shadow-sm';
+                emailInp.value = 'hrga@sipadin.com';
             }
         }
 
@@ -200,31 +215,17 @@
 
             setTimeout(() => {
                 if (role === 'karyawan') {
-                    setCurrentUser({
-                        name: 'Rizky Darmawan',
-                        role: 'karyawan',
-                        dept: 'IT & Infrastructure',
-                        nip: 'EMP-2022091',
-                        email: 'karyawan@sipadin.com',
-                        avatar: 'RD'
-                    });
+                    setCurrentUser(DEMO_ACCOUNTS.karyawan);
                     showToast('success', 'Login Berhasil', 'Selamat datang kembali, Rizky!');
-                    setTimeout(() => {
-                        window.location.href = 'dashboard-karyawan.html';
-                    }, 400);
-                } else {
-                    setCurrentUser({
-                        name: 'Budi Pratama',
-                        role: 'atasan',
-                        dept: 'IT & Operations Manager',
-                        nip: 'MGR-2018004',
-                        email: 'manager@sipadin.com',
-                        avatar: 'BP'
-                    });
+                    setTimeout(() => { window.location.href = 'dashboard-karyawan.html'; }, 400);
+                } else if (role === 'atasan') {
+                    setCurrentUser(DEMO_ACCOUNTS.atasan);
                     showToast('success', 'Login Berhasil', 'Selamat datang, Manager Budi Pratama!');
-                    setTimeout(() => {
-                        window.location.href = 'dashboard-atasan.html';
-                    }, 400);
+                    setTimeout(() => { window.location.href = 'dashboard-atasan.html'; }, 400);
+                } else if (role === 'hrga') {
+                    setCurrentUser(DEMO_ACCOUNTS.hrga);
+                    showToast('success', 'Login Berhasil', 'Selamat datang, HRGA Supervisor Dewi Rahayu!');
+                    setTimeout(() => { window.location.href = 'dashboard-hrga.html'; }, 400);
                 }
             }, 500);
         }

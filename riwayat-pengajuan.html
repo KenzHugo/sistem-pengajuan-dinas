@@ -219,19 +219,26 @@
         }
 
         function renderRiwayatView() {
+            const user = getCurrentUser();
             const list = getPengajuanData();
-            const myList = list.filter(p => p.nama === 'Rizky Darmawan');
+            const myList = list.filter(p => p.nama === user.name || p.nip === user.nip);
 
             // Update Counts
             document.getElementById('count-semua').textContent = myList.length;
             document.getElementById('count-pending').textContent = myList.filter(p => p.status === 'pending').length;
-            document.getElementById('count-approved').textContent = myList.filter(p => p.status === 'approved').length;
-            document.getElementById('count-rejected').textContent = myList.filter(p => p.status === 'rejected').length;
+            document.getElementById('count-approved').textContent = myList.filter(p => ['approved', 'verified_hrga', 'notified_direksi'].includes(p.status)).length;
+            document.getElementById('count-rejected').textContent = myList.filter(p => ['rejected', 'rejected_hrga'].includes(p.status)).length;
 
             // Filter & search
             let filtered = myList;
             if (currentFilter !== 'semua') {
-                filtered = filtered.filter(p => p.status === currentFilter);
+                if (currentFilter === 'approved') {
+                    filtered = filtered.filter(p => ['approved', 'verified_hrga', 'notified_direksi'].includes(p.status));
+                } else if (currentFilter === 'rejected') {
+                    filtered = filtered.filter(p => ['rejected', 'rejected_hrga'].includes(p.status));
+                } else {
+                    filtered = filtered.filter(p => p.status === currentFilter);
+                }
             }
             if (searchQuery) {
                 filtered = filtered.filter(p => 
@@ -253,15 +260,8 @@
 
             emptyState.classList.add('hidden');
             tbody.innerHTML = filtered.map((item) => {
-                let badgeClass = 'badge-status pending';
-                let badgeText = '<i class="ph-fill ph-clock"></i> Pending';
-                if (item.status === 'approved') {
-                    badgeClass = 'badge-status approved';
-                    badgeText = '<i class="ph-fill ph-check-circle"></i> Disetujui';
-                } else if (item.status === 'rejected') {
-                    badgeClass = 'badge-status rejected';
-                    badgeText = '<i class="ph-fill ph-x-circle"></i> Ditolak';
-                }
+                const badgeHtml = getStatusBadge(item.status, 'xs');
+                const canPrint = ['approved', 'verified_hrga', 'notified_direksi'].includes(item.status);
 
                 return `
                     <tr>
@@ -273,11 +273,11 @@
                             <div class="flex items-center gap-1.5 font-bold text-white text-xs">
                                 <i class="ph-bold ph-map-pin text-brand-400"></i> ${item.tujuan}
                             </div>
-                            <span class="text-[11px] text-slate-400 block mt-0.5">${item.instansi || 'Rekanan Kantor'}</span>
+                            <span class="text-[11px] text-slate-400 block mt-0.5">${item.instansi || '-'}</span>
                         </td>
                         <td>
                             <span class="text-xs font-semibold text-slate-200 block">${formatDate(item.mulai)} - ${formatDate(item.selesai)}</span>
-                            <span class="text-[11px] text-brand-300 font-medium">${item.durasi || calculateDuration(item.mulai, item.selesai)} Hari Perjalanan</span>
+                            <span class="text-[11px] text-brand-300 font-medium">${item.durasi || calculateDuration(item.mulai, item.selesai)} Hari</span>
                         </td>
                         <td>
                             <span class="text-xs font-medium text-slate-300">${item.keperluan}</span>
@@ -286,16 +286,14 @@
                             ${formatRupiah(item.totalBiaya)}
                         </td>
                         <td>
-                            <span class="${badgeClass}">
-                                ${badgeText}
-                            </span>
+                            ${badgeHtml}
                         </td>
                         <td class="text-center">
                             <div class="flex items-center justify-center gap-1.5">
                                 <button onclick="openDetailModal(${item.id})" class="px-2.5 py-1 rounded-lg bg-[#090d16] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
                                     Detail
                                 </button>
-                                ${item.status === 'approved' ? `
+                                ${canPrint ? `
                                     <button onclick="printSPPDSlip(${item.id})" class="px-2.5 py-1 rounded-lg bg-brand-gradient hover:opacity-90 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1">
                                         <i class="ph-bold ph-printer"></i> SPPD
                                     </button>

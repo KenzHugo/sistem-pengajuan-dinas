@@ -820,4 +820,151 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     // Inisialisasi data user dinamis di sidebar
     initSidebarUser();
+
+// Mengani Form Login di index.html
+const loginForm = document.getElementById('login-form');
+
+if (loginForm) {
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const emailInput = document.getElementById('email').value;
+    const passwordInput = document.getElementById('password').value;
+
+    try {
+      const response = await fetch('http://localhost:8080/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailInput, password: passwordInput })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Simpan data user ke browser
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        // Redirect sesuai role
+        if (data.user.role === 'karyawan') {
+          window.location.href = 'dashboard-karyawan.html';
+        } else if (data.user.role === 'atasan') {
+          window.location.href = 'dashboard-atasan.html';
+        } else if (data.user.role === 'hrga') {
+          window.location.href = 'dashboard-hrga.html';
+        }
+      } else {
+        alert(data.message || 'Login gagal!');
+      }
+    } catch (error) {
+      console.error('Error saat login:', error);
+      alert('Gagal terhubung ke server backend!');
+    }
+  });
+}
+
+// Menangani Form Pengajuan Dinas
+const formPengajuan = document.getElementById('form-pengajuan');
+
+if (formPengajuan) {
+  formPengajuan.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Ambil data user yang sedang login
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      alert('Silakan login terlebih dahulu!');
+      window.location.href = 'index.html';
+      return;
+    }
+
+    const payload = {
+      user_id: user.id,
+      tujuan: document.getElementById('tujuan').value,
+      instansi: document.getElementById('instansi').value,
+      tgl_keberangkatan: document.getElementById('tgl_keberangkatan').value,
+      tgl_kembali: document.getElementById('tgl_kembali').value,
+      transportasi: document.getElementById('transportasi').value,
+      akomodasi: document.getElementById('akomodasi').value,
+      keperluan: document.getElementById('keperluan').value,
+      keterangan: document.getElementById('keterangan').value,
+      estimasi_biaya: parseFloat(document.getElementById('estimasi_biaya').value)
+    };
+
+    try {
+      const response = await fetch('http://localhost:8080/api/pengajuan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        alert('Pengajuan berhasil dibuat!');
+        window.location.href = 'dashboard-karyawan.html';
+      } else {
+        alert('Gagal membuat pengajuan!');
+      }
+    } catch (error) {
+      console.error('Error pengajuan:', error);
+    }
+  });
+}
+
+// Fungsi untuk memuat data di Dashboard Karyawan
+async function loadDashboardKaryawan() {
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user) return;
+
+  try {
+    const response = await fetch(`http://localhost:8080/api/pengajuan?user_id=${user.id}`);
+    const listPengajuan = await response.json();
+
+    const tableBody = document.getElementById('tabel-pengajuan-body');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '';
+    listPengajuan.forEach((item) => {
+      tableBody.innerHTML += `
+        <tr>
+          <td>${item.id}</td>
+          <td>${item.tujuan}</td>
+          <td>${item.tgl_keberangkatan} s/d ${item.tgl_kembali}</td>
+          <td>Rp ${item.estimasi_biaya.toLocaleString('id-ID')}</td>
+          <td><span class="badge ${item.status}">${item.status}</span></td>
+        </tr>
+      `;
+    });
+  } catch (error) {
+    console.error('Error load dashboard:', error);
+  }
+}
+
+// Panggil fungsi saat halaman selesai dimuat
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('dashboard-karyawan-page')) {
+    loadDashboardKaryawan();
+  }
+});
+
+// Fungsi mengubah status pengajuan
+async function updateStatusPengajuan(pengajuanId, statusBaru) {
+  try {
+    const response = await fetch(`http://localhost:8080/api/pengajuan/${pengajuanId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: statusBaru })
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      alert(`Status berhasil diubah menjadi: ${statusBaru}`);
+      location.reload(); // Refresh halaman untuk perbarui data
+    } else {
+      alert(data.message || 'Gagal mengubah status');
+    }
+  } catch (error) {
+    console.error('Error update status:', error);
+  }
+}
+
+
 });

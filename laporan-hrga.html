@@ -214,62 +214,67 @@
             renderHRGALaporanView();
         });
 
-        function renderHRGALaporanView() {
-            const list = getPengajuanData();
-            const deptFilter = document.getElementById('filter-dept-hrga').value;
-            const statusFilter = document.getElementById('filter-status-hrga').value;
-            const searchVal = document.getElementById('inp-search-hrga').value.toLowerCase().trim();
+        async function renderHRGALaporanView() {
+            const list = await apiGetPengajuan({ role: 'HRGA' });
+            const deptFilter = document.getElementById('filter-dept-hrga')?.value || '';
+            const statusFilter = document.getElementById('filter-status-hrga')?.value || '';
+            const searchVal = document.getElementById('inp-search-hrga')?.value.toLowerCase().trim() || '';
 
             const total = list.length;
-            const approved = list.filter(p => ['verified_hrga', 'notified_direksi'].includes(p.status)).length;
-            const totalBudget = list.reduce((acc, curr) => acc + (curr.totalBiaya || 0), 0);
+            const approved = list.filter(p => ['CONTROLLED_HRD', 'WA_SENT_DIREKSI', 'CONFIRMED_DIREKSI', 'SURAT_TUGAS_ISSUED', 'verified_hrga', 'notified_direksi'].includes(p.statusFlow || p.status)).length;
+            const totalBudget = list.reduce((acc, curr) => acc + (curr.estimasiBiaya || curr.totalBiaya || 0), 0);
             const avgDur = list.length ? Math.round(list.reduce((acc, curr) => acc + (curr.durasi || 1), 0) / list.length) : 0;
 
-            document.getElementById('stat-total-hrga').textContent = total;
-            document.getElementById('stat-approved-hrga').textContent = approved;
-            document.getElementById('stat-budget-hrga').textContent = formatRupiah(totalBudget);
-            document.getElementById('stat-avg-duration').textContent = avgDur + ' Hari';
+            if (document.getElementById('stat-total-hrga')) document.getElementById('stat-total-hrga').textContent = total;
+            if (document.getElementById('stat-approved-hrga')) document.getElementById('stat-approved-hrga').textContent = approved;
+            if (document.getElementById('stat-budget-hrga')) document.getElementById('stat-budget-hrga').textContent = formatRupiah(totalBudget);
+            if (document.getElementById('stat-avg-duration')) document.getElementById('stat-avg-duration').textContent = avgDur + ' Hari';
 
             let filtered = list;
-            if (deptFilter) filtered = filtered.filter(p => p.dept === deptFilter);
-            if (statusFilter) filtered = filtered.filter(p => p.status === statusFilter);
+            if (deptFilter) {
+                filtered = filtered.filter(p => (p.dept || p.kodeDepartemen || '').toUpperCase().includes(deptFilter.toUpperCase()));
+            }
+            if (statusFilter) {
+                filtered = filtered.filter(p => (p.statusFlow || p.status) === statusFilter);
+            }
             if (searchVal) {
                 filtered = filtered.filter(p => 
-                    p.nama.toLowerCase().includes(searchVal) ||
-                    p.tujuan.toLowerCase().includes(searchVal) ||
-                    p.dept.toLowerCase().includes(searchVal) ||
-                    (p.nomorSurat && p.nomorSurat.toLowerCase().includes(searchVal))
+                    (p.nama || '').toLowerCase().includes(searchVal) ||
+                    (p.tujuan || p.kotaTujuan || '').toLowerCase().includes(searchVal) ||
+                    (p.dept || p.kodeDepartemen || '').toLowerCase().includes(searchVal) ||
+                    (p.nomorSurat && p.nomorSurat.toLowerCase().includes(searchVal)) ||
+                    (p.noPengajuan && p.noPengajuan.toLowerCase().includes(searchVal))
                 );
             }
 
             const tbody = document.getElementById('table-laporan-hrga-body');
             tbody.innerHTML = filtered.map(item => {
-                const badgeHtml = getStatusBadge(item.status, 'xs');
+                const badgeHtml = getStatusBadge(item.statusFlow || item.status, 'xs');
                 return `
                     <tr>
                         <td class="font-mono font-bold text-xs text-amber-300">
-                            ${item.nomorSurat || 'SPPD-' + item.id}
+                            ${item.noPengajuan || item.nomorSurat}
                         </td>
                         <td>
                             <p class="font-bold text-white text-xs">${item.nama}</p>
-                            <p class="text-[10px] text-slate-400">${item.dept}</p>
+                            <p class="text-[10px] text-slate-400">${item.dept || item.kodeDepartemen} · ${item.nip || item.nomorID}</p>
                         </td>
                         <td>
-                            <span class="font-semibold text-slate-200 text-xs">${item.asal || 'Surabaya'} ➔ ${item.tujuan}</span>
-                            <span class="text-[11px] text-slate-400 block mt-0.5">${item.keperluan}</span>
+                            <span class="font-semibold text-slate-200 text-xs">${item.asal || 'Surabaya'} ➔ ${item.tujuan || item.kotaTujuan}</span>
+                            <span class="text-[11px] text-slate-400 block mt-0.5 truncate max-w-[200px]">${item.keperluan || item.maksudTujuan}</span>
                         </td>
                         <td class="text-xs text-slate-300">
-                            ${formatDate(item.mulai)} - ${formatDate(item.selesai)}
-                            <span class="text-amber-400 block font-mono font-medium text-[10px]">${item.durasi || 1} Hari</span>
+                            ${formatDate(item.tanggalBerangkat || item.mulai)} - ${formatDate(item.tanggalKembali || item.selesai)}
+                            <span class="text-amber-400 block font-mono font-medium text-[10px]">${item.durasi} Hari</span>
                         </td>
                         <td class="font-mono text-xs font-bold text-emerald-400">
-                            ${formatRupiah(item.totalBiaya)}
+                            ${formatRupiah(item.estimasiBiaya || item.totalBiaya)}
                         </td>
                         <td>
                             ${badgeHtml}
                         </td>
                         <td class="text-center">
-                            <button onclick="openDetailModal(${item.id})" class="px-2.5 py-1 rounded-lg bg-[#090d16] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
+                            <button onclick="showDetail('${item.noPengajuan}')" class="px-2.5 py-1 rounded-lg bg-[#090d16] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
                                 Detail
                             </button>
                         </td>
@@ -278,27 +283,27 @@
             }).join('');
         }
 
-        function exportToCSV() {
-            const list = getPengajuanData();
+        async function exportToCSV() {
+            const list = await apiGetPengajuan({ role: 'HRGA' });
             let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Nomor SPPD,Nama,NIP,Departemen,Tujuan,Instansi,Mulai,Selesai,Durasi Hari,Keperluan,Transportasi,Akomodasi,Total Biaya,Status\n";
+            csvContent += "Nomor SPPD,Nama,NIP,Departemen,Tujuan,Instansi,Mulai,Selesai,Durasi Hari,Keperluan,Fasilitas,Akomodasi,Total Biaya,Status\n";
 
             list.forEach(item => {
                 const row = [
-                    `"${item.nomorSurat || ''}"`,
+                    `"${item.noPengajuan || item.nomorSurat || ''}"`,
                     `"${item.nama || ''}"`,
-                    `"${item.nip || ''}"`,
-                    `"${item.dept || ''}"`,
-                    `"${item.tujuan || ''}"`,
+                    `"${item.nip || item.nomorID || ''}"`,
+                    `"${item.dept || item.kodeDepartemen || ''}"`,
+                    `"${item.tujuan || item.kotaTujuan || ''}"`,
                     `"${item.instansi || ''}"`,
-                    `"${item.mulai || ''}"`,
-                    `"${item.selesai || ''}"`,
+                    `"${item.tanggalBerangkat || item.mulai || ''}"`,
+                    `"${item.tanggalKembali || item.selesai || ''}"`,
                     `"${item.durasi || 1}"`,
-                    `"${item.keperluan || ''}"`,
-                    `"${item.transportasi || ''}"`,
+                    `"${item.keperluan || item.maksudTujuan || ''}"`,
+                    `"${item.kriteriaFasilitas || ''}"`,
                     `"${item.akomodasi || ''}"`,
-                    `"${item.totalBiaya || 0}"`,
-                    `"${item.status || ''}"`
+                    `"${item.estimasiBiaya || item.totalBiaya || 0}"`,
+                    `"${item.statusFlow || item.status || ''}"`
                 ].join(',');
                 csvContent += row + "\n";
             });
@@ -314,5 +319,4 @@
         }
     </script>
 </body>
-
 </html>

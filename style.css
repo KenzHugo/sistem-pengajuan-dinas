@@ -327,14 +327,19 @@ select.form-control-custom {
 }
 
 /* SPPD Print Document Styles */
+#sppd-print-area {
+    display: none !important;
+}
+
 @media print {
     body * {
-        visibility: hidden;
+        visibility: hidden !important;
     }
     #sppd-print-area, #sppd-print-area * {
-        visibility: visible;
+        visibility: visible !important;
     }
     #sppd-print-area {
+        display: block !important;
         position: absolute;
         left: 0;
         top: 0;
@@ -342,6 +347,7 @@ select.form-control-custom {
         background: white !important;
         color: black !important;
         padding: 20px;
+        z-index: 99999;
     }
     .no-print {
         display: none !important;

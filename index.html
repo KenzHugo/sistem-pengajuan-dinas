@@ -78,85 +78,46 @@
                 
                 <div class="text-center space-y-1">
                     <h3 class="text-xl font-bold text-white">Masuk ke Portal</h3>
-                    <p class="text-xs text-slate-400">Pilih role dan masukkan kredensial akun</p>
-                </div>
-
-                <!-- Role Selector Tabs -->
-                <div class="space-y-1.5">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Akses Sebagai</label>
-                    <div class="grid grid-cols-3 gap-1.5 p-1 bg-[#090d16] border border-white/5 rounded-xl">
-                        <button type="button" id="tab-btn-karyawan" onclick="selectRole('karyawan')"
-                            class="flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-bold transition-all bg-brand-gradient text-white shadow-sm">
-                            <i class="ph-bold ph-user"></i> Karyawan
-                        </button>
-                        <button type="button" id="tab-btn-atasan" onclick="selectRole('atasan')"
-                            class="flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white">
-                            <i class="ph-bold ph-shield-check"></i> Atasan
-                        </button>
-                        <button type="button" id="tab-btn-hrga" onclick="selectRole('hrga')"
-                            class="flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white">
-                            <i class="ph-bold ph-buildings"></i> HRGA
-                        </button>
-                    </div>
+                    <p class="text-xs text-slate-400">Masukkan email dan kata sandi akun SiPaDin Anda</p>
                 </div>
 
                 <!-- Login Form -->
-                <form id="login-form" onsubmit="handleLoginSubmit(event)" class="space-y-3.5" novalidate>
-                    <input type="hidden" id="login-role" value="karyawan" />
-
-                    <div class="space-y-1">
-                        <label for="login-email" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Perusahaan</label>
+                <form id="login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4" novalidate>
+                    <div class="space-y-1.5">
+                        <label for="login-nama" class="block text-xs font-bold text-slate-300">Nama Lengkap</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-3 flex items-center text-slate-500 pointer-events-none">
-                                <i class="ph-bold ph-envelope text-sm"></i>
+                            <span class="absolute inset-y-0 left-3.5 flex items-center text-slate-500 pointer-events-none">
+                                <i class="ph-bold ph-user text-base"></i>
                             </span>
-                            <input id="login-email" type="email" required placeholder="nama@adiprima.co.id"
-                                value="karyawan@sipadin.com"
-                                class="form-control-custom text-xs pl-9" />
+                            <input id="login-nama" type="text" required placeholder="Masukkan nama lengkap Anda"
+                                class="form-control-custom text-xs pl-10" autocomplete="name" />
                         </div>
                     </div>
 
-                    <div class="space-y-1">
+                    <div class="space-y-1.5">
                         <div class="flex items-center justify-between">
-                            <label for="login-password" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kata Sandi</label>
-                            <a href="javascript:void(0)" onclick="showToast('info', 'Demo Mode', 'Kredensial otomatis terisi untuk demo.')" class="text-[10px] text-brand-400 hover:underline">Bantuan?</a>
+                            <label for="login-password" class="block text-xs font-bold text-slate-300">Kata Sandi</label>
                         </div>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-3 flex items-center text-slate-500 pointer-events-none">
-                                <i class="ph-bold ph-lock-key text-sm"></i>
+                            <span class="absolute inset-y-0 left-3.5 flex items-center text-slate-500 pointer-events-none">
+                                <i class="ph-bold ph-lock-key text-base"></i>
                             </span>
-                            <input id="login-password" type="password" required placeholder="••••••••" value="password123"
-                                class="form-control-custom text-xs pl-9 pr-9" />
+                            <input id="login-password" type="password" required placeholder="Masukkan kata sandi"
+                                class="form-control-custom text-xs pl-10 pr-10" autocomplete="current-password" />
                             <button type="button" onclick="togglePasswordVisibility()"
-                                class="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-brand-400"
+                                class="absolute inset-y-0 right-3.5 flex items-center text-slate-500 hover:text-brand-400"
                                 tabindex="-1">
-                                <i id="eye-icon" class="ph-bold ph-eye text-sm"></i>
+                                <i id="eye-icon" class="ph-bold ph-eye text-base"></i>
                             </button>
                         </div>
                     </div>
 
                     <button type="submit" id="btn-login"
-                        class="w-full flex items-center justify-center gap-2 bg-brand-gradient hover:opacity-95 active:scale-95 text-white font-bold py-2.5 rounded-xl shadow-md shadow-brand-500/30 transition-all text-xs mt-2">
+                        class="w-full flex items-center justify-center gap-2 bg-brand-gradient hover:opacity-95 active:scale-95 text-white font-bold py-3 rounded-xl shadow-md shadow-brand-500/30 transition-all text-xs mt-2">
                         <i class="ph-bold ph-sign-in text-sm"></i>
                         <span>Masuk ke Dashboard</span>
                     </button>
                 </form>
-
-                <!-- Quick Demo Buttons -->
-                <div class="pt-3 border-t border-white/5 space-y-2">
-                    <p class="text-center text-[10px] font-semibold text-slate-400">⚡ Akses Cepat Demo:</p>
-                    <div class="grid grid-cols-3 gap-1.5">
-                        <button onclick="quickLogin('karyawan')" class="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-[#090d16] border border-white/5 hover:border-brand-500/40 text-slate-300 hover:text-white text-[11px] font-medium transition-all">
-                            <i class="ph-bold ph-user text-brand-400"></i> Karyawan
-                        </button>
-                        <button onclick="quickLogin('atasan')" class="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-[#090d16] border border-white/5 hover:border-purple-500/40 text-slate-300 hover:text-white text-[11px] font-medium transition-all">
-                            <i class="ph-bold ph-shield-check text-purple-400"></i> Atasan
-                        </button>
-                        <button onclick="quickLogin('hrga')" class="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-[#090d16] border border-white/5 hover:border-amber-500/40 text-slate-300 hover:text-white text-[11px] font-medium transition-all">
-                            <i class="ph-bold ph-buildings text-amber-400"></i> HRGA
-                        </button>
-                    </div>
-                </div>
 
             </div>
         </div>
@@ -166,74 +127,42 @@
     <!-- Scripts -->
     <script src="script.js"></script>
     <script>
-        function selectRole(role) {
-            const roleInput = document.getElementById('login-role');
-            const btnKaryawan = document.getElementById('tab-btn-karyawan');
-            const btnAtasan = document.getElementById('tab-btn-atasan');
-            const btnHrga = document.getElementById('tab-btn-hrga');
-            const emailInp = document.getElementById('login-email');
-
-            roleInput.value = role;
-
-            // Reset tab styles
-            const unactiveClass = 'flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white';
-            btnKaryawan.className = unactiveClass;
-            btnAtasan.className = unactiveClass;
-            btnHrga.className = unactiveClass;
-
-            if (role === 'karyawan') {
-                btnKaryawan.className = 'flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-bold transition-all bg-brand-gradient text-white shadow-sm';
-                emailInp.value = 'karyawan@sipadin.com';
-            } else if (role === 'atasan') {
-                btnAtasan.className = 'flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-bold transition-all bg-purple-600 text-white shadow-sm';
-                emailInp.value = 'manager@sipadin.com';
-            } else if (role === 'hrga') {
-                btnHrga.className = 'flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-bold transition-all bg-amber-600 text-white shadow-sm';
-                emailInp.value = 'hrga@sipadin.com';
-            }
-        }
-
         function togglePasswordVisibility() {
             const inp = document.getElementById('login-password');
             const icon = document.getElementById('eye-icon');
             if (inp.type === 'password') {
                 inp.type = 'text';
-                icon.className = 'ph-bold ph-eye-slash text-sm';
+                icon.className = 'ph-bold ph-eye-slash text-base';
             } else {
                 inp.type = 'password';
-                icon.className = 'ph-bold ph-eye text-sm';
+                icon.className = 'ph-bold ph-eye text-base';
             }
         }
 
-        function handleLoginSubmit(e) {
+        async function handleLoginSubmit(e) {
             e.preventDefault();
-            const role = document.getElementById('login-role').value;
-            const btn = document.getElementById('btn-login');
+            const nama     = document.getElementById('login-nama').value.trim();
+            const password = document.getElementById('login-password').value;
+            const btn      = document.getElementById('btn-login');
+
+            if (!nama || !password) {
+                showToast('error', 'Validasi Gagal', 'Mohon isi nama dan kata sandi Anda.');
+                return;
+            }
 
             btn.innerHTML = '<i class="ph-bold ph-circle-notch text-xs animate-spin"></i> Memverifikasi...';
-            btn.disabled = true;
+            btn.disabled  = true;
 
-            setTimeout(() => {
-                if (role === 'karyawan') {
-                    setCurrentUser(DEMO_ACCOUNTS.karyawan);
-                    showToast('success', 'Login Berhasil', 'Selamat datang kembali, Rizky!');
-                    setTimeout(() => { window.location.href = 'dashboard-karyawan.html'; }, 400);
-                } else if (role === 'atasan') {
-                    setCurrentUser(DEMO_ACCOUNTS.atasan);
-                    showToast('success', 'Login Berhasil', 'Selamat datang, Manager Budi Pratama!');
-                    setTimeout(() => { window.location.href = 'dashboard-atasan.html'; }, 400);
-                } else if (role === 'hrga') {
-                    setCurrentUser(DEMO_ACCOUNTS.hrga);
-                    showToast('success', 'Login Berhasil', 'Selamat datang, HRGA Supervisor Dewi Rahayu!');
-                    setTimeout(() => { window.location.href = 'dashboard-hrga.html'; }, 400);
-                }
-            }, 500);
-        }
-
-        function quickLogin(role) {
-            selectRole(role);
-            const btn = document.getElementById('btn-login');
-            btn.click();
+            try {
+                const res = await apiLogin(nama, password);
+                setCurrentUser(res.user);
+                showToast('success', 'Login Berhasil', `Selamat datang, ${res.user.nama || res.user.name}!`);
+                setTimeout(() => redirectToDashboard(res.user.role), 400);
+            } catch (err) {
+                showToast('error', 'Login Gagal', err.message || 'Nama atau kata sandi tidak valid');
+                btn.innerHTML = '<i class="ph-bold ph-sign-in text-sm"></i><span>Masuk ke Dashboard</span>';
+                btn.disabled  = false;
+            }
         }
     </script>
 </body>

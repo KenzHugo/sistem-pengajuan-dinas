@@ -185,31 +185,58 @@
             <div class="app-card overflow-hidden">
                 
                 <!-- Table Header Controls -->
-                <div class="p-5 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                            <i class="ph-bold ph-list-checks text-purple-400 text-base"></i> Daftar Pengajuan Dinas Karyawan
-                        </h3>
-                        <p class="text-xs text-slate-400 mt-0.5">Tinjau rincian perjalanan dinas sebelum menyetujui anggaran</p>
+                <div class="p-5 border-b border-white/5 space-y-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                                <i class="ph-bold ph-list-checks text-purple-400 text-base"></i> Daftar Pengajuan Dinas Karyawan
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Tinjau rincian perjalanan dinas sebelum menyetujui anggaran</p>
+                        </div>
+
+                        <!-- Search & Filter Controls -->
+                        <div class="flex items-center gap-2.5 flex-wrap">
+                            <select id="filter-dept" onchange="renderAtasanTable()" class="form-control-custom text-xs max-w-[180px]">
+                                <option value="">Semua Departemen</option>
+                                <option value="IT">IT &amp; Infrastructure</option>
+                                <option value="SALES">Marketing &amp; Sales</option>
+                                <option value="FIN">Finance &amp; Accounting</option>
+                                <option value="HRD">Human Resources</option>
+                                <option value="PROD">Produksi</option>
+                                <option value="MAINT">Maintenance</option>
+                            </select>
+
+                            <div class="relative min-w-[200px]">
+                                <span class="absolute inset-y-0 left-3 flex items-center text-slate-500 pointer-events-none">
+                                    <i class="ph-bold ph-magnifying-glass text-xs"></i>
+                                </span>
+                                <input type="text" id="inp-search-mgr" placeholder="Cari nama / tujuan / nomor..." oninput="renderAtasanTable()"
+                                    class="form-control-custom text-xs pl-8" />
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Search & Filter Controls -->
-                    <div class="flex items-center gap-2.5 flex-wrap">
-                        <select id="filter-dept" onchange="renderAtasanTable()" class="form-control-custom text-xs max-w-[180px]">
-                            <option value="">Semua Departemen</option>
-                            <option value="IT & Infrastructure">IT &amp; Infrastructure</option>
-                            <option value="Marketing & Sales">Marketing &amp; Sales</option>
-                            <option value="Finance & Accounting">Finance &amp; Accounting</option>
-                            <option value="Human Resources">Human Resources</option>
-                        </select>
-
-                        <div class="relative min-w-[200px]">
-                            <span class="absolute inset-y-0 left-3 flex items-center text-slate-500 pointer-events-none">
-                                <i class="ph-bold ph-magnifying-glass text-xs"></i>
-                            </span>
-                            <input type="text" id="inp-search-mgr" placeholder="Cari nama / tujuan..." oninput="renderAtasanTable()"
-                                class="form-control-custom text-xs pl-8" />
-                        </div>
+                    <!-- Filter Tabs -->
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 border-t border-white/5">
+                        <button id="mgr-tab-semua" onclick="setAtasanTab('semua')"
+                            class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm whitespace-nowrap transition-all">
+                            Semua (<span id="mgr-count-tab-semua">0</span>)
+                        </button>
+                        <button id="mgr-tab-menunggu" onclick="setAtasanTab('menunggu')"
+                            class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
+                            <span>Menunggu Review</span>
+                            <span id="mgr-count-tab-menunggu" class="px-1.5 py-0.5 text-[10px] rounded-full bg-amber-500/20 text-amber-300 font-mono">0</span>
+                        </button>
+                        <button id="mgr-tab-disetujui" onclick="setAtasanTab('disetujui')"
+                            class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
+                            <span>Disetujui</span>
+                            <span id="mgr-count-tab-disetujui" class="px-1.5 py-0.5 text-[10px] rounded-full bg-emerald-500/20 text-emerald-300 font-mono">0</span>
+                        </button>
+                        <button id="mgr-tab-ditolak" onclick="setAtasanTab('ditolak')"
+                            class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
+                            <span>Ditolak</span>
+                            <span id="mgr-count-tab-ditolak" class="px-1.5 py-0.5 text-[10px] rounded-full bg-rose-500/20 text-rose-300 font-mono">0</span>
+                        </button>
                     </div>
                 </div>
 
@@ -341,59 +368,106 @@
     <script src="script.js"></script>
     <script>
         let currentReviewId = null;
+        let currentAtasanTab = 'semua';
 
         document.addEventListener('DOMContentLoaded', () => {
             renderAtasanTable();
         });
 
-        function renderAtasanTable() {
-            const list = getPengajuanData();
-            const deptFilter = document.getElementById('filter-dept').value;
-            const searchVal = document.getElementById('inp-search-mgr').value.toLowerCase().trim();
+        function setAtasanTab(tab) {
+            currentAtasanTab = tab;
+            const tabs = ['semua', 'menunggu', 'disetujui', 'ditolak'];
+            tabs.forEach(t => {
+                const btn = document.getElementById('mgr-tab-' + t);
+                if (btn) {
+                    if (t === tab) {
+                        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm whitespace-nowrap transition-all';
+                    } else {
+                        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5';
+                    }
+                }
+            });
+            renderAtasanTable();
+        }
 
-            let urgentCount = 0;
-            let pendingCount = 0;
+        async function renderAtasanTable() {
+            const user = getCurrentUser();
+            const list = await apiGetPengajuan({
+                role: 'ATASAN',
+                user_id: user?.nip || user?.nomor_id || '',
+            });
+            const deptFilter = document.getElementById('filter-dept')?.value || '';
+            const searchVal  = document.getElementById('inp-search-mgr')?.value.toLowerCase().trim() || '';
+
+            let urgentCount   = 0;
+            let pendingCount  = 0;
             let approvedCount = 0;
+            let rejectedCount = 0;
 
             list.forEach(item => {
-                if (item.status === 'pending') {
+                const s = item.statusFlow || item.status;
+                if (s === 'SUBMITTED' || s === 'pending') {
                     pendingCount++;
-                    const diff = daysUntil(item.mulai);
+                    const diff = daysUntil(item.tanggalBerangkat || item.mulai);
                     if (diff <= 3 && diff >= 0) urgentCount++;
-                } else if (['approved', 'verified_hrga', 'notified_direksi'].includes(item.status)) {
+                } else if (s === 'REJECTED' || s === 'rejected') {
+                    rejectedCount++;
+                } else {
                     approvedCount++;
                 }
             });
 
+            // Update Statistics Cards
             document.getElementById('mgr-stat-total').textContent = list.length;
             document.getElementById('mgr-stat-pending').textContent = pendingCount;
             document.getElementById('mgr-stat-approved').textContent = approvedCount;
             document.getElementById('mgr-stat-urgent').textContent = urgentCount;
-            document.getElementById('header-notif-badge').textContent = urgentCount;
-
-            const banner = document.getElementById('urgent-warning-banner');
-            if (urgentCount > 0) {
-                banner.classList.remove('hidden');
-                document.getElementById('urgent-count-text').textContent = urgentCount;
-            } else {
-                banner.classList.add('hidden');
+            if (document.getElementById('header-notif-badge')) {
+                document.getElementById('header-notif-badge').textContent = urgentCount;
             }
 
-            // Filter List
+            // Update Tab Badges
+            if (document.getElementById('mgr-count-tab-semua')) document.getElementById('mgr-count-tab-semua').textContent = list.length;
+            if (document.getElementById('mgr-count-tab-menunggu')) document.getElementById('mgr-count-tab-menunggu').textContent = pendingCount;
+            if (document.getElementById('mgr-count-tab-disetujui')) document.getElementById('mgr-count-tab-disetujui').textContent = approvedCount;
+            if (document.getElementById('mgr-count-tab-ditolak')) document.getElementById('mgr-count-tab-ditolak').textContent = rejectedCount;
+
+            const banner = document.getElementById('urgent-warning-banner');
+            if (banner) {
+                if (urgentCount > 0) {
+                    banner.classList.remove('hidden');
+                    document.getElementById('urgent-count-text').textContent = urgentCount;
+                } else {
+                    banner.classList.add('hidden');
+                }
+            }
+
+            // Filter List by Tab, Dept, and Search
             let filtered = list;
+
+            if (currentAtasanTab === 'menunggu') {
+                filtered = filtered.filter(p => (p.statusFlow || p.status) === 'SUBMITTED' || (p.statusFlow || p.status) === 'pending');
+            } else if (currentAtasanTab === 'disetujui') {
+                filtered = filtered.filter(p => ['APPROVED_ATASAN','CONTROLLED_HRD','WA_SENT_DIREKSI','CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED','approved','verified_hrga','notified_direksi'].includes(p.statusFlow || p.status));
+            } else if (currentAtasanTab === 'ditolak') {
+                filtered = filtered.filter(p => (p.statusFlow || p.status) === 'REJECTED' || (p.statusFlow || p.status) === 'rejected');
+            }
+
             if (deptFilter) {
-                filtered = filtered.filter(p => p.dept === deptFilter);
+                filtered = filtered.filter(p => (p.dept || p.kodeDepartemen || '').toUpperCase().includes(deptFilter.toUpperCase()));
             }
             if (searchVal) {
                 filtered = filtered.filter(p => 
-                    p.nama.toLowerCase().includes(searchVal) ||
-                    p.tujuan.toLowerCase().includes(searchVal) ||
-                    p.keperluan.toLowerCase().includes(searchVal)
+                    (p.nama || '').toLowerCase().includes(searchVal) ||
+                    (p.tujuan || '').toLowerCase().includes(searchVal) ||
+                    (p.keperluan || '').toLowerCase().includes(searchVal) ||
+                    (p.noPengajuan || '').toLowerCase().includes(searchVal) ||
+                    (p.nomorSurat || '').toLowerCase().includes(searchVal)
                 );
             }
 
-            const tbody = document.getElementById('table-atasan-body');
-            const emptyState = document.getElementById('atasan-empty-state');
+            const tbody       = document.getElementById('table-atasan-body');
+            const emptyState  = document.getElementById('atasan-empty-state');
 
             if (!filtered.length) {
                 tbody.innerHTML = '';
@@ -403,16 +477,17 @@
 
             emptyState.classList.add('hidden');
             tbody.innerHTML = filtered.map(item => {
-                const diff = daysUntil(item.mulai);
-                const isH3 = item.status === 'pending' && diff <= 3 && diff >= 0;
-                const rowBg = isH3 ? 'bg-rose-500/[0.03]' : '';
-                const statusBadge = getStatusBadge(item.status, 'xs');
+                const diff       = daysUntil(item.tanggalBerangkat || item.mulai);
+                const isPending  = (item.statusFlow || item.status) === 'SUBMITTED' || (item.statusFlow || item.status) === 'pending';
+                const isH3       = isPending && diff <= 3 && diff >= 0;
+                const rowBg      = isH3 ? 'bg-rose-500/[0.03]' : '';
+                const statusBadge = getStatusBadge(item.statusFlow || item.status, 'xs');
 
                 const urgentBadge = isH3 
                     ? `<span class="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 badge-pulse ml-1"><i class="ph-bold ph-warning"></i> H-${diff}</span>` 
                     : '';
 
-                const initials = item.nama.split(' ').map(n=>n[0]).join('').slice(0,2);
+                const initials = (item.nama || 'K').split(' ').map(n=>n[0]).join('').slice(0,2);
 
                 return `
                     <tr class="${rowBg}">
@@ -423,36 +498,36 @@
                                 </div>
                                 <div>
                                     <p class="font-bold text-white text-xs">${item.nama}</p>
-                                    <p class="text-[10px] text-slate-400">${item.dept}</p>
+                                    <p class="text-[10px] text-slate-400">${item.dept || item.kodeDepartemen} · ${item.nip || item.nomorID}</p>
                                 </div>
                             </div>
                         </td>
                         <td>
                             <div class="flex items-center gap-1.5 font-bold text-white text-xs">
-                                <i class="ph-bold ph-map-pin text-brand-400"></i> ${item.tujuan}
+                                <i class="ph-bold ph-map-pin text-brand-400"></i> ${item.tujuan || item.kotaTujuan}
                             </div>
-                            <span class="text-[11px] text-slate-400 block mt-0.5">${item.keperluan}</span>
+                            <span class="text-[11px] text-slate-400 block mt-0.5 truncate max-w-[200px]">${item.keperluan || item.maksudTujuan}</span>
                         </td>
                         <td>
                             <div class="flex items-center gap-1">
-                                <span class="text-xs font-semibold text-slate-200">${formatDate(item.mulai)}</span>
+                                <span class="text-xs font-semibold text-slate-200">${formatDate(item.tanggalBerangkat || item.mulai)}</span>
                                 ${urgentBadge}
                             </div>
-                            <span class="text-[11px] text-slate-400 block mt-0.5">s/d ${formatDate(item.selesai)} (${item.durasi || calculateDuration(item.mulai, item.selesai)} Hari)</span>
+                            <span class="text-[11px] text-slate-400 block mt-0.5">s/d ${formatDate(item.tanggalKembali || item.selesai)} (${item.durasi || 1} Hari)</span>
                         </td>
                         <td class="font-mono text-xs font-bold text-emerald-400">
-                            ${formatRupiah(item.totalBiaya)}
+                            ${formatRupiah(item.estimasiBiaya || item.totalBiaya)}
                         </td>
                         <td>
                             ${statusBadge}
                         </td>
                         <td class="text-center">
                             <div class="flex items-center justify-center gap-1.5">
-                                <button onclick="openDetailModal(${item.id})" class="px-2.5 py-1.5 rounded-lg bg-[#141e33] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
+                                <button onclick="showDetail('${item.noPengajuan}')" class="px-2.5 py-1.5 rounded-lg bg-[#141e33] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
                                     Detail
                                 </button>
-                                ${item.status === 'pending' ? `
-                                    <button onclick="openReviewModal(${item.id})" class="px-3 py-1.5 rounded-lg ${isH3 ? 'bg-rose-500 hover:bg-rose-400 text-white' : 'bg-purple-600 hover:bg-purple-500 text-white'} text-xs font-bold transition-all shadow-sm">
+                                ${isPending ? `
+                                    <button onclick="openReviewModal('${item.noPengajuan}')" class="px-3 py-1.5 rounded-lg ${isH3 ? 'bg-rose-500 hover:bg-rose-400 text-white' : 'bg-purple-600 hover:bg-purple-500 text-white'} text-xs font-bold transition-all shadow-sm">
                                         Review
                                     </button>
                                 ` : `
@@ -465,26 +540,25 @@
             }).join('');
         }
 
-        function openReviewModal(id) {
-            currentReviewId = id;
-            const list = getPengajuanData();
-            const item = list.find(p => p.id === id);
+        async function openReviewModal(noPengajuan) {
+            currentReviewId = noPengajuan;
+            const item = await apiGetPengajuanByID(noPengajuan);
             if (!item) return;
 
             document.getElementById('m-review-name').textContent = item.nama;
-            document.getElementById('m-review-dept').textContent = item.dept + ' · ' + (item.nip || 'EMP-2022091');
-            document.getElementById('m-review-sppd').textContent = item.nomorSurat || 'SPPD-' + item.id;
-            document.getElementById('m-review-tujuan').textContent = item.asal + ' ➔ ' + item.tujuan;
-            document.getElementById('m-review-jadwal').textContent = `${formatDate(item.mulai)} - ${formatDate(item.selesai)} (${item.durasi || 3} Hari)`;
-            document.getElementById('m-review-keperluan').textContent = item.keperluan;
-            document.getElementById('m-review-keterangan').textContent = `"${item.keterangan}"`;
+            document.getElementById('m-review-dept').textContent = (item.dept || item.kodeDepartemen) + ' · ' + (item.nip || item.nomorID || '-');
+            document.getElementById('m-review-sppd').textContent = item.noPengajuan;
+            document.getElementById('m-review-tujuan').textContent = 'Surabaya ➔ ' + (item.tujuan || item.kotaTujuan);
+            document.getElementById('m-review-jadwal').textContent = `${formatDate(item.tanggalBerangkat || item.mulai)} - ${formatDate(item.tanggalKembali || item.selesai)} (${item.durasi} Hari)`;
+            document.getElementById('m-review-keperluan').textContent = item.keperluan || item.maksudTujuan;
+            document.getElementById('m-review-keterangan').textContent = `"${item.kriteriaFasilitas || 'Standar'}"`;
 
-            document.getElementById('m-review-total').textContent = formatRupiah(item.totalBiaya);
+            document.getElementById('m-review-total').textContent = formatRupiah(item.estimasiBiaya || item.totalBiaya);
             document.getElementById('m-review-transport').textContent = formatRupiah(item.biayaTransport || 0);
             document.getElementById('m-review-hotel').textContent = formatRupiah(item.biayaPenginapan || 0);
             document.getElementById('m-review-harian').textContent = formatRupiah(item.uangHarian || 0);
 
-            document.getElementById('inp-catatan-atasan').value = item.catatanAtasan || '';
+            document.getElementById('inp-catatan-atasan').value = item.catatanAtasan || item.catatanHRD || '';
 
             const modal = document.getElementById('modal-review-mgr');
             modal.classList.remove('hidden');
@@ -493,12 +567,14 @@
 
         function closeReviewModal() {
             const modal = document.getElementById('modal-review-mgr');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
             currentReviewId = null;
         }
 
-        function submitDecision(decision) {
+        async function submitDecision(decision) {
             if (!currentReviewId) return;
             const note = document.getElementById('inp-catatan-atasan').value.trim();
 
@@ -508,9 +584,9 @@
             }
 
             if (decision === 'approved') {
-                approveByAtasan(currentReviewId, note);
+                await approveByAtasan(currentReviewId, note);
             } else {
-                rejectByAtasan(currentReviewId, note);
+                await rejectByAtasan(currentReviewId, note);
             }
 
             closeReviewModal();

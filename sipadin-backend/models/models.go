@@ -2,77 +2,102 @@ package models
 
 import "time"
 
-type User struct {
-	ID         uint      `gorm:"primaryKey;column:id" json:"id"`
-	Nama       string    `gorm:"column:nama;size:100;not null" json:"nama"`
-	NIP        string    `gorm:"column:nip;size:50;not null" json:"nip"`
-	Email      string    `gorm:"column:email;size:100;unique;not null" json:"email"`
-	Password   string    `gorm:"column:password;size:255;not null" json:"password,omitempty"`
-	Role       string    `gorm:"column:role;type:varchar(50);not null" json:"role"`
-	Departemen string    `gorm:"column:departemen;size:100;not null" json:"departemen"`
-	Jabatan    string    `gorm:"column:jabatan;size:100;not null" json:"jabatan"`
-	CreatedAt  time.Time `gorm:"column:created_at" json:"created_at"`
+// ============================================================
+// MASTER TABLE: Karyawan_copy1 (pre-existing, read-only via GORM)
+// ============================================================
+
+type KaryawanCopy1 struct {
+	NomorID       string `gorm:"column:NomorID;primaryKey"         json:"nomor_id"`
+	Nama          string `gorm:"column:Nama"                       json:"nama"`
+	KodeDepartemen string `gorm:"column:KodeDepartemen"            json:"kode_departemen"`
+	KodeJabatan   string `gorm:"column:KodeJabatan"               json:"kode_jabatan"`
+	KodeGolongan  string `gorm:"column:KodeGolongan"              json:"kode_golongan"`
+	Email         string `gorm:"column:Email"                     json:"email"`
+	Password      string `gorm:"column:Password"                  json:"password,omitempty"`
+	Aktif         int    `gorm:"column:Aktif"                     json:"aktif"`
 }
 
-func (User) TableName() string {
-	return "users"
+func (KaryawanCopy1) TableName() string {
+	return "Karyawan_copy1"
 }
 
-type PengajuanDinas struct {
-	ID                     uint      `gorm:"primaryKey;column:id" json:"id"`
-	NomorSurat             string    `gorm:"column:nomor_surat;size:100" json:"nomor_surat"`
-	UserID                 uint      `gorm:"column:user_id;not null" json:"user_id"`
-	User                   User      `gorm:"foreignKey:UserID;references:ID" json:"user,omitempty"`
-	Nama                   string    `gorm:"column:nama;size:100" json:"nama"`
-	NIP                    string    `gorm:"column:nip;size:50" json:"nip"`
-	Dept                   string    `gorm:"column:dept;size:100" json:"dept"`
-	Jabatan                string    `gorm:"column:jabatan;size:100" json:"jabatan"`
-	Asal                   string    `gorm:"column:asal;size:100" json:"asal"`
-	Tujuan                 string    `gorm:"column:tujuan;size:255;not null" json:"tujuan"`
-	Instansi               string    `gorm:"column:instansi;size:255;not null" json:"instansi"`
-	TglKeberangkatan       string    `gorm:"column:tgl_keberangkatan;size:50;not null" json:"tgl_keberangkatan"`
-	TglKembali             string    `gorm:"column:tgl_kembali;size:50;not null" json:"tgl_kembali"`
-	JamBerangkat           string    `gorm:"column:jam_berangkat;size:20" json:"jam_berangkat"`
-	Jarak                  int       `gorm:"column:jarak" json:"jarak"`
-	LamaJam                int       `gorm:"column:lama_jam" json:"lama_jam"`
-	Durasi                 int       `gorm:"column:durasi" json:"durasi"`
-	StatusMenginap         string    `gorm:"column:status_menginap;size:20" json:"status_menginap"`
-	Kriteria               string    `gorm:"column:kriteria;size:100" json:"kriteria"`
-	Transportasi           string    `gorm:"column:transportasi;size:100;not null" json:"transportasi"`
-	Akomodasi              string    `gorm:"column:akomodasi;size:100" json:"akomodasi"`
-	Keperluan              string    `gorm:"column:keperluan;type:text;not null" json:"keperluan"`
-	Keterangan             string    `gorm:"column:keterangan;type:text" json:"keterangan"`
-	BiayaTransport         float64   `gorm:"column:biaya_transport;type:decimal(12,2)" json:"biaya_transport"`
-	BiayaPenginapan        float64   `gorm:"column:biaya_penginapan;type:decimal(12,2)" json:"biaya_penginapan"`
-	UangHarian             float64   `gorm:"column:uang_harian;type:decimal(12,2)" json:"uang_harian"`
-	EstimasiBiaya          float64   `gorm:"column:estimasi_biaya;type:decimal(12,2);not null" json:"estimasi_biaya"`
-	Lampiran               string    `gorm:"column:lampiran;size:255" json:"lampiran"`
-	Status                 string    `gorm:"column:status;type:varchar(50);default:'pending'" json:"status"`
-	TanggalPengajuan       string    `gorm:"column:tanggal_pengajuan;size:50" json:"tanggal_pengajuan"`
-	CatatanAtasan          string    `gorm:"column:catatan_atasan;type:text" json:"catatan_atasan"`
-	DisetujuiOleh          string    `gorm:"column:disetujui_oleh;size:100" json:"disetujui_oleh"`
-	TanggalDisetujui       string    `gorm:"column:tanggal_disetujui;size:50" json:"tanggal_disetujui"`
-	CatatanHRGA            string    `gorm:"column:catatan_hrga;type:text" json:"catatan_hrga"`
-	DiverifikasiOleh       string    `gorm:"column:diverifikasi_oleh;size:100" json:"diverifikasi_oleh"`
-	TanggalVerifikasiHRGA  string    `gorm:"column:tanggal_verifikasi_hrga;size:50" json:"tanggal_verifikasi_hrga"`
-	TanggalNotifikasiDireksi string  `gorm:"column:tanggal_notifikasi_direksi;size:50" json:"tanggal_notifikasi_direksi"`
-	PesanWA                string    `gorm:"column:pesan_wa;type:text" json:"pesan_wa"`
-	CreatedAt              time.Time `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt              time.Time `gorm:"column:updated_at" json:"updated_at"`
+// ============================================================
+// MASTER TABLE: PerjalananDinas_Tarif (pre-existing, read-only)
+// Composite PK: Area + NoUrut + Jabatan
+// ============================================================
+
+type PerjalananDinasTarif struct {
+	Area      string  `gorm:"column:Area;primaryKey"      json:"area"`
+	NoUrut    float64 `gorm:"column:NoUrut;primaryKey"    json:"no_urut"`
+	Jabatan   string  `gorm:"column:Jabatan;primaryKey"   json:"jabatan"`
+	Transport float64 `gorm:"column:Transport"            json:"transport"`
+	UangMakan float64 `gorm:"column:UangMakan"            json:"uang_makan"`
+	UangSaku  float64 `gorm:"column:UangSaku"             json:"uang_saku"`
+	Tiket     float64 `gorm:"column:Tiket"                json:"tiket"`
+	Hotel     float64 `gorm:"column:Hotel"                json:"hotel"`
+	MataUang  string  `gorm:"column:MataUang"             json:"mata_uang"`
 }
 
-func (PengajuanDinas) TableName() string {
-	return "pengajuan_dinas"
+func (PerjalananDinasTarif) TableName() string {
+	return "PerjalananDinas_Tarif"
 }
 
-type NotifikasiDireksi struct {
-	ID               uint      `gorm:"primaryKey;column:id" json:"id"`
-	PengajuanID      uint      `gorm:"column:pengajuan_id;not null" json:"pengajuan_id"`
-	IsiPesan         string    `gorm:"column:isi_pesan;type:text;not null" json:"isi_pesan"`
-	StatusPengiriman string    `gorm:"column:status_pengiriman;size:50;default:'terkirim'" json:"status_pengiriman"`
-	SentAt           time.Time `gorm:"column:sent_at" json:"sent_at"`
+// ============================================================
+// MASTER TABLE: PerjalananDinas_Fasilitas (pre-existing, read-only)
+// ============================================================
+
+type PerjalananDinasFasilitas struct {
+	Kriteria     string `gorm:"column:Kriteria;primaryKey"  json:"kriteria"`
+	HakTransport int    `gorm:"column:HakTransport"         json:"hak_transport"`
+	HakUangMakan int    `gorm:"column:HakUangMakan"         json:"hak_uang_makan"`
+	HakUangSaku  int    `gorm:"column:HakUangSaku"          json:"hak_uang_saku"`
+	HakTiket     int    `gorm:"column:HakTiket"             json:"hak_tiket"`
+	HakHotel     int    `gorm:"column:HakHotel"             json:"hak_hotel"`
 }
 
-func (NotifikasiDireksi) TableName() string {
-	return "notifikasi_direksi"
+func (PerjalananDinasFasilitas) TableName() string {
+	return "PerjalananDinas_Fasilitas"
+}
+
+// ============================================================
+// TRANSACTIONAL TABLE: PerjalananDinas_Pengajuan
+// StatusFlow pipeline:
+//   SUBMITTED → APPROVED_ATASAN → CONTROLLED_HRD →
+//   WA_SENT_DIREKSI → CONFIRMED_DIREKSI → SURAT_TUGAS_ISSUED
+//   (any stage → REJECTED)
+// ============================================================
+
+type PerjalananDinasPengajuan struct {
+	NoPengajuan              string     `gorm:"column:NoPengajuan;primaryKey"          json:"no_pengajuan"`
+	NomorID                  string     `gorm:"column:NomorID;not null"                json:"nomor_id"`
+	AtasanNomorID            string     `gorm:"column:AtasanNomorID"                   json:"atasan_nomor_id"`
+	HRDNomorID               string     `gorm:"column:HRDNomorID"                      json:"hrd_nomor_id"`
+	AreaTujuan               string     `gorm:"column:AreaTujuan"                      json:"area_tujuan"`
+	KotaTujuan               string     `gorm:"column:KotaTujuan"                      json:"kota_tujuan"`
+	MaksudTujuan             string     `gorm:"column:MaksudTujuan;type:text"          json:"maksud_tujuan"`
+	KriteriaFasilitas        string     `gorm:"column:KriteriaFasilitas"               json:"kriteria_fasilitas"`
+	TanggalBerangkat         time.Time  `gorm:"column:TanggalBerangkat"                json:"tanggal_berangkat"`
+	TanggalKembali           time.Time  `gorm:"column:TanggalKembali"                  json:"tanggal_kembali"`
+	JamBerangkat             string     `gorm:"column:JamBerangkat"                    json:"jam_berangkat"`
+	JamKembali               string     `gorm:"column:JamKembali"                      json:"jam_kembali"`
+	EstimasiBiaya            float64    `gorm:"column:EstimasiBiaya;type:decimal(15,2)" json:"estimasi_biaya"`
+	StatusFlow               string     `gorm:"column:StatusFlow;type:varchar(50);default:'SUBMITTED'" json:"status_flow"`
+	CatatanHRD               string     `gorm:"column:CatatanHRD;type:text"            json:"catatan_hrd"`
+	KonfirmasiDireksiNote    string     `gorm:"column:KonfirmasiDireksiNote;type:text" json:"konfirmasi_direksi_note"`
+	TanggalKonfirmasiDireksi *time.Time `gorm:"column:TanggalKonfirmasiDireksi"        json:"tanggal_konfirmasi_direksi"`
+	NomorSuratTugas          string     `gorm:"column:NomorSuratTugas"                 json:"nomor_surat_tugas"`
+	CreatedAt                time.Time  `gorm:"column:CreatedAt;autoCreateTime"        json:"created_at"`
+	UpdatedAt                time.Time  `gorm:"column:UpdatedAt;autoUpdateTime"        json:"updated_at"`
+
+	// Virtual associations and enriched fields (not stored in DB columns)
+	Karyawan       *KaryawanCopy1 `gorm:"-" json:"karyawan,omitempty"`
+	Atasan         *KaryawanCopy1 `gorm:"-" json:"atasan,omitempty"`
+	Nama           string         `gorm:"-" json:"nama,omitempty"`
+	KodeDepartemen string         `gorm:"-" json:"kode_departemen,omitempty"`
+	KodeJabatan    string         `gorm:"-" json:"kode_jabatan,omitempty"`
+	AtasanNama     string         `gorm:"-" json:"atasan_nama,omitempty"`
+}
+
+func (PerjalananDinasPengajuan) TableName() string {
+	return "PerjalananDinas_Pengajuan"
 }

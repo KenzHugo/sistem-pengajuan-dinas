@@ -204,47 +204,56 @@
             const tabs = ['semua', 'pending', 'approved', 'rejected'];
             tabs.forEach(t => {
                 const btn = document.getElementById('tab-' + t);
-                if (t === status) {
-                    btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-brand-gradient text-white shadow-sm whitespace-nowrap';
-                } else {
-                    btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap';
+                if (btn) {
+                    if (t === status) {
+                        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-brand-gradient text-white shadow-sm whitespace-nowrap';
+                    } else {
+                        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap';
+                    }
                 }
             });
             renderRiwayatView();
         }
 
         function handleSearch() {
-            searchQuery = document.getElementById('inp-search').value.toLowerCase().trim();
+            searchQuery = document.getElementById('inp-search')?.value.toLowerCase().trim() || '';
             renderRiwayatView();
         }
 
-        function renderRiwayatView() {
+        async function renderRiwayatView() {
             const user = getCurrentUser();
-            const list = getPengajuanData();
-            const myList = list.filter(p => p.nama === user.name || p.nip === user.nip);
+            const list = await apiGetPengajuan({
+                role: (user?.role || 'karyawan').toUpperCase(),
+                user_id: user?.nip || user?.nomor_id || '',
+            });
+            const myList = list;
+
+            const pendingCount  = myList.filter(p => (p.statusFlow || p.status) === 'SUBMITTED' || (p.statusFlow || p.status) === 'pending').length;
+            const approvedCount = myList.filter(p => ['APPROVED_ATASAN', 'CONTROLLED_HRD', 'WA_SENT_DIREKSI', 'CONFIRMED_DIREKSI', 'SURAT_TUGAS_ISSUED', 'approved', 'verified_hrga', 'notified_direksi'].includes(p.statusFlow || p.status)).length;
+            const rejectedCount = myList.filter(p => (p.statusFlow || p.status) === 'REJECTED' || (p.statusFlow || p.status) === 'rejected').length;
 
             // Update Counts
-            document.getElementById('count-semua').textContent = myList.length;
-            document.getElementById('count-pending').textContent = myList.filter(p => p.status === 'pending').length;
-            document.getElementById('count-approved').textContent = myList.filter(p => ['approved', 'verified_hrga', 'notified_direksi'].includes(p.status)).length;
-            document.getElementById('count-rejected').textContent = myList.filter(p => ['rejected', 'rejected_hrga'].includes(p.status)).length;
+            if (document.getElementById('count-semua')) document.getElementById('count-semua').textContent = myList.length;
+            if (document.getElementById('count-pending')) document.getElementById('count-pending').textContent = pendingCount;
+            if (document.getElementById('count-approved')) document.getElementById('count-approved').textContent = approvedCount;
+            if (document.getElementById('count-rejected')) document.getElementById('count-rejected').textContent = rejectedCount;
 
             // Filter & search
             let filtered = myList;
-            if (currentFilter !== 'semua') {
-                if (currentFilter === 'approved') {
-                    filtered = filtered.filter(p => ['approved', 'verified_hrga', 'notified_direksi'].includes(p.status));
-                } else if (currentFilter === 'rejected') {
-                    filtered = filtered.filter(p => ['rejected', 'rejected_hrga'].includes(p.status));
-                } else {
-                    filtered = filtered.filter(p => p.status === currentFilter);
-                }
+            if (currentFilter === 'pending') {
+                filtered = filtered.filter(p => (p.statusFlow || p.status) === 'SUBMITTED' || (p.statusFlow || p.status) === 'pending');
+            } else if (currentFilter === 'approved') {
+                filtered = filtered.filter(p => ['APPROVED_ATASAN', 'CONTROLLED_HRD', 'WA_SENT_DIREKSI', 'CONFIRMED_DIREKSI', 'SURAT_TUGAS_ISSUED', 'approved', 'verified_hrga', 'notified_direksi'].includes(p.statusFlow || p.status));
+            } else if (currentFilter === 'rejected') {
+                filtered = filtered.filter(p => (p.statusFlow || p.status) === 'REJECTED' || (p.statusFlow || p.status) === 'rejected');
             }
+
             if (searchQuery) {
                 filtered = filtered.filter(p => 
-                    p.tujuan.toLowerCase().includes(searchQuery) ||
-                    p.keperluan.toLowerCase().includes(searchQuery) ||
+                    (p.tujuan || p.kotaTujuan || '').toLowerCase().includes(searchQuery) ||
+                    (p.keperluan || p.maksudTujuan || '').toLowerCase().includes(searchQuery) ||
                     (p.nomorSurat && p.nomorSurat.toLowerCase().includes(searchQuery)) ||
+                    (p.noPengajuan && p.noPengajuan.toLowerCase().includes(searchQuery)) ||
                     (p.instansi && p.instansi.toLowerCase().includes(searchQuery))
                 );
             }
@@ -260,41 +269,43 @@
 
             emptyState.classList.add('hidden');
             tbody.innerHTML = filtered.map((item) => {
-                const badgeHtml = getStatusBadge(item.status, 'xs');
-                const canPrint = ['approved', 'verified_hrga', 'notified_direksi'].includes(item.status);
+                const s = item.statusFlow || item.status;
+                const badgeHtml = getStatusBadge(s, 'xs');
+                const canPrint = ['APPROVED_ATASAN', 'CONTROLLED_HRD', 'WA_SENT_DIREKSI', 'CONFIRMED_DIREKSI', 'SURAT_TUGAS_ISSUED', 'approved', 'verified_hrga', 'notified_direksi'].includes(s);
 
                 return `
                     <tr>
                         <td>
-                            <span class="text-xs font-mono font-bold text-white block">${item.nomorSurat || 'SPPD-' + item.id}</span>
-                            <span class="text-[10px] text-slate-400">${formatDate(item.tanggalPengajuan || item.mulai)}</span>
+                            <span class="text-xs font-mono font-bold text-white block">${item.noPengajuan || item.nomorSurat}</span>
+                            <span class="text-[10px] text-slate-400">${formatDate(item.createdAt || item.tanggalBerangkat)}</span>
                         </td>
                         <td>
                             <div class="flex items-center gap-1.5 font-bold text-white text-xs">
-                                <i class="ph-bold ph-map-pin text-brand-400"></i> ${item.tujuan}
+                                <i class="ph-bold ph-map-pin text-brand-400"></i> ${item.tujuan || item.kotaTujuan}
                             </div>
-                            <span class="text-[11px] text-slate-400 block mt-0.5">${item.instansi || '-'}</span>
+                            <span class="text-[11px] text-slate-400 block mt-0.5">${item.areaTujuan ? '(' + item.areaTujuan + ')' : ''}</span>
                         </td>
                         <td>
-                            <span class="text-xs font-semibold text-slate-200 block">${formatDate(item.mulai)} - ${formatDate(item.selesai)}</span>
-                            <span class="text-[11px] text-brand-300 font-medium">${item.durasi || calculateDuration(item.mulai, item.selesai)} Hari</span>
+                            <span class="text-xs font-semibold text-slate-200 block">${formatDate(item.tanggalBerangkat || item.mulai)} - ${formatDate(item.tanggalKembali || item.selesai)}</span>
+                            <span class="text-[11px] text-brand-300 font-medium">${item.durasi} Hari</span>
                         </td>
                         <td>
-                            <span class="text-xs font-medium text-slate-300">${item.keperluan}</span>
+                            <span class="text-xs font-medium text-slate-300 block truncate max-w-[220px]">${item.keperluan || item.maksudTujuan}</span>
+                            <span class="text-[10px] text-slate-500">${item.kriteriaFasilitas || 'Standar'}</span>
                         </td>
                         <td class="font-mono text-xs font-bold text-emerald-400">
-                            ${formatRupiah(item.totalBiaya)}
+                            ${formatRupiah(item.estimasiBiaya || item.totalBiaya)}
                         </td>
                         <td>
                             ${badgeHtml}
                         </td>
                         <td class="text-center">
                             <div class="flex items-center justify-center gap-1.5">
-                                <button onclick="openDetailModal(${item.id})" class="px-2.5 py-1 rounded-lg bg-[#090d16] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
+                                <button onclick="showDetail('${item.noPengajuan}')" class="px-2.5 py-1 rounded-lg bg-[#090d16] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
                                     Detail
                                 </button>
                                 ${canPrint ? `
-                                    <button onclick="printSPPDSlip(${item.id})" class="px-2.5 py-1 rounded-lg bg-brand-gradient hover:opacity-90 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1">
+                                    <button onclick="printSPPDSlip('${item.noPengajuan}')" class="px-2.5 py-1 rounded-lg bg-brand-gradient hover:opacity-90 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1">
                                         <i class="ph-bold ph-printer"></i> SPPD
                                     </button>
                                 ` : ''}
@@ -306,5 +317,4 @@
         }
     </script>
 </body>
-
 </html>

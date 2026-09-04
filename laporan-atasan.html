@@ -262,64 +262,73 @@
             renderLaporanTable();
         });
 
-        function renderLaporanTable() {
-            const list = getPengajuanData();
-            const statusFilter = document.getElementById('rep-filter-status').value;
-            const searchVal = document.getElementById('inp-search-rep').value.toLowerCase().trim();
+        async function renderLaporanTable() {
+            const list = await apiGetPengajuan();
+            const statusFilter = document.getElementById('rep-filter-status')?.value || '';
+            const searchVal = document.getElementById('inp-search-rep')?.value.toLowerCase().trim() || '';
 
-            const approvedList = list.filter(p => p.status === 'approved');
-            const totalApprovedBudget = approvedList.reduce((acc, curr) => acc + (curr.totalBiaya || 0), 0);
+            const approvedList = list.filter(p => ['APPROVED_ATASAN', 'CONTROLLED_HRD', 'WA_SENT_DIREKSI', 'CONFIRMED_DIREKSI', 'SURAT_TUGAS_ISSUED', 'approved', 'verified_hrga', 'notified_direksi'].includes(p.statusFlow || p.status));
+            const totalApprovedBudget = approvedList.reduce((acc, curr) => acc + (curr.estimasiBiaya || curr.totalBiaya || 0), 0);
 
-            document.getElementById('rep-total-budget').textContent = formatRupiah(totalApprovedBudget);
-            document.getElementById('rep-total-sppd').textContent = approvedList.length;
+            if (document.getElementById('rep-total-budget')) document.getElementById('rep-total-budget').textContent = formatRupiah(totalApprovedBudget);
+            if (document.getElementById('rep-total-sppd')) document.getElementById('rep-total-sppd').textContent = approvedList.length;
 
             renderAnalytics(list);
 
             let filtered = list;
             if (statusFilter) {
-                filtered = filtered.filter(p => p.status === statusFilter);
+                if (statusFilter === 'pending') {
+                    filtered = filtered.filter(p => (p.statusFlow || p.status) === 'SUBMITTED' || (p.statusFlow || p.status) === 'pending');
+                } else if (statusFilter === 'approved') {
+                    filtered = filtered.filter(p => ['APPROVED_ATASAN', 'CONTROLLED_HRD', 'WA_SENT_DIREKSI', 'CONFIRMED_DIREKSI', 'SURAT_TUGAS_ISSUED', 'approved', 'verified_hrga', 'notified_direksi'].includes(p.statusFlow || p.status));
+                } else if (statusFilter === 'rejected') {
+                    filtered = filtered.filter(p => (p.statusFlow || p.status) === 'REJECTED' || (p.statusFlow || p.status) === 'rejected');
+                } else {
+                    filtered = filtered.filter(p => (p.statusFlow || p.status) === statusFilter);
+                }
             }
             if (searchVal) {
                 filtered = filtered.filter(p =>
-                    p.nama.toLowerCase().includes(searchVal) ||
-                    p.tujuan.toLowerCase().includes(searchVal) ||
-                    (p.dept && p.dept.toLowerCase().includes(searchVal)) ||
-                    (p.nomorSurat && p.nomorSurat.toLowerCase().includes(searchVal))
+                    (p.nama || '').toLowerCase().includes(searchVal) ||
+                    (p.tujuan || p.kotaTujuan || '').toLowerCase().includes(searchVal) ||
+                    (p.dept || p.kodeDepartemen || '').toLowerCase().includes(searchVal) ||
+                    (p.nomorSurat && p.nomorSurat.toLowerCase().includes(searchVal)) ||
+                    (p.noPengajuan && p.noPengajuan.toLowerCase().includes(searchVal))
                 );
             }
 
             const tbody = document.getElementById('table-laporan-body');
             tbody.innerHTML = filtered.map(item => {
-                const badgeHtml = getStatusBadge(item.status, 'xs');
+                const badgeHtml = getStatusBadge(item.statusFlow || item.status, 'xs');
 
                 return `
                     <tr>
                         <td class="font-mono font-bold text-xs text-brand-300">
-                            ${item.nomorSurat || 'SPPD-' + item.id}
+                            ${item.noPengajuan || item.nomorSurat}
                         </td>
                         <td>
                             <p class="font-bold text-white text-xs">${item.nama}</p>
-                            <p class="text-[10px] text-slate-400">${item.dept}</p>
+                            <p class="text-[10px] text-slate-400">${item.dept || item.kodeDepartemen} · ${item.nip || item.nomorID}</p>
                         </td>
                         <td>
-                            <span class="font-semibold text-slate-200 text-xs">${item.asal} ➔ ${item.tujuan}</span>
-                            <span class="text-[11px] text-slate-400 block mt-0.5">${item.keperluan}</span>
+                            <span class="font-semibold text-slate-200 text-xs">${item.asal || 'Surabaya'} ➔ ${item.tujuan || item.kotaTujuan}</span>
+                            <span class="text-[11px] text-slate-400 block mt-0.5 truncate max-w-[200px]">${item.keperluan || item.maksudTujuan}</span>
                         </td>
                         <td class="text-xs text-slate-300">
-                            ${formatDate(item.mulai)} - ${formatDate(item.selesai)}
-                            <span class="text-brand-400 block font-mono font-medium text-[10px]">${item.durasi || 3} Hari</span>
+                            ${formatDate(item.tanggalBerangkat || item.mulai)} - ${formatDate(item.tanggalKembali || item.selesai)}
+                            <span class="text-brand-400 block font-mono font-medium text-[10px]">${item.durasi} Hari</span>
                         </td>
                         <td class="text-xs text-slate-300">
-                            ${item.transportasi}
+                            <span class="text-brand-300 font-medium">${item.kriteriaFasilitas || 'Standar'}</span>
                         </td>
                         <td class="font-mono text-xs font-bold text-emerald-400">
-                            ${formatRupiah(item.totalBiaya)}
+                            ${formatRupiah(item.estimasiBiaya || item.totalBiaya)}
                         </td>
                         <td>
                             ${badgeHtml}
                         </td>
                         <td class="text-center">
-                            <button onclick="openDetailModal(${item.id})" class="px-2.5 py-1 rounded-lg bg-[#090d16] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
+                            <button onclick="showDetail('${item.noPengajuan}')" class="px-2.5 py-1 rounded-lg bg-[#090d16] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
                                 Detail
                             </button>
                         </td>
@@ -331,83 +340,87 @@
         function renderAnalytics(list) {
             const depts = {};
             list.forEach(p => {
-                const d = p.dept || 'Lainnya';
-                depts[d] = (depts[d] || 0) + (p.totalBiaya || 0);
+                const d = p.dept || p.kodeDepartemen || 'Lainnya';
+                depts[d] = (depts[d] || 0) + (p.estimasiBiaya || p.totalBiaya || 0);
             });
 
             const totalAll = Object.values(depts).reduce((a, b) => a + b, 0) || 1;
             const deptContainer = document.getElementById('dept-distribution-list');
             
-            deptContainer.innerHTML = Object.entries(depts).map(([deptName, amount]) => {
-                const pct = Math.round((amount / totalAll) * 100);
-                return `
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-slate-300 text-xs">
-                            <span>${deptName}</span>
-                            <span class="font-mono text-white font-bold">${formatRupiah(amount)} (${pct}%)</span>
+            if (deptContainer) {
+                deptContainer.innerHTML = Object.entries(depts).map(([deptName, amount]) => {
+                    const pct = Math.round((amount / totalAll) * 100);
+                    return `
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-slate-300 text-xs">
+                                <span>${deptName}</span>
+                                <span class="font-mono text-white font-bold">${formatRupiah(amount)} (${pct}%)</span>
+                            </div>
+                            <div class="w-full h-1.5 rounded-full bg-[#090d16] overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-purple-500 to-indigo-500" style="width: ${pct}%"></div>
+                            </div>
                         </div>
-                        <div class="w-full h-1.5 rounded-full bg-[#090d16] overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-purple-500 to-indigo-500" style="width: ${pct}%"></div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+            }
 
             const transports = {
                 'Pesawat Terbang': 0,
                 'Kereta Api': 0,
                 'Mobil Dinas': 0,
-                'Lainnya': 0
+                'Lainnya / Moda Standar': 0
             };
 
             list.forEach(p => {
-                const t = p.transportasi || '';
+                const t = p.kriteriaFasilitas || p.transportasi || '';
                 if (t.includes('Pesawat')) transports['Pesawat Terbang']++;
                 else if (t.includes('Kereta')) transports['Kereta Api']++;
                 else if (t.includes('Mobil')) transports['Mobil Dinas']++;
-                else transports['Lainnya']++;
+                else transports['Lainnya / Moda Standar']++;
             });
 
             const totalTrips = list.length || 1;
             const transContainer = document.getElementById('transport-distribution-list');
 
-            transContainer.innerHTML = Object.entries(transports).map(([mode, count]) => {
-                const pct = Math.round((count / totalTrips) * 100);
-                return `
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-slate-300 text-xs">
-                            <span>${mode}</span>
-                            <span class="font-mono text-white font-bold">${count} Perjalanan (${pct}%)</span>
+            if (transContainer) {
+                transContainer.innerHTML = Object.entries(transports).map(([mode, count]) => {
+                    const pct = Math.round((count / totalTrips) * 100);
+                    return `
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-slate-300 text-xs">
+                                <span>${mode}</span>
+                                <span class="font-mono text-white font-bold">${count} Perjalanan (${pct}%)</span>
+                            </div>
+                            <div class="w-full h-1.5 rounded-full bg-[#090d16] overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-brand-500 to-emerald-500" style="width: ${pct}%"></div>
+                            </div>
                         </div>
-                        <div class="w-full h-1.5 rounded-full bg-[#090d16] overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-brand-500 to-emerald-500" style="width: ${pct}%"></div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+            }
         }
 
-        function exportToCSV() {
-            const list = getPengajuanData();
+        async function exportToCSV() {
+            const list = await apiGetPengajuan();
             let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Nomor SPPD,Nama,NIP,Departemen,Tujuan,Instansi,Mulai,Selesai,Durasi Hari,Keperluan,Transportasi,Akomodasi,Total Biaya,Status\n";
+            csvContent += "Nomor SPPD,Nama,NIP,Departemen,Tujuan,Instansi,Mulai,Selesai,Durasi Hari,Keperluan,Fasilitas,Akomodasi,Total Biaya,Status\n";
 
             list.forEach(item => {
                 const row = [
-                    `"${item.nomorSurat || ''}"`,
+                    `"${item.noPengajuan || item.nomorSurat || ''}"`,
                     `"${item.nama || ''}"`,
-                    `"${item.nip || ''}"`,
-                    `"${item.dept || ''}"`,
-                    `"${item.tujuan || ''}"`,
+                    `"${item.nip || item.nomorID || ''}"`,
+                    `"${item.dept || item.kodeDepartemen || ''}"`,
+                    `"${item.tujuan || item.kotaTujuan || ''}"`,
                     `"${item.instansi || ''}"`,
-                    `"${item.mulai || ''}"`,
-                    `"${item.selesai || ''}"`,
-                    `"${item.durasi || 3}"`,
-                    `"${item.keperluan || ''}"`,
-                    `"${item.transportasi || ''}"`,
+                    `"${item.tanggalBerangkat || item.mulai || ''}"`,
+                    `"${item.tanggalKembali || item.selesai || ''}"`,
+                    `"${item.durasi || 1}"`,
+                    `"${item.keperluan || item.maksudTujuan || ''}"`,
+                    `"${item.kriteriaFasilitas || ''}"`,
                     `"${item.akomodasi || ''}"`,
-                    `"${item.totalBiaya || 0}"`,
-                    `"${item.status || ''}"`
+                    `"${item.estimasiBiaya || item.totalBiaya || 0}"`,
+                    `"${item.statusFlow || item.status || ''}"`
                 ].join(',');
                 csvContent += row + "\n";
             });
@@ -415,7 +428,7 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Rekapitulasi_Dinas_Adiprima_${today.toISOString().split('T')[0]}.csv`);
+            link.setAttribute("download", `Rekapitulasi_Dinas_Adiprima_${new Date().toISOString().split('T')[0]}.csv`);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -423,5 +436,4 @@
         }
     </script>
 </body>
-
 </html>

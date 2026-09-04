@@ -10,35 +10,75 @@ import (
 )
 
 func main() {
-	// 1. Koneksi Database & Seed Data
+	// 1. Connect to MySQL & run AutoMigrate on PerjalananDinas_Pengajuan
 	config.ConnectDB()
 
-	// 2. Inisialisasi Fiber
-	app := fiber.New()
+	// 2. Initialize Fiber
+	app := fiber.New(fiber.Config{
+		AppName: "SIPADIN Backend v3.0",
+	})
 
-	// 3. Middleware CORS
+	// 3. CORS middleware — allow all origins for local HTML/LiveServer dev
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
-		AllowHeaders: "Origin, Content-Type, Accept",
+		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 		AllowMethods: "GET, POST, PUT, DELETE, OPTIONS",
 	}))
 
-	// 4. Setup Routing API
+	// 4. API routing
 	api := app.Group("/api")
 
-	// Endpoint Auth
-	api.Post("/login", controllers.Login)
+	// ── Auth ──────────────────────────────────────────────────
+	auth := api.Group("/auth")
+	auth.Post("/login", controllers.Login)
 
-	// Endpoint Pengajuan Dinas
-	api.Get("/pengajuan", controllers.GetPengajuan)
-	api.Get("/pengajuan/:id", controllers.GetPengajuanByID)
-	api.Post("/pengajuan", controllers.CreatePengajuan)
-	api.Put("/pengajuan/:id/status", controllers.UpdateStatus)
+	// ── Master Lookup Data ────────────────────────────────────
+	master := api.Group("/master")
+	master.Get("/tarif", controllers.GetMasterTarif)
+	master.Get("/fasilitas", controllers.GetMasterFasilitas)
 
-	// 5. Static File Serving (Akses langsung web via http://localhost:8080)
+	// ── Pengajuan CRUD ────────────────────────────────────────
+	pengajuan := api.Group("/pengajuan")
+	pengajuan.Post("/", controllers.CreatePengajuan)
+	pengajuan.Get("/", controllers.GetPengajuan)
+	pengajuan.Get("/detail", controllers.GetPengajuanByID)
+	pengajuan.Get("/detail/*", controllers.GetPengajuanByID)
+
+	// Stage 2: Atasan approves or rejects
+	pengajuan.Put("/action/atasan-approve", controllers.AtasanApprove)
+	pengajuan.Put("/action/atasan-reject", controllers.AtasanReject)
+	pengajuan.Put("/action/approve", controllers.AtasanApprove)
+	pengajuan.Put("/action/reject", controllers.AtasanReject)
+	pengajuan.Put("/:id/atasan-approve", controllers.AtasanApprove)
+	pengajuan.Put("/:id/atasan-reject", controllers.AtasanReject)
+	pengajuan.Put("/:id/approve", controllers.AtasanApprove)
+	pengajuan.Put("/:id/reject", controllers.AtasanReject)
+
+	// Stage 3: HRGA controls & verifies
+	pengajuan.Put("/action/hrd-control", controllers.HRDControl)
+	pengajuan.Put("/:id/hrd-control", controllers.HRDControl)
+
+	// Stage 4: HRGA generates WA message → opens WhatsApp
+	pengajuan.Get("/action/wa-text", controllers.GetWAText)
+	pengajuan.Get("/:id/wa-text", controllers.GetWAText)
+
+	// Stage 5: HRGA records Direksi confirmation
+	pengajuan.Put("/action/direksi-confirm", controllers.DireksiConfirm)
+	pengajuan.Put("/:id/direksi-confirm", controllers.DireksiConfirm)
+
+	// Stage 6: HRGA issues official Surat Tugas
+	pengajuan.Post("/action/surat-tugas", controllers.IssueSuratTugas)
+	pengajuan.Put("/action/surat-tugas", controllers.IssueSuratTugas)
+	pengajuan.Post("/:id/surat-tugas", controllers.IssueSuratTugas)
+	pengajuan.Put("/:id/issue-surat-tugas", controllers.IssueSuratTugas)
+
+	// Fallback ID route
+	pengajuan.Get("/:id", controllers.GetPengajuanByID)
+
+	// 5. Static file serving — serve frontend HTML directly via http://localhost:8080
 	app.Static("/", "../")
 
-	// 6. Jalankan Server di Port 8080
-	log.Println("SIPADIN Server berjalan di http://localhost:8080")
+	// 6. Start server
+	log.Println("🚀 SIPADIN Server v3.0 berjalan di http://localhost:8080")
 	log.Fatal(app.Listen(":8080"))
 }

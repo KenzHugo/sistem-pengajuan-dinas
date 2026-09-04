@@ -7,29 +7,32 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var DB *gorm.DB
 
 func ConnectDB() {
-	// Sesuaikan user, password, host, port, dan dbname
+	// DSN for sipadin MySQL database
 	dsn := "root:@tcp(127.0.0.1:3306)/sipadin?charset=utf8mb4&parseTime=True&loc=Local"
+
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		// Disable FK constraints during migration so master tables aren't affected
 		DisableForeignKeyConstraintWhenMigrating: true,
+		// Suppress verbose SQL logs in production; change to logger.Info for debugging
+		Logger: logger.Default.LogMode(logger.Warn),
 	})
 	if err != nil {
 		log.Fatal("Gagal koneksi ke database: ", err)
 	}
 
-	// Drop and AutoMigrate untuk memastikan seluruh kolom dan tipe data sesuai
-	_ = db.Migrator().DropTable(&models.NotifikasiDireksi{}, &models.PengajuanDinas{}, &models.User{})
-	if err := db.AutoMigrate(&models.User{}, &models.PengajuanDinas{}, &models.NotifikasiDireksi{}); err != nil {
-		log.Println("Migrate warning:", err)
+	// Only auto-migrate the transactional table.
+	// Master tables (Karyawan_copy1, PerjalananDinas_Tarif, PerjalananDinas_Fasilitas)
+	// already exist and are populated from the provided SQL files — do NOT touch them.
+	if err := db.AutoMigrate(&models.PerjalananDinasPengajuan{}); err != nil {
+		log.Println("AutoMigrate warning:", err)
 	}
 
 	DB = db
-	fmt.Println("Koneksi Database Berhasil!")
-
-	// Seed data awal jika tabel kosong
-	SeedData()
+	fmt.Println("✅ Koneksi Database Berhasil! Tabel PerjalananDinas_Pengajuan siap.")
 }

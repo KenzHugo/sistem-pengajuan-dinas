@@ -226,24 +226,38 @@
                 class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface-card border border-surface-border p-3 rounded-2xl">
                 <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
                     <button id="hrga-tab-semua" onclick="setHRGAFilter('semua')"
-                        class="px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 text-white shadow-sm transition-all whitespace-nowrap">
-                        Semua Pengajuan
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-600 text-white shadow-sm transition-all whitespace-nowrap">
+                        Semua (<span id="hrga-count-tab-semua">0</span>)
                     </button>
-                    <button id="hrga-tab-approved" onclick="setHRGAFilter('approved')"
-                        class="px-4 py-2 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
-                        <span>Pending HRGA</span>
+                    <button id="hrga-tab-approved" onclick="setHRGAFilter('APPROVED_ATASAN')"
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
+                        <span>1. Pending HRGA</span>
                         <span id="badge-count-pending-hrga"
                             class="px-1.5 py-0.5 text-[10px] rounded-full bg-blue-500/20 text-blue-300 font-mono">0</span>
                     </button>
-                    <button id="hrga-tab-verified" onclick="setHRGAFilter('verified_hrga')"
-                        class="px-4 py-2 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
-                        <span>Siap Notifikasi WA</span>
+                    <button id="hrga-tab-verified" onclick="setHRGAFilter('CONTROLLED_HRD')"
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
+                        <span>2. Siap Kirim WA</span>
                         <span id="badge-count-verified-hrga"
                             class="px-1.5 py-0.5 text-[10px] rounded-full bg-teal-500/20 text-teal-300 font-mono">0</span>
                     </button>
-                    <button id="hrga-tab-notified" onclick="setHRGAFilter('notified_direksi')"
-                        class="px-4 py-2 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap">
-                        Direksi Notified
+                    <button id="hrga-tab-notified" onclick="setHRGAFilter('WA_SENT_DIREKSI')"
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
+                        <span>3. Tunggu OK Direksi</span>
+                        <span id="badge-count-notified-hrga"
+                            class="px-1.5 py-0.5 text-[10px] rounded-full bg-purple-500/20 text-purple-300 font-mono">0</span>
+                    </button>
+                    <button id="hrga-tab-confirmed" onclick="setHRGAFilter('CONFIRMED_DIREKSI')"
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
+                        <span>4. Siap Terbitkan ST</span>
+                        <span id="badge-count-confirmed-hrga"
+                            class="px-1.5 py-0.5 text-[10px] rounded-full bg-emerald-500/20 text-emerald-300 font-mono">0</span>
+                    </button>
+                    <button id="hrga-tab-issued" onclick="setHRGAFilter('SURAT_TUGAS_ISSUED')"
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
+                        <span>5. Selesai / Terbit</span>
+                        <span id="badge-count-issued-hrga"
+                            class="px-1.5 py-0.5 text-[10px] rounded-full bg-indigo-500/20 text-indigo-300 font-mono">0</span>
                     </button>
                 </div>
 
@@ -252,7 +266,7 @@
                         <i class="ph-bold ph-magnifying-glass text-xs"></i>
                     </span>
                     <input type="text" id="hrga-inp-search" oninput="handleHRGASearch()"
-                        placeholder="Cari nama / nomor SPPD..." class="form-control-custom text-xs pl-9" />
+                        placeholder="Cari nama / nomor SPPD / kota..." class="form-control-custom text-xs pl-9" />
                 </div>
             </div>
 
@@ -478,14 +492,21 @@
 
         function setHRGAFilter(status) {
             currentHRGAFilter = status;
-            const tabs = ['semua', 'approved', 'verified_hrga', 'notified_direksi'];
+            const tabs = [
+                { id: 'hrga-tab-semua', key: 'semua' },
+                { id: 'hrga-tab-approved', key: 'APPROVED_ATASAN' },
+                { id: 'hrga-tab-verified', key: 'CONTROLLED_HRD' },
+                { id: 'hrga-tab-notified', key: 'WA_SENT_DIREKSI' },
+                { id: 'hrga-tab-confirmed', key: 'CONFIRMED_DIREKSI' },
+                { id: 'hrga-tab-issued', key: 'SURAT_TUGAS_ISSUED' },
+            ];
             tabs.forEach(t => {
-                const btn = document.getElementById('hrga-tab-' + (t === 'semua' ? 'semua' : t === 'approved' ? 'approved' : t === 'verified_hrga' ? 'verified' : 'notified'));
+                const btn = document.getElementById(t.id);
                 if (btn) {
-                    if (t === status) {
-                        btn.className = 'px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 text-white shadow-sm transition-all whitespace-nowrap flex items-center gap-1.5';
+                    if (t.key === status) {
+                        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-600 text-white shadow-sm transition-all whitespace-nowrap flex items-center gap-1.5';
                     } else {
-                        btn.className = 'px-4 py-2 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5';
+                        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5';
                     }
                 }
             });
@@ -493,38 +514,55 @@
         }
 
         function handleHRGASearch() {
-            hrgaSearchQuery = document.getElementById('hrga-inp-search').value.toLowerCase().trim();
+            hrgaSearchQuery = document.getElementById('hrga-inp-search')?.value.toLowerCase().trim() || '';
             renderHRGADashboard();
         }
 
-        function renderHRGADashboard() {
-            const list = getPengajuanData();
+        async function renderHRGADashboard() {
+            const list = await apiGetPengajuan({ role: 'HRGA' });
 
-            const countPending = list.filter(p => p.status === 'approved').length;
-            const countVerified = list.filter(p => p.status === 'verified_hrga').length;
-            const countNotified = list.filter(p => p.status === 'notified_direksi').length;
-            const totalBudgetVerified = list.filter(p => ['verified_hrga', 'notified_direksi'].includes(p.status))
-                .reduce((acc, curr) => acc + (curr.totalBiaya || 0), 0);
+            // Count per stage
+            const countPending   = list.filter(p => (p.statusFlow || p.status) === 'APPROVED_ATASAN' || (p.statusFlow || p.status) === 'approved').length;
+            const countVerified  = list.filter(p => (p.statusFlow || p.status) === 'CONTROLLED_HRD' || (p.statusFlow || p.status) === 'verified_hrga').length;
+            const countNotified  = list.filter(p => (p.statusFlow || p.status) === 'WA_SENT_DIREKSI' || (p.statusFlow || p.status) === 'notified_direksi').length;
+            const countConfirmed = list.filter(p => (p.statusFlow || p.status) === 'CONFIRMED_DIREKSI').length;
+            const countIssued    = list.filter(p => (p.statusFlow || p.status) === 'SURAT_TUGAS_ISSUED').length;
 
+            const totalBudgetVerified = list.filter(p => ['CONTROLLED_HRD', 'WA_SENT_DIREKSI', 'CONFIRMED_DIREKSI', 'SURAT_TUGAS_ISSUED', 'verified_hrga', 'notified_direksi'].includes(p.statusFlow || p.status))
+                .reduce((acc, curr) => acc + (curr.estimasiBiaya || curr.totalBiaya || 0), 0);
+
+            // Update Stats Cards
             document.getElementById('hrga-stat-pending').textContent = countPending;
             document.getElementById('hrga-stat-verified').textContent = countVerified;
             document.getElementById('hrga-stat-notified').textContent = countNotified;
             document.getElementById('hrga-stat-budget').textContent = formatRupiah(totalBudgetVerified);
 
-            document.getElementById('badge-count-pending-hrga').textContent = countPending;
-            document.getElementById('badge-count-verified-hrga').textContent = countVerified;
+            // Update Tab Badges
+            if (document.getElementById('hrga-count-tab-semua')) document.getElementById('hrga-count-tab-semua').textContent = list.length;
+            if (document.getElementById('badge-count-pending-hrga')) document.getElementById('badge-count-pending-hrga').textContent = countPending;
+            if (document.getElementById('badge-count-verified-hrga')) document.getElementById('badge-count-verified-hrga').textContent = countVerified;
+            if (document.getElementById('badge-count-notified-hrga')) document.getElementById('badge-count-notified-hrga').textContent = countNotified;
+            if (document.getElementById('badge-count-confirmed-hrga')) document.getElementById('badge-count-confirmed-hrga').textContent = countConfirmed;
+            if (document.getElementById('badge-count-issued-hrga')) document.getElementById('badge-count-issued-hrga').textContent = countIssued;
 
             // Filter List
             let filtered = list;
             if (currentHRGAFilter !== 'semua') {
-                filtered = filtered.filter(p => p.status === currentHRGAFilter);
+                filtered = filtered.filter(p => {
+                    const s = p.statusFlow || p.status;
+                    if (currentHRGAFilter === 'APPROVED_ATASAN') return s === 'APPROVED_ATASAN' || s === 'approved';
+                    if (currentHRGAFilter === 'CONTROLLED_HRD') return s === 'CONTROLLED_HRD' || s === 'verified_hrga';
+                    if (currentHRGAFilter === 'WA_SENT_DIREKSI') return s === 'WA_SENT_DIREKSI' || s === 'notified_direksi';
+                    return s === currentHRGAFilter;
+                });
             }
             if (hrgaSearchQuery) {
                 filtered = filtered.filter(p =>
-                    p.nama.toLowerCase().includes(hrgaSearchQuery) ||
-                    p.tujuan.toLowerCase().includes(hrgaSearchQuery) ||
-                    p.dept.toLowerCase().includes(hrgaSearchQuery) ||
-                    (p.nomorSurat && p.nomorSurat.toLowerCase().includes(hrgaSearchQuery))
+                    (p.nama || '').toLowerCase().includes(hrgaSearchQuery) ||
+                    (p.tujuan || p.kotaTujuan || '').toLowerCase().includes(hrgaSearchQuery) ||
+                    (p.dept || p.kodeDepartemen || '').toLowerCase().includes(hrgaSearchQuery) ||
+                    (p.nomorSurat && p.nomorSurat.toLowerCase().includes(hrgaSearchQuery)) ||
+                    (p.noPengajuan && p.noPengajuan.toLowerCase().includes(hrgaSearchQuery))
                 );
             }
 
@@ -541,28 +579,47 @@
 
             emptyState.classList.add('hidden');
             tbody.innerHTML = filtered.map(item => {
-                const statusBadge = getStatusBadge(item.status, 'xs');
-                const initials = item.nama.split(' ').map(n => n[0]).join('').slice(0, 2);
+                const s = item.statusFlow || item.status;
+                const statusBadge = getStatusBadge(s, 'xs');
+                const initials = (item.nama || 'K').split(' ').map(n => n[0]).join('').slice(0, 2);
 
                 let actionBtn = '';
-                if (item.status === 'approved') {
-                    // Tahap 3: Verifikasi HRGA
+                if (s === 'APPROVED_ATASAN' || s === 'approved') {
+                    // Stage 3: Verifikasi HRGA
                     actionBtn = `
-                        <button onclick="openVerifikasiModal(${item.id})" class="px-3 py-1.5 rounded-lg bg-teal-gradient hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1">
+                        <button onclick="openVerifikasiModal('${item.noPengajuan}')" class="px-3 py-1.5 rounded-lg bg-teal-gradient hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1">
                             <i class="ph-bold ph-shield-check"></i> Verifikasi HRGA
                         </button>
                     `;
-                } else if (item.status === 'verified_hrga') {
-                    // Tahap 4: Kirim WA ke Direksi
+                } else if (s === 'CONTROLLED_HRD' || s === 'verified_hrga') {
+                    // Stage 4: Kirim WA ke Direksi
                     actionBtn = `
-                        <button onclick="openWAModal(${item.id})" class="px-3 py-1.5 rounded-lg bg-emerald-gradient hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1">
+                        <button onclick="openWAModal('${item.noPengajuan}')" class="px-3 py-1.5 rounded-lg bg-emerald-gradient hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1">
                             <i class="ph-bold ph-whatsapp-logo"></i> Kirim WA Direksi
                         </button>
                     `;
-                } else if (item.status === 'notified_direksi') {
+                } else if (s === 'WA_SENT_DIREKSI' || s === 'notified_direksi') {
+                    // Stage 5: Input Konfirmasi OK
                     actionBtn = `
-                        <button onclick="openWAModal(${item.id})" class="px-2.5 py-1.5 rounded-lg bg-[#141e33] border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition-all flex items-center gap-1">
-                            <i class="ph-bold ph-eye"></i> Lihat WA
+                        <button onclick="handleQuickConfirmDireksi('${item.noPengajuan}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1">
+                            <i class="ph-bold ph-seal-check"></i> Input OK Direksi
+                        </button>
+                        <button onclick="openWAModal('${item.noPengajuan}')" class="px-2 py-1.5 rounded-lg bg-[#141e33] border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition-all" title="Buka WhatsApp">
+                            <i class="ph-bold ph-whatsapp-logo"></i>
+                        </button>
+                    `;
+                } else if (s === 'CONFIRMED_DIREKSI') {
+                    // Stage 6: Terbitkan Surat Tugas
+                    actionBtn = `
+                        <button onclick="handleIssueSuratTugas('${item.noPengajuan}')" class="px-3 py-1.5 rounded-lg bg-brand-gradient hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1">
+                            <i class="ph-bold ph-file-text"></i> Terbitkan Surat Tugas
+                        </button>
+                    `;
+                } else if (s === 'SURAT_TUGAS_ISSUED') {
+                    // Cetak
+                    actionBtn = `
+                        <button onclick="printSuratTugas('${item.noPengajuan}')" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1">
+                            <i class="ph-bold ph-printer"></i> Cetak Surat Tugas
                         </button>
                     `;
                 } else {
@@ -578,29 +635,29 @@
                                 </div>
                                 <div>
                                     <p class="font-bold text-white text-xs">${item.nama}</p>
-                                    <span class="text-[10px] font-mono text-slate-400 block">${item.nomorSurat || 'SPPD-' + item.id}</span>
+                                    <span class="text-[10px] font-mono text-slate-400 block">${item.noPengajuan || item.nomorSurat}</span>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <p class="text-xs font-semibold text-slate-200">${item.dept}</p>
-                            <p class="text-[10px] text-slate-400 mt-0.5">${item.jabatan || 'Staf'}</p>
+                            <p class="text-xs font-semibold text-slate-200">${item.dept || item.kodeDepartemen}</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">${item.jabatan || item.kodeJabatan || 'Staf'}</p>
                         </td>
                         <td>
                             <div class="flex items-center gap-1.5 font-bold text-white text-xs">
-                                <i class="ph-bold ph-map-pin text-amber-400"></i> ${item.tujuan}
+                                <i class="ph-bold ph-map-pin text-amber-400"></i> ${item.tujuan || item.kotaTujuan}
                             </div>
-                            <span class="text-[11px] text-slate-400 block mt-0.5">${formatDate(item.mulai)} - ${formatDate(item.selesai)} (${item.durasi || 1} Hari)</span>
+                            <span class="text-[11px] text-slate-400 block mt-0.5">${formatDate(item.tanggalBerangkat || item.mulai)} - ${formatDate(item.tanggalKembali || item.selesai)} (${item.durasi || 1} Hari)</span>
                         </td>
                         <td class="font-mono text-xs font-bold text-emerald-400">
-                            ${formatRupiah(item.totalBiaya)}
+                            ${formatRupiah(item.estimasiBiaya || item.totalBiaya)}
                         </td>
                         <td>
                             ${statusBadge}
                         </td>
                         <td class="text-center">
                             <div class="flex items-center justify-center gap-1.5">
-                                <button onclick="openDetailModal(${item.id})" class="px-2.5 py-1.5 rounded-lg bg-[#141e33] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
+                                <button onclick="showDetail('${item.noPengajuan}')" class="px-2.5 py-1.5 rounded-lg bg-[#141e33] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
                                     Detail
                                 </button>
                                 ${actionBtn}
@@ -612,32 +669,35 @@
         }
 
         // Modal Verifikasi (Tahap 3)
-        function openVerifikasiModal(id) {
-            currentVerifikasiId = id;
-            const list = getPengajuanData();
-            const item = list.find(p => p.id === id);
+        async function openVerifikasiModal(noPengajuan) {
+            currentVerifikasiId = noPengajuan;
+            const item = await apiGetPengajuanByID(noPengajuan);
             if (!item) return;
 
-            document.getElementById('m-v-sppd').textContent = item.nomorSurat || 'SPPD-' + item.id;
-            document.getElementById('m-v-nama').textContent = item.nama + ' (' + (item.nip || '-') + ')';
-            document.getElementById('m-v-dept').textContent = item.jabatan + ' · ' + item.dept;
-            document.getElementById('m-v-tujuan').textContent = item.asal + ' ➔ ' + item.tujuan + ' (' + formatDate(item.mulai) + ')';
-            document.getElementById('m-v-total').textContent = formatRupiah(item.totalBiaya);
-            document.getElementById('inp-catatan-hrga').value = item.catatanHRGA || '';
+            document.getElementById('m-v-sppd').textContent = item.noPengajuan;
+            document.getElementById('m-v-nama').textContent = item.nama + ' (' + (item.nip || item.nomorID || '-') + ')';
+            document.getElementById('m-v-dept').textContent = (item.jabatan || item.kodeJabatan || 'Staf') + ' · ' + (item.dept || item.kodeDepartemen);
+            document.getElementById('m-v-tujuan').textContent = (item.asal || 'Surabaya') + ' ➔ ' + (item.tujuan || item.kotaTujuan) + ' (' + formatDate(item.tanggalBerangkat || item.mulai) + ')';
+            document.getElementById('m-v-total').textContent = formatRupiah(item.estimasiBiaya || item.totalBiaya);
+            document.getElementById('inp-catatan-hrga').value = item.catatanHRD || '';
 
             const modal = document.getElementById('modal-verifikasi-hrga');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
         }
 
         function closeVerifikasiModal() {
             const modal = document.getElementById('modal-verifikasi-hrga');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
             currentVerifikasiId = null;
         }
 
-        function submitHRGADecision(action) {
+        async function submitHRGADecision(action) {
             if (!currentVerifikasiId) return;
             const note = document.getElementById('inp-catatan-hrga').value.trim();
 
@@ -647,9 +707,9 @@
             }
 
             if (action === 'verify') {
-                verifyByHRGA(currentVerifikasiId, note);
+                await verifyByHRGA(currentVerifikasiId, note);
             } else {
-                rejectByHRGA(currentVerifikasiId, note);
+                await rejectByHRGA(currentVerifikasiId, note);
             }
 
             closeVerifikasiModal();
@@ -657,24 +717,28 @@
         }
 
         // Modal Notifikasi WA Direksi (Tahap 4)
-        function openWAModal(id) {
-            currentWAId = id;
-            const list = getPengajuanData();
-            const item = list.find(p => p.id === id);
-            if (!item) return;
+        async function openWAModal(noPengajuan) {
+            currentWAId = noPengajuan;
+            try {
+                const res = await apiGetWAText(noPengajuan);
+                document.getElementById('wa-message-preview').textContent = res.text || '';
 
-            const pesan = generateWAMessage(item);
-            document.getElementById('wa-message-preview').textContent = pesan;
-
-            const modal = document.getElementById('modal-wa-direksi');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+                const modal = document.getElementById('modal-wa-direksi');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+            } catch (err) {
+                showToast('error', 'Gagal Menyiapkan WA', err.message);
+            }
         }
 
         function closeWAModal() {
             const modal = document.getElementById('modal-wa-direksi');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
             currentWAId = null;
         }
 
@@ -687,16 +751,28 @@
             });
         }
 
-        function confirmAndOpenWA() {
+        async function confirmAndOpenWA() {
             if (!currentWAId) return;
-            const result = notifyDireksi(currentWAId);
-            if (result && result.waUrl) {
-                window.open(result.waUrl, '_blank');
-            }
+            await sendWADireksi(currentWAId);
             closeWAModal();
             renderHRGADashboard();
         }
+
+        // Quick Stage 5: Input OK Direksi
+        async function handleQuickConfirmDireksi(noPengajuan) {
+            const ok = await confirmDireksi(noPengajuan, 'OK / Disetujui oleh Direksi');
+            if (ok) {
+                renderHRGADashboard();
+            }
+        }
+
+        // Quick Stage 6: Issue Surat Tugas
+        async function handleIssueSuratTugas(noPengajuan) {
+            const res = await issueSuratTugas(noPengajuan);
+            if (res) {
+                renderHRGADashboard();
+            }
+        }
     </script>
 </body>
-
 </html>

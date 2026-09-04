@@ -530,7 +530,7 @@
             }
         }
 
-        function handlePengajuanSubmit(e) {
+        async function handlePengajuanSubmit(e) {
             e.preventDefault();
             const tujuan = document.getElementById('inp-tujuan').value.trim();
             const instansi = document.getElementById('inp-instansi').value.trim();
@@ -570,59 +570,35 @@
             const total = bTransport + bHotel + bHarian;
 
             const btn = document.getElementById('btn-submit-pengajuan');
-            btn.innerHTML = '<i class="ph-bold ph-circle-notch text-sm animate-spin"></i> Mengirim...';
+            btn.innerHTML = '<i class="ph-bold ph-circle-notch text-sm animate-spin"></i> Mengirim ke Golang Backend...';
             btn.disabled = true;
 
-            const newId = Date.now();
-            const newItem = {
-                id: newId,
-                nomorSurat: generateNomorSurat(user.dept || 'IT & Infrastructure'),
-                nama: user.name || 'Karyawan',
-                nip: user.nip || 'EMP-2026001',
-                dept: user.dept || 'IT & Infrastructure',
-                jabatan: user.jabatan || 'Staff Professional',
-                asal: 'Surabaya',
-                tujuan: tujuan,
-                instansi: instansi,
-                mulai: mulai,
-                selesai: selesai,
-                jamBerangkat: jamBerangkat,
-                jarak: jarak,
-                lamaJam: lamaJam,
-                statusMenginap: statusMenginap,
-                kriteria: kriteria,
-                durasi: durasi,
-                transportasi: transportasi,
-                akomodasi: akomodasi,
-                keperluan: keperluan,
-                keterangan: keterangan,
-                biayaTransport: bTransport,
-                biayaPenginapan: bHotel,
-                uangHarian: bHarian,
-                totalBiaya: total,
-                lampiran: 'Surat_Tugas_Resmi.pdf',
-                status: 'pending',
-                tanggalPengajuan: daysFromNow(0),
-                catatanAtasan: '',
-                disetujuiOleh: '',
-                tanggalDisetujui: '',
-                catatanHRGA: '',
-                diverifikasiOleh: '',
-                tanggalVerifikasiHRGA: '',
-                tanggalNotifikasiDireksi: '',
-                pesanWA: '',
+            // nomor_id diambil otomatis dari sesi login (localStorage) — user tidak perlu mengetiknya
+            const payload = {
+                nomor_id:           user.nip || user.nomor_id || '',
+                atasan_nomor_id:    '',                                   // bisa diisi dari dropdown atasan jika ada
+                area_tujuan:        document.getElementById('area-tujuan')?.value || tujuan,
+                kota_tujuan:        tujuan,
+                maksud_tujuan:      keperluan + (keterangan ? ' — ' + keterangan : ''),
+                kriteria_fasilitas: kriteria,
+                tanggal_berangkat:  mulai,
+                tanggal_kembali:    selesai,
+                jam_berangkat:      jamBerangkat,
+                jam_kembali:        document.getElementById('jam-kembali')?.value || '17:00',
+                estimasi_biaya:     total,
             };
 
-            const data = getPengajuanData();
-            data.unshift(newItem);
-            savePengajuanData(data);
-
-            setTimeout(() => {
-                showToast('success', 'Pengajuan Terkirim!', `Pengajuan SPPD ${newItem.nomorSurat} ke ${tujuan} berhasil diajukan.`);
+            try {
+                const res = await apiCreatePengajuan(payload);
+                showToast('success', 'Pengajuan Terkirim!', `Pengajuan SPPD ${res.noPengajuan || res.nomorSurat || ''} ke ${tujuan} berhasil disimpan ke database.`);
                 setTimeout(() => {
                     window.location.href = 'riwayat-pengajuan.html';
                 }, 700);
-            }, 500);
+            } catch (err) {
+                showToast('error', 'Gagal Mengirim', err.message || 'Terjadi kesalahan saat menyimpan pengajuan.');
+                btn.innerHTML = '<span>Kirim Pengajuan Dinas</span><i class="ph-bold ph-paper-plane-tilt text-base"></i>';
+                btn.disabled = false;
+            }
         }
     </script>
 </body>

@@ -280,15 +280,18 @@
             renderKaryawanDashboard();
         });
 
-        function renderKaryawanDashboard() {
+        async function renderKaryawanDashboard() {
             const user = getCurrentUser();
-            const list = getPengajuanData();
-            const myList = list.filter(p => p.nama === user.name || p.nip === user.nip);
+            const list = await apiGetPengajuan({
+                role: 'KARYAWAN',
+                user_id: user?.nip || user?.nomor_id || '',
+            });
+            const myList = list;
             
             const total = myList.length;
-            const approved = myList.filter(p => ['approved', 'verified_hrga', 'notified_direksi'].includes(p.status)).length;
-            const pending = myList.filter(p => p.status === 'pending').length;
-            const totalBudget = myList.reduce((acc, curr) => acc + (curr.totalBiaya || 0), 0);
+            const approved = myList.filter(p => ['CONFIRMED_DIREKSI', 'SURAT_TUGAS_ISSUED', 'CONTROLLED_HRD', 'APPROVED_ATASAN', 'approved', 'verified_hrga', 'notified_direksi'].includes(p.statusFlow || p.status)).length;
+            const pending = myList.filter(p => (p.statusFlow || p.status) === 'SUBMITTED' || (p.statusFlow || p.status) === 'pending').length;
+            const totalBudget = myList.reduce((acc, curr) => acc + (curr.estimasiBiaya || curr.totalBiaya || 0), 0);
 
             document.getElementById('k-stat-total').textContent = total;
             document.getElementById('k-stat-approved').textContent = approved;
@@ -311,8 +314,8 @@
                 `;
             } else {
                 recentContainer.innerHTML = recentItems.map(item => {
-                    const badgeHtml = getStatusBadge(item.status, 'xs');
-                    const canPrint = ['approved', 'verified_hrga', 'notified_direksi'].includes(item.status);
+                    const badgeHtml = getStatusBadge(item.statusFlow || item.status, 'xs');
+                    const canPrint = ['APPROVED_ATASAN', 'CONTROLLED_HRD', 'WA_SENT_DIREKSI', 'CONFIRMED_DIREKSI', 'SURAT_TUGAS_ISSUED', 'approved', 'verified_hrga', 'notified_direksi'].includes(item.statusFlow || item.status);
 
                     return `
                         <div class="py-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/5 last:border-0">
@@ -322,19 +325,19 @@
                                 </div>
                                 <div>
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <h4 class="text-xs font-bold text-white">${item.asal || 'Surabaya'} ➔ ${item.tujuan}</h4>
+                                        <h4 class="text-xs font-bold text-white">${item.asal || 'Surabaya'} ➔ ${item.tujuan || item.kotaTujuan}</h4>
                                         ${badgeHtml}
                                     </div>
-                                    <p class="text-[11px] text-slate-400 mt-0.5">${item.keperluan} · <span class="text-slate-300 font-medium">${formatDate(item.mulai)} - ${formatDate(item.selesai)}</span> (${item.durasi || calculateDuration(item.mulai, item.selesai)} Hari)</p>
-                                    <p class="text-[11px] text-emerald-400 font-mono font-semibold mt-0.5">${formatRupiah(item.totalBiaya)}</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">${item.keperluan || item.maksudTujuan} · <span class="text-slate-300 font-medium">${formatDate(item.tanggalBerangkat || item.mulai)} - ${formatDate(item.tanggalKembali || item.selesai)}</span> (${item.durasi} Hari)</p>
+                                    <p class="text-[11px] text-emerald-400 font-mono font-semibold mt-0.5">${formatRupiah(item.estimasiBiaya || item.totalBiaya)}</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-1.5 w-full sm:w-auto justify-end">
-                                <button onclick="openDetailModal(${item.id})" class="px-2.5 py-1 rounded-lg bg-[#090d16] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
+                                <button onclick="showDetail('${item.noPengajuan}')" class="px-2.5 py-1 rounded-lg bg-[#090d16] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
                                     Detail
                                 </button>
                                 ${canPrint ? `
-                                    <button onclick="printSPPDSlip(${item.id})" class="px-2.5 py-1 rounded-lg bg-brand-gradient hover:opacity-90 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1">
+                                    <button onclick="printSPPDSlip('${item.noPengajuan}')" class="px-2.5 py-1 rounded-lg bg-brand-gradient hover:opacity-90 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1">
                                         <i class="ph-bold ph-printer"></i> SPPD
                                     </button>
                                 ` : ''}
@@ -345,29 +348,29 @@
             }
 
             // Upcoming Trip section
-            const upcoming = myList.find(p => ['pending', 'approved', 'verified_hrga'].includes(p.status));
+            const upcoming = myList.find(p => ['SUBMITTED', 'APPROVED_ATASAN', 'CONTROLLED_HRD', 'WA_SENT_DIREKSI', 'CONFIRMED_DIREKSI', 'pending', 'approved', 'verified_hrga'].includes(p.statusFlow || p.status));
             const upcomingContainer = document.getElementById('upcoming-trip-content');
             const diffBadge = document.getElementById('upcoming-diff-badge');
 
             if (upcoming) {
-                const diff = daysUntil(upcoming.mulai);
+                const diff = daysUntil(upcoming.tanggalBerangkat || upcoming.mulai);
                 diffBadge.innerHTML = diff >= 0 ? `<span class="text-brand-300 font-bold">H-${diff}</span>` : `<span class="text-slate-400">Berlangsung</span>`;
                 
                 upcomingContainer.innerHTML = `
                     <div>
-                        <p class="text-base font-bold text-white">${upcoming.tujuan}</p>
-                        <p class="text-xs text-slate-300">${upcoming.instansi || 'Agenda Kegiatan Dinas'}</p>
+                        <p class="text-base font-bold text-white">${upcoming.tujuan || upcoming.kotaTujuan}</p>
+                        <p class="text-xs text-slate-300">${upcoming.maksudTujuan || upcoming.keperluan || 'Agenda Kegiatan Dinas'}</p>
                         <div class="p-2.5 rounded-xl bg-[#090d16] border border-white/5 text-xs space-y-1 mt-2">
                             <div class="flex justify-between text-slate-400">
                                 <span>Tanggal:</span>
-                                <span class="text-white font-medium">${formatDate(upcoming.mulai)}</span>
+                                <span class="text-white font-medium">${formatDate(upcoming.tanggalBerangkat || upcoming.mulai)}</span>
                             </div>
                             <div class="flex justify-between text-slate-400">
-                                <span>Moda:</span>
-                                <span class="text-white font-medium truncate max-w-[130px]">${upcoming.transportasi}</span>
+                                <span>Fasilitas:</span>
+                                <span class="text-white font-medium truncate max-w-[130px]">${upcoming.kriteriaFasilitas || 'Standar'}</span>
                             </div>
                         </div>
-                        <button onclick="openDetailModal(${upcoming.id})" class="w-full mt-2.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition-all shadow-sm">
+                        <button onclick="showDetail('${upcoming.noPengajuan}')" class="w-full mt-2.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition-all shadow-sm">
                             Lihat Rencana Tugas
                         </button>
                     </div>

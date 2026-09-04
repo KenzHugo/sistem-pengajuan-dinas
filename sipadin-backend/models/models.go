@@ -68,26 +68,26 @@ func (PerjalananDinasFasilitas) TableName() string {
 // ============================================================
 
 type PerjalananDinasPengajuan struct {
-	NoPengajuan              string     `gorm:"column:NoPengajuan;primaryKey"          json:"no_pengajuan"`
-	NomorID                  string     `gorm:"column:NomorID;not null"                json:"nomor_id"`
-	AtasanNomorID            string     `gorm:"column:AtasanNomorID"                   json:"atasan_nomor_id"`
-	HRDNomorID               string     `gorm:"column:HRDNomorID"                      json:"hrd_nomor_id"`
-	AreaTujuan               string     `gorm:"column:AreaTujuan"                      json:"area_tujuan"`
-	KotaTujuan               string     `gorm:"column:KotaTujuan"                      json:"kota_tujuan"`
-	MaksudTujuan             string     `gorm:"column:MaksudTujuan;type:text"          json:"maksud_tujuan"`
-	KriteriaFasilitas        string     `gorm:"column:KriteriaFasilitas"               json:"kriteria_fasilitas"`
-	TanggalBerangkat         time.Time  `gorm:"column:TanggalBerangkat"                json:"tanggal_berangkat"`
-	TanggalKembali           time.Time  `gorm:"column:TanggalKembali"                  json:"tanggal_kembali"`
-	JamBerangkat             string     `gorm:"column:JamBerangkat"                    json:"jam_berangkat"`
-	JamKembali               string     `gorm:"column:JamKembali"                      json:"jam_kembali"`
-	EstimasiBiaya            float64    `gorm:"column:EstimasiBiaya;type:decimal(15,2)" json:"estimasi_biaya"`
-	StatusFlow               string     `gorm:"column:StatusFlow;type:varchar(50);default:'SUBMITTED'" json:"status_flow"`
-	CatatanHRD               string     `gorm:"column:CatatanHRD;type:text"            json:"catatan_hrd"`
-	KonfirmasiDireksiNote    string     `gorm:"column:KonfirmasiDireksiNote;type:text" json:"konfirmasi_direksi_note"`
-	TanggalKonfirmasiDireksi *time.Time `gorm:"column:TanggalKonfirmasiDireksi"        json:"tanggal_konfirmasi_direksi"`
-	NomorSuratTugas          string     `gorm:"column:NomorSuratTugas"                 json:"nomor_surat_tugas"`
-	CreatedAt                time.Time  `gorm:"column:CreatedAt;autoCreateTime"        json:"created_at"`
-	UpdatedAt                time.Time  `gorm:"column:UpdatedAt;autoUpdateTime"        json:"updated_at"`
+	NoPengajuan              string     `gorm:"column:NoPengajuan;primaryKey;type:varchar(50)"              json:"no_pengajuan"`
+	NomorID                  string     `gorm:"column:NomorID;not null;type:varchar(50)"                    json:"nomor_id"`
+	AtasanNomorID            string     `gorm:"column:AtasanNomorID;type:varchar(50)"                       json:"atasan_nomor_id"`
+	HRDNomorID               string     `gorm:"column:HRDNomorID;type:varchar(50)"                          json:"hrd_nomor_id"`
+	AreaTujuan               string     `gorm:"column:AreaTujuan;type:varchar(100)"                         json:"area_tujuan"`
+	KotaTujuan               string     `gorm:"column:KotaTujuan;type:varchar(100)"                         json:"kota_tujuan"`
+	MaksudTujuan             string     `gorm:"column:MaksudTujuan;type:text"                               json:"maksud_tujuan"`
+	KriteriaFasilitas        string     `gorm:"column:KriteriaFasilitas;type:varchar(100)"                  json:"kriteria_fasilitas"`
+	TanggalBerangkat         time.Time  `gorm:"column:TanggalBerangkat"                                     json:"tanggal_berangkat"`
+	TanggalKembali           time.Time  `gorm:"column:TanggalKembali"                                       json:"tanggal_kembali"`
+	JamBerangkat             string     `gorm:"column:JamBerangkat;type:varchar(10)"                        json:"jam_berangkat"`
+	JamKembali               string     `gorm:"column:JamKembali;type:varchar(10)"                          json:"jam_kembali"`
+	EstimasiBiaya            float64    `gorm:"column:EstimasiBiaya;type:decimal(15,2)"                     json:"estimasi_biaya"`
+	StatusFlow               string     `gorm:"column:StatusFlow;type:varchar(50);default:'SUBMITTED'"      json:"status_flow"`
+	CatatanHRD               string     `gorm:"column:CatatanHRD;type:text"                                 json:"catatan_hrd"`
+	KonfirmasiDireksiNote    string     `gorm:"column:KonfirmasiDireksiNote;type:text"                      json:"konfirmasi_direksi_note"`
+	TanggalKonfirmasiDireksi *time.Time `gorm:"column:TanggalKonfirmasiDireksi"                             json:"tanggal_konfirmasi_direksi"`
+	NomorSuratTugas          string     `gorm:"column:NomorSuratTugas;type:varchar(50)"                     json:"nomor_surat_tugas"`
+	CreatedAt                time.Time  `gorm:"column:CreatedAt;autoCreateTime"                             json:"created_at"`
+	UpdatedAt                time.Time  `gorm:"column:UpdatedAt;autoUpdateTime"                             json:"updated_at"`
 
 	// Virtual associations and enriched fields (not stored in DB columns)
 	Karyawan       *KaryawanCopy1 `gorm:"-" json:"karyawan,omitempty"`

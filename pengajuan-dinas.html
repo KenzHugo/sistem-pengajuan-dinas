@@ -50,14 +50,14 @@
             <!-- User Profile Info -->
             <div class="p-4 mx-3 my-3 rounded-2xl bg-[#141e33] border border-white/5">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-brand-500/20 text-brand-300 border border-brand-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                        RD
+                    <div id="userAvatarInitial" data-user-avatar class="w-10 h-10 rounded-xl bg-brand-500/20 text-brand-300 border border-brand-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                        --
                     </div>
                     <div class="overflow-hidden min-w-0">
-                        <p class="text-xs font-bold text-white truncate">Rizky Darmawan</p>
-                        <p class="text-[11px] text-brand-300/80 truncate">IT &amp; Infrastructure</p>
-                        <span class="inline-flex items-center gap-1 text-[9px] text-emerald-400 font-semibold mt-0.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Akun Karyawan
+                        <p id="userProfileName" data-user-name class="text-xs font-bold text-white truncate">Memuat...</p>
+                        <p id="userProfileDept" data-user-dept class="text-[11px] text-brand-300/80 truncate">-</p>
+                        <span id="userProfileRole" data-user-role class="inline-flex items-center gap-1 text-[9px] text-emerald-400 font-semibold mt-0.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Karyawan
                         </span>
                     </div>
                 </div>
@@ -160,6 +160,38 @@
 
                 <!-- Left Column: Form Fields -->
                 <div class="lg:col-span-8 space-y-5">
+
+                    <!-- Section 0: Data Pemohon (Auto-filled & Readonly) -->
+                    <div class="app-card p-5 space-y-4">
+                        <div class="flex items-center gap-2.5 pb-3 border-b border-white/5">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base">
+                                <i class="ph-bold ph-user"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-white">Data Pemohon Perjalanan Dinas</h3>
+                                <p class="text-[11px] text-slate-400">Identitas pemohon terisi otomatis sesuai akun aktif</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nama Pemohon</label>
+                                <input type="text" id="inp-pemohon-nama" readonly
+                                    class="form-control-custom text-xs text-slate-300 bg-[#090d16] cursor-not-allowed" />
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Departemen / Divisi</label>
+                                <input type="text" id="inp-pemohon-dept" readonly
+                                    class="form-control-custom text-xs text-slate-300 bg-[#090d16] cursor-not-allowed" />
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nomor ID / NIP</label>
+                                <input type="text" id="inp-pemohon-id" readonly
+                                    class="form-control-custom text-xs text-slate-300 bg-[#090d16] cursor-not-allowed" />
+                                <input type="hidden" id="nomor_id" name="nomor_id" />
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Section 1: Informasi Dasar & Tujuan -->
                     <div class="app-card p-5 space-y-4">
@@ -348,17 +380,39 @@
                                 class="form-control-custom text-xs resize-none"></textarea>
                         </div>
 
-                        <div class="space-y-1">
+                        <div class="space-y-1.5">
                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lampiran Dokumen / Surat Undangan</label>
-                            <div class="flex flex-col items-center justify-center p-4 border border-dashed border-white/10 hover:border-brand-500/50 rounded-xl cursor-pointer bg-[#090d16] transition-all">
-                                <i class="ph-bold ph-upload-simple text-2xl text-slate-400"></i>
-                                <p class="text-xs font-medium text-slate-300 mt-1.5">Pilih file surat tugas / undangan</p>
-                                <p class="text-[10px] text-slate-500">PDF, DOCX, JPG (Maks 5MB)</p>
-                                <input type="file" id="inp-file" class="hidden" onchange="handleFileSelected(event)" />
+                            
+                            <!-- Upload Dropzone -->
+                            <div id="upload-dropzone" onclick="triggerFileInput()"
+                                class="flex flex-col items-center justify-center p-5 border-2 border-dashed border-white/10 hover:border-brand-500/50 rounded-2xl cursor-pointer bg-[#090d16] hover:bg-brand-500/5 transition-all group select-none">
+                                <div class="w-10 h-10 rounded-xl bg-white/5 group-hover:bg-brand-500/20 flex items-center justify-center text-slate-400 group-hover:text-brand-300 transition-all">
+                                    <i class="ph-bold ph-upload-simple text-xl"></i>
+                                </div>
+                                <p class="text-xs font-semibold text-slate-200 mt-2">Klik atau seret file ke sini</p>
+                                <p class="text-[11px] text-slate-500 mt-0.5">PDF, DOCX, DOC, JPG, PNG (Maksimal 5MB)</p>
+                                <input type="file" id="inp-file" class="hidden" accept=".pdf,.docx,.doc,.jpg,.jpeg,.png" onchange="handleFileSelected(event)" />
                             </div>
-                            <div id="file-preview-badge" class="hidden items-center gap-2 p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-medium mt-2">
-                                <i class="ph-bold ph-file-text"></i>
-                                <span id="file-name-text">Surat_Undangan_Resmi.pdf</span>
+
+                            <!-- File Preview Card -->
+                            <div id="file-preview-badge" class="hidden items-center justify-between p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-medium">
+                                <div class="flex items-center gap-2.5 overflow-hidden">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                                        <i class="ph-bold ph-file-text text-lg" id="file-preview-icon"></i>
+                                    </div>
+                                    <div class="truncate">
+                                        <p class="font-bold text-white text-xs truncate" id="file-name-text">Surat_Undangan_Resmi.pdf</p>
+                                        <p class="text-[10px] text-slate-400" id="file-size-text">1.2 MB</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1.5 flex-shrink-0">
+                                    <button type="button" onclick="triggerFileInput()" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-[11px] font-semibold transition-all">
+                                        Ganti
+                                    </button>
+                                    <button type="button" onclick="removeSelectedFile(event)" class="w-7 h-7 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 flex items-center justify-center transition-all" title="Hapus File">
+                                        <i class="ph-bold ph-trash text-sm"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -446,6 +500,8 @@
     <!-- Scripts -->
     <script src="script.js"></script>
     <script>
+        let selectedFileData = null;
+
         document.addEventListener('DOMContentLoaded', () => {
             const mulaiInp = document.getElementById('inp-mulai');
             const selesaiInp = document.getElementById('inp-selesai');
@@ -460,7 +516,112 @@
             selesaiInp.value = endDef;
 
             updateLiveSummary();
+            initDropzone();
         });
+
+        function initDropzone() {
+            const dropzone = document.getElementById('upload-dropzone');
+            if (!dropzone) return;
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.add('border-brand-500', 'bg-brand-500/10');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.remove('border-brand-500', 'bg-brand-500/10');
+                });
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files.length > 0) {
+                    processUploadedFile(files[0]);
+                }
+            });
+        }
+
+        function triggerFileInput() {
+            const input = document.getElementById('inp-file');
+            if (input) input.click();
+        }
+
+        function handleFileSelected(e) {
+            const file = e.target.files[0];
+            if (file) {
+                processUploadedFile(file);
+            }
+        }
+
+        function processUploadedFile(file) {
+            if (!file) return;
+
+            // Validate file size (max 5MB)
+            const maxBytes = 5 * 1024 * 1024;
+            if (file.size > maxBytes) {
+                showToast('error', 'File Terlalu Besar', 'Ukuran file dokumen maksimal adalah 5MB.');
+                document.getElementById('inp-file').value = '';
+                return;
+            }
+
+            // Format size
+            const sizeStr = file.size > 1024 * 1024
+                ? (file.size / (1024 * 1024)).toFixed(2) + ' MB'
+                : (file.size / 1024).toFixed(1) + ' KB';
+
+            // Determine file icon
+            const ext = file.name.split('.').pop().toLowerCase();
+            let iconClass = 'ph-bold ph-file-text';
+            if (ext === 'pdf') iconClass = 'ph-bold ph-file-pdf';
+            else if (['jpg', 'jpeg', 'png'].includes(ext)) iconClass = 'ph-bold ph-file-image';
+            else if (['doc', 'docx'].includes(ext)) iconClass = 'ph-bold ph-file-doc';
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                selectedFileData = {
+                    name: file.name,
+                    size: sizeStr,
+                    type: file.type || ext,
+                    base64: evt.target.result,
+                    uploadedAt: new Date().toISOString()
+                };
+
+                document.getElementById('file-name-text').textContent = file.name;
+                document.getElementById('file-size-text').textContent = sizeStr;
+                const iconEl = document.getElementById('file-preview-icon');
+                if (iconEl) iconEl.className = iconClass + ' text-lg';
+
+                const badge = document.getElementById('file-preview-badge');
+                if (badge) {
+                    badge.classList.remove('hidden');
+                    badge.classList.add('flex');
+                }
+
+                showToast('success', 'File Terpilih', `${file.name} (${sizeStr}) siap dilampirkan.`);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeSelectedFile(e) {
+            if (e) e.stopPropagation();
+            selectedFileData = null;
+            const input = document.getElementById('inp-file');
+            if (input) input.value = '';
+
+            const badge = document.getElementById('file-preview-badge');
+            if (badge) {
+                badge.classList.add('hidden');
+                badge.classList.remove('flex');
+            }
+            showToast('info', 'Lampiran Dihapus', 'File dokumen lampiran telah dibatalkan.');
+        }
 
         function handleDateChange() {
             const mulaiInp = document.getElementById('inp-mulai');
@@ -519,17 +680,6 @@
             document.getElementById('sum-total').textContent = formatRupiah(total);
         }
 
-        function handleFileSelected(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const badge = document.getElementById('file-preview-badge');
-                document.getElementById('file-name-text').textContent = file.name;
-                badge.classList.remove('hidden');
-                badge.classList.add('flex');
-                showToast('success', 'File Terpilih', file.name + ' siap dilampirkan.');
-            }
-        }
-
         async function handlePengajuanSubmit(e) {
             e.preventDefault();
             const tujuan = document.getElementById('inp-tujuan').value.trim();
@@ -573,13 +723,18 @@
             btn.innerHTML = '<i class="ph-bold ph-circle-notch text-sm animate-spin"></i> Mengirim ke Golang Backend...';
             btn.disabled = true;
 
-            // nomor_id diambil otomatis dari sesi login (localStorage) — user tidak perlu mengetiknya
+            // Build maksud tujuan with attachment note if attached
+            let maksudTujuanFull = keperluan + (keterangan ? ' — ' + keterangan : '');
+            if (selectedFileData) {
+                maksudTujuanFull += ` [Lampiran: ${selectedFileData.name}]`;
+            }
+
             const payload = {
-                nomor_id:           user.nip || user.nomor_id || '',
-                atasan_nomor_id:    '',                                   // bisa diisi dari dropdown atasan jika ada
+                nomor_id:           document.getElementById('nomor_id')?.value || document.getElementById('inp-pemohon-id')?.value || user?.nip || user?.nomor_id || '',
+                atasan_nomor_id:    '',
                 area_tujuan:        document.getElementById('area-tujuan')?.value || tujuan,
                 kota_tujuan:        tujuan,
-                maksud_tujuan:      keperluan + (keterangan ? ' — ' + keterangan : ''),
+                maksud_tujuan:      maksudTujuanFull,
                 kriteria_fasilitas: kriteria,
                 tanggal_berangkat:  mulai,
                 tanggal_kembali:    selesai,
@@ -590,13 +745,30 @@
 
             try {
                 const res = await apiCreatePengajuan(payload);
-                showToast('success', 'Pengajuan Terkirim!', `Pengajuan SPPD ${res.noPengajuan || res.nomorSurat || ''} ke ${tujuan} berhasil disimpan ke database.`);
+                const spId = res.noPengajuan || res.nomorSurat || '';
+
+                // Save attachment data to localStorage for preview in detail modals
+                if (selectedFileData && spId) {
+                    try {
+                        localStorage.setItem('sipadin_lampiran_' + spId, JSON.stringify(selectedFileData));
+                    } catch (e) {
+                        console.warn('Storage quota exceeded for base64, storing file metadata only');
+                        localStorage.setItem('sipadin_lampiran_' + spId, JSON.stringify({
+                            name: selectedFileData.name,
+                            size: selectedFileData.size,
+                            type: selectedFileData.type,
+                            uploadedAt: selectedFileData.uploadedAt
+                        }));
+                    }
+                }
+
+                showToast('success', 'Pengajuan Terkirim!', `Pengajuan SPPD ${spId} ke ${tujuan} berhasil disimpan ke database.`);
                 setTimeout(() => {
                     window.location.href = 'riwayat-pengajuan.html';
                 }, 700);
             } catch (err) {
                 showToast('error', 'Gagal Mengirim', err.message || 'Terjadi kesalahan saat menyimpan pengajuan.');
-                btn.innerHTML = '<span>Kirim Pengajuan Dinas</span><i class="ph-bold ph-paper-plane-tilt text-base"></i>';
+                btn.innerHTML = '<i class="ph-bold ph-paper-plane-right text-sm"></i><span>Kirimkan Pengajuan</span>';
                 btn.disabled = false;
             }
         }

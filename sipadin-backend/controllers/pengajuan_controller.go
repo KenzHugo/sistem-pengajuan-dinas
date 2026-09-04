@@ -375,7 +375,7 @@ func AtasanApprove(c *fiber.Ctx) error {
 
 // ============================================================
 // PUT /api/pengajuan/:id/atasan-reject / PUT /api/pengajuan/:id/reject
-// Atasan menolak pengajuan (SUBMITTED → REJECTED)
+// Atasan / HRGA / Sistem menolak pengajuan
 // ============================================================
 func AtasanReject(c *fiber.Ctx) error {
 	id := extractPengajuanID(c)
@@ -383,15 +383,16 @@ func AtasanReject(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Pengajuan tidak ditemukan"})
 	}
-	if p.StatusFlow != StatusSubmitted && p.StatusFlow != StatusApprovedAtasan {
+	if p.StatusFlow == StatusSuratTugasIssued || p.StatusFlow == StatusRejected {
 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
-			"message": fmt.Sprintf("Tidak dapat menolak: status saat ini adalah '%s'", p.StatusFlow),
+			"message": fmt.Sprintf("Tidak dapat menolak: status saat ini sudah '%s'", p.StatusFlow),
 		})
 	}
 
 	type Input struct {
 		CatatanHRD string `json:"catatan_hrd"`
 		Catatan    string `json:"catatan"`
+		HRDNomorID string `json:"hrd_nomor_id"`
 	}
 	var input Input
 	_ = c.BodyParser(&input)
@@ -399,6 +400,9 @@ func AtasanReject(c *fiber.Ctx) error {
 		p.CatatanHRD = input.CatatanHRD
 	} else if input.Catatan != "" {
 		p.CatatanHRD = input.Catatan
+	}
+	if input.HRDNomorID != "" {
+		p.HRDNomorID = input.HRDNomorID
 	}
 
 	p.StatusFlow = StatusRejected
@@ -410,6 +414,102 @@ func AtasanReject(c *fiber.Ctx) error {
 	enrichPengajuan(p)
 	return c.JSON(fiber.Map{"message": "Pengajuan ditolak", "data": p})
 }
+
+// ============================================================
+// PUT /api/pengajuan/:id/hrd-reject / PUT /api/pengajuan/action/hrd-reject
+// HRGA menolak pengajuan di tahap kontrol kebijakan (APPROVED_ATASAN / CONTROLLED_HRD → REJECTED)
+// ============================================================
+func HRDReject(c *fiber.Ctx) error {
+	id := extractPengajuanID(c)
+	p, err := getPengajuanWithKaryawan(id)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Pengajuan tidak ditemukan"})
+	}
+	if p.StatusFlow == StatusSuratTugasIssued || p.StatusFlow == StatusRejected {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+			"message": fmt.Sprintf("Tidak dapat menolak: status saat ini adalah '%s'", p.StatusFlow),
+		})
+	}
+
+	type Input struct {
+		CatatanHRD string `json:"catatan_hrd"`
+		Catatan    string `json:"catatan"`
+		HRDNomorID string `json:"hrd_nomor_id"`
+	}
+	var input Input
+	_ = c.BodyParser(&input)
+
+	note := input.CatatanHRD
+	if note == "" {
+		note = input.Catatan
+	}
+	if note == "" {
+		note = "Ditolak oleh HRGA / Tidak memenuhi kebijakan anggaran"
+	}
+
+	p.CatatanHRD = note
+	if input.HRDNomorID != "" {
+		p.HRDNomorID = input.HRDNomorID
+	}
+	p.StatusFlow = StatusRejected
+	p.UpdatedAt = time.Now()
+
+	if err := config.DB.Save(p).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Gagal memperbarui status penolakan HRGA: " + err.Error()})
+	}
+	enrichPengajuan(p)
+	return c.JSON(fiber.Map{"message": "Pengajuan berhasil ditolak oleh HRGA", "data": p})
+}
+
+// ============================================================
+// PUT /api/pengajuan/:id/direksi-reject / PUT /api/pengajuan/action/direksi-reject
+// Direksi / HRGA menginput penolakan Direksi (WA_SENT_DIREKSI / CONTROLLED_HRD → REJECTED)
+// ============================================================
+func DireksiReject(c *fiber.Ctx) error {
+	id := extractPengajuanID(c)
+	p, err := getPengajuanWithKaryawan(id)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Pengajuan tidak ditemukan"})
+	}
+	if p.StatusFlow == StatusSuratTugasIssued || p.StatusFlow == StatusRejected {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+			"message": fmt.Sprintf("Tidak dapat menolak: status saat ini adalah '%s'", p.StatusFlow),
+		})
+	}
+
+	type Input struct {
+		KonfirmasiNote string `json:"konfirmasi_note"`
+		Catatan        string `json:"catatan"`
+		CatatanHRD     string `json:"catatan_hrd"`
+	}
+	var input Input
+	_ = c.BodyParser(&input)
+
+	note := input.KonfirmasiNote
+	if note == "" {
+		note = input.Catatan
+	}
+	if note == "" {
+		note = input.CatatanHRD
+	}
+	if note == "" {
+		note = "Ditolak oleh Direksi"
+	}
+
+	now := time.Now()
+	p.KonfirmasiDireksiNote = note
+	p.TanggalKonfirmasiDireksi = &now
+	p.CatatanHRD = note
+	p.StatusFlow = StatusRejected
+	p.UpdatedAt = now
+
+	if err := config.DB.Save(p).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Gagal memperbarui status penolakan Direksi: " + err.Error()})
+	}
+	enrichPengajuan(p)
+	return c.JSON(fiber.Map{"message": "Pengajuan berhasil ditolak oleh Direksi", "data": p})
+}
+
 
 // ============================================================
 // PUT /api/pengajuan/:id/hrd-control

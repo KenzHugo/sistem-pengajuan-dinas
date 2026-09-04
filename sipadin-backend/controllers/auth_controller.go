@@ -85,6 +85,10 @@ func Login(c *fiber.Ctx) error {
 
 func inferRole(k models.KaryawanCopy1) string {
 	dept := strings.ToUpper(strings.TrimSpace(k.KodeDepartemen))
+	jab := strings.ToUpper(strings.TrimSpace(k.KodeJabatan))
+	if dept == "DIR" || dept == "DIREKSI" || dept == "BOD" || jab == "DIR" || jab == "DIREKSI" || jab == "00" {
+		return "DIREKSI"
+	}
 	if dept == "HRD" || dept == "HRGA" {
 		return "HRGA"
 	}

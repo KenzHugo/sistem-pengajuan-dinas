@@ -50,13 +50,13 @@
             <!-- Manager Profile Info -->
             <div class="p-4 mx-3 my-3 rounded-2xl bg-[#141e33] border border-white/5">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                        BP
+                    <div id="userAvatarInitial" data-user-avatar class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                        --
                     </div>
                     <div class="overflow-hidden min-w-0">
-                        <p class="text-xs font-bold text-white truncate">Budi Pratama</p>
-                        <p class="text-[11px] text-purple-300/80 truncate">IT &amp; Ops Manager</p>
-                        <span class="inline-flex items-center gap-1 text-[9px] text-emerald-400 font-semibold mt-0.5">
+                        <p id="userProfileName" data-user-name class="text-xs font-bold text-white truncate">Memuat...</p>
+                        <p id="userProfileDept" data-user-dept class="text-[11px] text-purple-300/80 truncate">-</p>
+                        <span id="userProfileRole" data-user-role class="inline-flex items-center gap-1 text-[9px] text-emerald-400 font-semibold mt-0.5">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Otoritas Approval
                         </span>
                     </div>
@@ -292,28 +292,28 @@
                 <!-- Employee Box -->
                 <div class="p-3.5 rounded-xl bg-[#141e33] border border-white/5 flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-bold text-white" id="m-review-name">Rizky Darmawan</p>
-                        <p class="text-[11px] text-slate-400" id="m-review-dept">IT &amp; Infrastructure</p>
+                        <p class="text-sm font-bold text-white" id="m-review-name">-</p>
+                        <p class="text-[11px] text-slate-400" id="m-review-dept">-</p>
                     </div>
-                    <span class="text-brand-300 font-mono font-bold text-xs" id="m-review-sppd">SPPD/IT/2026/08/001</span>
+                    <span class="text-brand-300 font-mono font-bold text-xs" id="m-review-sppd">-</span>
                 </div>
 
                 <!-- Destination & Details -->
                 <div class="grid grid-cols-2 gap-3">
                     <div class="p-3 rounded-xl bg-[#090d16] border border-white/5">
                         <span class="text-slate-500 block text-[10px] uppercase font-semibold">Tujuan Dinas</span>
-                        <span class="text-white font-bold text-xs mt-0.5 block" id="m-review-tujuan">Jakarta Pusat</span>
+                        <span class="text-white font-bold text-xs mt-0.5 block" id="m-review-tujuan">-</span>
                     </div>
                     <div class="p-3 rounded-xl bg-[#090d16] border border-white/5">
                         <span class="text-slate-500 block text-[10px] uppercase font-semibold">Jadwal &amp; Durasi</span>
-                        <span class="text-white font-bold text-xs mt-0.5 block" id="m-review-jadwal">12 Aug - 15 Aug (4 Hari)</span>
+                        <span class="text-white font-bold text-xs mt-0.5 block" id="m-review-jadwal">-</span>
                     </div>
                 </div>
 
                 <div class="p-3 rounded-xl bg-[#090d16] border border-white/5">
                     <span class="text-slate-500 block text-[10px] uppercase font-semibold">Keperluan &amp; Uraian Tugas</span>
-                    <span class="text-white font-semibold block mt-0.5" id="m-review-keperluan">Rapat / Meeting Klien</span>
-                    <p class="text-slate-400 mt-1 italic text-[11px] leading-relaxed" id="m-review-keterangan">Presentasi sistem ERP.</p>
+                    <span class="text-white font-semibold block mt-0.5" id="m-review-keperluan">-</span>
+                    <p class="text-slate-400 mt-1 italic text-[11px] leading-relaxed" id="m-review-keterangan">-</p>
                 </div>
 
                 <!-- Budget Summary -->
@@ -523,11 +523,11 @@
                         </td>
                         <td class="text-center">
                             <div class="flex items-center justify-center gap-1.5">
-                                <button onclick="showDetail('${item.noPengajuan}')" class="px-2.5 py-1.5 rounded-lg bg-[#141e33] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
+                                <button data-action="detail" data-id="${item.noPengajuan}" onclick="showDetail('${item.noPengajuan}')" class="px-2.5 py-1.5 rounded-lg bg-[#141e33] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
                                     Detail
                                 </button>
                                 ${isPending ? `
-                                    <button onclick="openReviewModal('${item.noPengajuan}')" class="px-3 py-1.5 rounded-lg ${isH3 ? 'bg-rose-500 hover:bg-rose-400 text-white' : 'bg-purple-600 hover:bg-purple-500 text-white'} text-xs font-bold transition-all shadow-sm">
+                                    <button data-action="approve" data-id="${item.noPengajuan}" onclick="openReviewModal('${item.noPengajuan}')" class="px-3 py-1.5 rounded-lg ${isH3 ? 'bg-rose-500 hover:bg-rose-400 text-white' : 'bg-purple-600 hover:bg-purple-500 text-white'} text-xs font-bold transition-all shadow-sm">
                                         Review
                                     </button>
                                 ` : `
@@ -592,6 +592,12 @@
             closeReviewModal();
             renderAtasanTable();
         }
+
+        window.renderAtasanTable = renderAtasanTable;
+        window.openReviewModal = openReviewModal;
+        window.closeReviewModal = closeReviewModal;
+        window.submitDecision = submitDecision;
+        window.setAtasanTab = setAtasanTab;
     </script>
 </body>
 

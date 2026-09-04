@@ -50,13 +50,13 @@
             <!-- HRGA Profile Info -->
             <div class="p-4 mx-3 my-3 rounded-2xl bg-[#141e33] border border-white/5">
                 <div class="flex items-center gap-3">
-                    <div data-user-avatar class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                        DR
+                    <div id="userAvatarInitial" data-user-avatar class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                        --
                     </div>
                     <div class="overflow-hidden min-w-0">
-                        <p data-user-name class="text-xs font-bold text-white truncate">Dewi Rahayu</p>
-                        <p data-user-dept class="text-[11px] text-amber-300/80 truncate">HRGA Supervisor</p>
-                        <span class="inline-flex items-center gap-1 text-[9px] text-amber-400 font-semibold mt-0.5">
+                        <p id="userProfileName" data-user-name class="text-xs font-bold text-white truncate">Memuat...</p>
+                        <p id="userProfileDept" data-user-dept class="text-[11px] text-amber-300/80 truncate">-</p>
+                        <span id="userProfileRole" data-user-role class="inline-flex items-center gap-1 text-[9px] text-amber-400 font-semibold mt-0.5">
                             <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Otoritas Kontrol HRD
                         </span>
                     </div>
@@ -156,11 +156,13 @@
 
                     <select id="filter-status-hrga" onchange="renderHRGALaporanView()" class="form-control-custom text-xs w-full sm:w-48">
                         <option value="">Semua Status Pipeline</option>
-                        <option value="pending">Menunggu Atasan (Tahap 1)</option>
-                        <option value="approved">Pending Kontrol HRGA (Tahap 2)</option>
-                        <option value="verified_hrga">Terverifikasi HRGA (Tahap 3)</option>
-                        <option value="notified_direksi">Diinformasikan ke Direksi (Tahap 4)</option>
-                        <option value="rejected">Ditolak</option>
+                        <option value="SUBMITTED">Menunggu Atasan (Tahap 1)</option>
+                        <option value="APPROVED_ATASAN">Pending Kontrol HRGA (Tahap 2)</option>
+                        <option value="CONTROLLED_HRD">Terverifikasi HRGA (Tahap 3)</option>
+                        <option value="WA_SENT_DIREKSI">Diinformasikan ke Direksi (Tahap 4)</option>
+                        <option value="CONFIRMED_DIREKSI">Disetujui Direksi (Tahap 5)</option>
+                        <option value="SURAT_TUGAS_ISSUED">Surat Tugas Terbit (Tahap 6)</option>
+                        <option value="REJECTED">Ditolak</option>
                     </select>
                 </div>
 
@@ -235,7 +237,17 @@
                 filtered = filtered.filter(p => (p.dept || p.kodeDepartemen || '').toUpperCase().includes(deptFilter.toUpperCase()));
             }
             if (statusFilter) {
-                filtered = filtered.filter(p => (p.statusFlow || p.status) === statusFilter);
+                filtered = filtered.filter(p => {
+                    const s = p.statusFlow || p.status;
+                    if (statusFilter === 'SUBMITTED') return s === 'SUBMITTED' || s === 'pending';
+                    if (statusFilter === 'APPROVED_ATASAN') return s === 'APPROVED_ATASAN' || s === 'approved';
+                    if (statusFilter === 'CONTROLLED_HRD') return s === 'CONTROLLED_HRD' || s === 'verified_hrga';
+                    if (statusFilter === 'WA_SENT_DIREKSI') return s === 'WA_SENT_DIREKSI' || s === 'notified_direksi';
+                    if (statusFilter === 'CONFIRMED_DIREKSI') return s === 'CONFIRMED_DIREKSI';
+                    if (statusFilter === 'SURAT_TUGAS_ISSUED') return s === 'SURAT_TUGAS_ISSUED';
+                    if (statusFilter === 'REJECTED') return s === 'REJECTED' || s === 'rejected';
+                    return s === statusFilter;
+                });
             }
             if (searchVal) {
                 filtered = filtered.filter(p => 
@@ -274,7 +286,7 @@
                             ${badgeHtml}
                         </td>
                         <td class="text-center">
-                            <button onclick="showDetail('${item.noPengajuan}')" class="px-2.5 py-1 rounded-lg bg-[#090d16] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
+                            <button data-action="detail" data-id="${item.noPengajuan}" onclick="showDetail('${item.noPengajuan}')" class="px-2.5 py-1 rounded-lg bg-[#090d16] border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all">
                                 Detail
                             </button>
                         </td>
@@ -317,6 +329,9 @@
             link.remove();
             showToast('success', 'Export CSV Berhasil', 'File rekapitulasi HRGA telah diunduh.');
         }
+
+        window.renderHRGALaporanView = renderHRGALaporanView;
+        window.exportToCSV = exportToCSV;
     </script>
 </body>
 </html>

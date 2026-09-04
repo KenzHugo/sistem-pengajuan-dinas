@@ -1,10 +1,13 @@
 // ============================================================
 // SIPADIN — SISTEM PENGAJUAN DINAS
-// GLOBAL JAVASCRIPT — 6-STAGE PIPELINE EDITION v3.5
+// GLOBAL JAVASCRIPT — 6-STAGE PIPELINE EDITION v4.0 (FINAL FIX)
 // Backend: Go/Fiber REST API @ http://localhost:8080/api
 // ============================================================
 
 const API_BASE = 'http://localhost:8080/api';
+
+// Global cache for fetched submissions
+window.cachedPengajuanList = [];
 
 // ── Tailwind Theme Configuration ────────────────────────────
 if (typeof tailwind !== 'undefined') {
@@ -215,7 +218,7 @@ function normalizePengajuan(item) {
         createdAt,
         updatedAt,
 
-        // Backward-compatible aliases for existing dashboard templates
+        // Backward-compatible aliases for dashboard templates
         nip:              nomorID,
         dept:             kodeDepartemen,
         jabatan:          kodeJabatan,
@@ -255,8 +258,6 @@ function normalizePengajuan(item) {
 
 /**
  * POST /api/auth/login
- * @param {string} nama - Full employee name from Karyawan_copy1
- * @param {string} password - Password
  */
 async function apiLogin(nama, password) {
     const response = await fetch(`${API_BASE}/auth/login`, {
@@ -285,7 +286,6 @@ async function apiGetMasterFasilitas() {
 
 /**
  * GET /api/pengajuan
- * @param {Object} params - { role, user_id, status }
  */
 async function apiGetPengajuan(params = {}) {
     try {
@@ -294,16 +294,17 @@ async function apiGetPengajuan(params = {}) {
         const res   = await fetch(url);
         if (!res.ok) throw new Error('Gagal mengambil data pengajuan');
         const data = await res.json();
-        return Array.isArray(data) ? data.map(normalizePengajuan) : [];
+        const normalized = Array.isArray(data) ? data.map(normalizePengajuan) : [];
+        window.cachedPengajuanList = normalized;
+        return normalized;
     } catch (err) {
         console.warn('API getPengajuan fallback:', err.message);
-        return [];
+        return window.cachedPengajuanList || [];
     }
 }
 
 /**
- * GET /api/pengajuan/detail?id=... (with list fallback)
- * @param {string} id - NoPengajuan
+ * GET /api/pengajuan/detail?id=... (with list lookup fallback)
  */
 async function apiGetPengajuanByID(id) {
     if (!id) return null;
@@ -317,8 +318,12 @@ async function apiGetPengajuanByID(id) {
     } catch (err) {
         console.warn('apiGetPengajuanByID detail query failed, fallback to list lookup:', err);
     }
-    // Fallback: search in cached list
-    const list = await apiGetPengajuan();
+    
+    // Fallback: search in cached list or fetch fresh list
+    let list = window.cachedPengajuanList;
+    if (!list || !list.length) {
+        list = await apiGetPengajuan();
+    }
     const found = list.find(p => p.noPengajuan === cleanId || p.id === cleanId || p.nomorSurat === cleanId || p.nomorSuratTugas === cleanId);
     if (found) return normalizePengajuan(found);
     throw new Error('Pengajuan tidak ditemukan');
@@ -326,7 +331,6 @@ async function apiGetPengajuanByID(id) {
 
 /**
  * POST /api/pengajuan
- * @param {Object} payload
  */
 async function apiCreatePengajuan(payload) {
     const user = getCurrentUser();
@@ -387,6 +391,24 @@ async function apiHRDControl(id, payload) {
 }
 
 /**
+ * PUT /api/pengajuan/action/hrd-reject?id=...
+ */
+async function apiHRDReject(id, note) {
+    const user = getCurrentUser();
+    const res  = await fetch(`${API_BASE}/pengajuan/action/hrd-reject?id=${encodeURIComponent(id)}`, {
+        method:  'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+            catatan_hrd:  note || 'Tidak memenuhi kebijakan HRGA.',
+            hrd_nomor_id: user?.nip || user?.nomor_id || '',
+        }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Gagal menolak pengajuan HRGA');
+    return normalizePengajuan(data.data || data);
+}
+
+/**
  * GET /api/pengajuan/action/wa-text?id=...
  */
 async function apiGetWAText(id) {
@@ -411,6 +433,20 @@ async function apiDireksiConfirm(id, note) {
 }
 
 /**
+ * PUT /api/pengajuan/action/direksi-reject?id=...
+ */
+async function apiDireksiReject(id, note) {
+    const res  = await fetch(`${API_BASE}/pengajuan/action/direksi-reject?id=${encodeURIComponent(id)}`, {
+        method:  'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ konfirmasi_note: note || 'Ditolak oleh Direksi' }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Gagal merekam penolakan Direksi');
+    return normalizePengajuan(data.data || data);
+}
+
+/**
  * POST /api/pengajuan/action/surat-tugas?id=...
  */
 async function apiIssueSuratTugas(id) {
@@ -424,65 +460,144 @@ async function apiIssueSuratTugas(id) {
 }
 
 // ============================================================
-// SESSION — LocalStorage
+// SESSION MANAGEMENT (Multi-key Sync: currentUser, user, sipadin_user_v3)
 // ============================================================
-const STORAGE_KEY_USER = 'sipadin_user_v3';
+const STORAGE_KEYS = ['currentUser', 'user', 'sipadin_user_v3'];
 
 function getCurrentUser() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY_USER);
-        if (!raw) return null;
-        const u = JSON.parse(raw);
-        if (!u.name && u.nama)             u.name = u.nama;
-        if (!u.dept && u.kode_departemen)  u.dept = u.kode_departemen;
-        if (!u.departemen && u.kode_departemen) u.departemen = u.kode_departemen;
-        if (!u.nip && u.nomor_id)          u.nip = u.nomor_id;
-        if (!u.avatar) u.avatar = _buildAvatarFromName(u.nama || u.name || 'U');
-        return u;
-    } catch { return null; }
+    for (const key of STORAGE_KEYS) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (raw) {
+                const u = JSON.parse(raw);
+                if (u && (u.nama || u.name || u.nomor_id || u.nip)) {
+                    if (!u.name && u.nama)             u.name = u.nama;
+                    if (!u.nama && u.name)             u.nama = u.name;
+                    if (!u.dept && u.kode_departemen)  u.dept = u.kode_departemen;
+                    if (!u.departemen && u.kode_departemen) u.departemen = u.kode_departemen;
+                    if (!u.nip && u.nomor_id)          u.nip = u.nomor_id;
+                    if (!u.nomor_id && u.nip)          u.nomor_id = u.nip;
+                    if (!u.avatar) u.avatar = _buildAvatarFromName(u.nama || u.name || 'U');
+                    return u;
+                }
+            }
+        } catch {}
+    }
+    return null;
 }
 
 function setCurrentUser(user) {
+    if (!user) return;
     if (!user.name && user.nama)             user.name = user.nama;
+    if (!user.nama && user.name)             user.nama = user.name;
     if (!user.dept && user.kode_departemen)  user.dept = user.kode_departemen;
     if (!user.departemen && user.kode_departemen) user.departemen = user.kode_departemen;
     if (!user.nip && user.nomor_id)          user.nip = user.nomor_id;
+    if (!user.nomor_id && user.nip)          user.nomor_id = user.nip;
     if (!user.avatar) user.avatar = _buildAvatarFromName(user.nama || user.name || 'U');
-    localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
+
+    const json = JSON.stringify(user);
+    STORAGE_KEYS.forEach(k => localStorage.setItem(k, json));
 }
 
 function _buildAvatarFromName(name) {
-    return (name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    return (name || 'U').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase();
 }
 
 function logout() {
-    localStorage.removeItem(STORAGE_KEY_USER);
+    STORAGE_KEYS.forEach(k => localStorage.removeItem(k));
     showToast('info', 'Sampai Jumpa', 'Anda telah berhasil keluar dari sistem.');
     setTimeout(() => { window.location.href = 'index.html'; }, 400);
 }
 
 function redirectToDashboard(role) {
-    const map = {
-        KARYAWAN: 'dashboard-karyawan.html',
-        ATASAN:   'dashboard-atasan.html',
-        HRGA:     'dashboard-hrga.html',
-    };
-    const dest = map[role?.toUpperCase()] || 'dashboard-karyawan.html';
-    window.location.href = dest;
+    const r = (role || '').toUpperCase();
+    if (r === 'ATASAN') {
+        window.location.href = 'dashboard-atasan.html';
+    } else if (r === 'HRGA' || r === 'HRD') {
+        window.location.href = 'dashboard-hrga.html';
+    } else if (r === 'DIREKSI' || r === 'DIR' || r === 'BOD') {
+        window.location.href = 'dashboard-hrga.html';
+    } else {
+        window.location.href = 'dashboard-karyawan.html';
+    }
 }
 
 // ============================================================
-// SIDEBAR USER POPULATION
+// 1. PROFILE SYNCHRONIZATION FOR ALL ROLES (syncUserProfile)
 // ============================================================
-function initSidebarUser() {
+function syncUserProfile() {
     const user = getCurrentUser();
+    const currentPath = window.location.pathname.split('/').pop().toLowerCase() || 'index.html';
+    const isIndex = currentPath === 'index.html' || currentPath === '';
+
+    // If not on login page and no session, redirect to index.html
+    if (!user && !isIndex) {
+        window.location.href = 'index.html';
+        return;
+    }
+
     if (!user) return;
-    document.querySelectorAll('[data-user-avatar]').forEach(el => el.textContent = user.avatar || 'U');
-    document.querySelectorAll('[data-user-name]').forEach(el => el.textContent = user.name || user.nama || 'Pengguna');
-    document.querySelectorAll('[data-user-dept]').forEach(el => el.textContent = user.dept || user.kode_departemen || user.departemen || '-');
-    document.querySelectorAll('[data-user-role]').forEach(el => el.textContent = user.role || '-');
-    document.querySelectorAll('[data-user-nip]').forEach(el => el.textContent = user.nip || user.nomor_id || '-');
+
+    const initial = user.avatar || _buildAvatarFromName(user.nama || user.name || 'U');
+    const fullName = user.nama || user.name || 'Pengguna';
+    const dept = user.kode_departemen || user.dept || user.departemen || '-';
+    const roleText = user.role || 'Karyawan';
+    const nip = user.nomor_id || user.nip || '-';
+
+    // Update uniform standard IDs
+    const elInitial = document.getElementById('userAvatarInitial');
+    if (elInitial) elInitial.textContent = initial;
+
+    const elName = document.getElementById('userProfileName');
+    if (elName) elName.textContent = fullName;
+
+    const elDept = document.getElementById('userProfileDept');
+    if (elDept) elDept.textContent = dept;
+
+    const elRole = document.getElementById('userProfileRole');
+    if (elRole) {
+        elRole.textContent = roleText;
+    }
+
+    // Update greeting banner name if present
+    const elGreeting = document.getElementById('userGreetingName');
+    if (elGreeting) elGreeting.textContent = fullName;
+
+    // Backward-compat data attribute selectors
+    document.querySelectorAll('[data-user-avatar]').forEach(el => el.textContent = initial);
+    document.querySelectorAll('[data-user-name]').forEach(el => el.textContent = fullName);
+    document.querySelectorAll('[data-user-dept]').forEach(el => el.textContent = dept);
+    document.querySelectorAll('[data-user-role]').forEach(el => el.textContent = roleText);
+    document.querySelectorAll('[data-user-nip]').forEach(el => el.textContent = nip);
+
+    // Auto-fill & lock on pengajuan-dinas.html
+    if (document.getElementById('main-pengajuan-form') || document.getElementById('inp-pemohon-nama')) {
+        const inpNama = document.getElementById('inp-pemohon-nama');
+        if (inpNama) {
+            inpNama.value = fullName;
+            inpNama.readOnly = true;
+        }
+
+        const inpDept = document.getElementById('inp-pemohon-dept');
+        if (inpDept) {
+            inpDept.value = dept;
+            inpDept.readOnly = true;
+        }
+
+        const inpId = document.getElementById('inp-pemohon-id');
+        if (inpId) {
+            inpId.value = nip;
+            inpId.readOnly = true;
+        }
+
+        const hiddenId = document.getElementById('nomor_id');
+        if (hiddenId) {
+            hiddenId.value = nip;
+        }
+    }
 }
+window.syncUserProfile = syncUserProfile;
 
 // ============================================================
 // TOAST NOTIFICATION SYSTEM
@@ -593,7 +708,7 @@ const controlByHRD = verifyByHRGA;
 /** Stage 3 (reject): HRGA rejects */
 async function rejectByHRGA(noPengajuan, catatan) {
     try {
-        const updated = await apiAtasanReject(noPengajuan, catatan || 'Tidak memenuhi kebijakan HRGA.');
+        const updated = await apiHRDReject(noPengajuan, catatan || 'Tidak memenuhi kebijakan HRGA.');
         showToast('warning', 'Pengajuan Ditolak HRGA', `${updated.noPengajuan} ditolak oleh HRGA.`);
         return true;
     } catch (err) {
@@ -629,6 +744,18 @@ async function confirmDireksi(noPengajuan, note) {
     }
 }
 
+/** Stage 5 (reject): Direksi rejects */
+async function rejectByDireksi(noPengajuan, note) {
+    try {
+        const updated = await apiDireksiReject(noPengajuan, note || 'Ditolak oleh Direksi');
+        showToast('warning', 'Pengajuan Ditolak Direksi', `${updated.noPengajuan} ditolak oleh Direksi.`);
+        return true;
+    } catch (err) {
+        showToast('error', 'Gagal Menolak Direksi', err.message);
+        return false;
+    }
+}
+
 /** Stage 6: HRGA issues Surat Tugas */
 async function issueSuratTugas(noPengajuan) {
     try {
@@ -641,8 +768,18 @@ async function issueSuratTugas(noPengajuan) {
     }
 }
 
+// Global Aliases for event delegation & inline callbacks
+window.approveByAtasan   = approveByAtasan;
+window.rejectByAtasan    = rejectByAtasan;
+window.verifyByHRGA      = verifyByHRGA;
+window.rejectByHRGA      = rejectByHRGA;
+window.sendWADireksi     = sendWADireksi;
+window.confirmDireksi    = confirmDireksi;
+window.rejectByDireksi   = rejectByDireksi;
+window.issueSuratTugas   = issueSuratTugas;
+
 // ============================================================
-// POPUP / MODAL DETAIL DINAMIS (Global: window.showDetail & window.openDetailModal)
+// 2. POPUP / MODAL DETAIL DINAMIS (window.showDetail)
 // ============================================================
 async function showDetail(noPengajuan) {
     if (!noPengajuan) {
@@ -652,7 +789,7 @@ async function showDetail(noPengajuan) {
 
     let item;
     try {
-        if (typeof noPengajuan === 'object' && noPengajuan.noPengajuan) {
+        if (typeof noPengajuan === 'object' && (noPengajuan.noPengajuan || noPengajuan.id)) {
             item = normalizePengajuan(noPengajuan);
         } else {
             item = await apiGetPengajuanByID(noPengajuan);
@@ -663,13 +800,13 @@ async function showDetail(noPengajuan) {
     }
 
     // Modal container (dynamically created if not present)
-    let modal = document.getElementById('modalDetail');
+    let modal = document.getElementById('modalDetailPengajuan');
     if (!modal) {
-        modal = document.getElementById('modal-detail-pengajuan');
+        modal = document.getElementById('modalDetail');
     }
     if (!modal) {
         modal = document.createElement('div');
-        modal.id = 'modalDetail';
+        modal.id = 'modalDetailPengajuan';
         modal.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-all';
         document.body.appendChild(modal);
     }
@@ -680,18 +817,46 @@ async function showDetail(noPengajuan) {
         ? `<span class="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold badge-pulse">Mendesak H-${hDiff}</span>`
         : '';
 
+    const isRejected = item.statusFlow === 'REJECTED' || item.status === 'rejected';
+    const isDireksiRejected = isRejected && (Boolean(item.konfirmasiDireksiNote) || Boolean(item.tanggalKonfirmasiDireksi));
+    const isHRGARejected = isRejected && !isDireksiRejected && (Boolean(item.hrdNomorID) || (item.catatanHRD && item.catatanHRD.toLowerCase().includes('hrga')));
+    const isAtasanRejected = isRejected && !isDireksiRejected && !isHRGARejected;
+
     const stages = [
         { label: '1. Pengajuan Karyawan',      done: true, note: '', sub: `${formatDate(item.createdAt || item.tanggalBerangkat)} · ${item.nama}` },
-        { label: '2. Approval Atasan',         done: ['APPROVED_ATASAN','CONTROLLED_HRD','WA_SENT_DIREKSI','CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED'].includes(item.statusFlow),
-                                               rej: item.statusFlow === 'REJECTED', note: item.catatanHRD, sub: item.atasanNama || item.atasanNomorID ? `Disetujui oleh: ${item.atasanNama || item.atasanNomorID}` : '' },
-        { label: '3. Kontrol & Verifikasi HRGA',done: ['CONTROLLED_HRD','WA_SENT_DIREKSI','CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED'].includes(item.statusFlow),
-                                               note: item.catatanHRD, sub: item.hrdNomorID ? `Verifikator: ${item.hrdNomorID}` : '' },
-        { label: '4. WhatsApp ke Direksi',     done: ['WA_SENT_DIREKSI','CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED'].includes(item.statusFlow),
-                                               note: '', sub: item.statusFlow === 'WA_SENT_DIREKSI' || ['CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED'].includes(item.statusFlow) ? 'Pesan resmi telah dikirim' : '' },
-        { label: '5. Konfirmasi Direksi',      done: ['CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED'].includes(item.statusFlow),
-                                               note: item.konfirmasiDireksiNote, sub: item.tanggalKonfirmasiDireksi ? formatDate(item.tanggalKonfirmasiDireksi) : '' },
-        { label: '6. Surat Tugas Terbit',     done: item.statusFlow === 'SURAT_TUGAS_ISSUED',
-                                               note: item.nomorSuratTugas, sub: item.nomorSuratTugas ? `No: ${item.nomorSuratTugas}` : '' },
+        { 
+            label: '2. Approval Atasan',         
+            done: ['APPROVED_ATASAN','CONTROLLED_HRD','WA_SENT_DIREKSI','CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED'].includes(item.statusFlow) || isHRGARejected || isDireksiRejected,
+            rej: isAtasanRejected, 
+            note: isAtasanRejected ? item.catatanHRD : '', 
+            sub: isAtasanRejected ? (item.atasanNama ? `Ditolak oleh ${item.atasanNama}` : 'Ditolak oleh Atasan') : (item.atasanNama || item.atasanNomorID ? `Disetujui oleh: ${item.atasanNama || item.atasanNomorID}` : '') 
+        },
+        { 
+            label: '3. Kontrol & Verifikasi HRGA',
+            done: ['CONTROLLED_HRD','WA_SENT_DIREKSI','CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED'].includes(item.statusFlow) || isDireksiRejected,
+            rej: isHRGARejected,
+            note: isHRGARejected ? item.catatanHRD : (['CONTROLLED_HRD','WA_SENT_DIREKSI','CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED'].includes(item.statusFlow) ? item.catatanHRD : ''), 
+            sub: isHRGARejected ? (item.hrdNomorID ? `Ditolak oleh HRGA (${item.hrdNomorID})` : 'Ditolak oleh HRGA') : (item.hrdNomorID ? `Verifikator: ${item.hrdNomorID}` : '') 
+        },
+        { 
+            label: '4. WhatsApp ke Direksi',     
+            done: ['WA_SENT_DIREKSI','CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED'].includes(item.statusFlow) || isDireksiRejected,
+            note: '', 
+            sub: item.statusFlow === 'WA_SENT_DIREKSI' || ['CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED'].includes(item.statusFlow) || isDireksiRejected ? 'Pesan resmi telah dikirim' : '' 
+        },
+        { 
+            label: '5. Konfirmasi Direksi',      
+            done: ['CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED'].includes(item.statusFlow),
+            rej: isDireksiRejected,
+            note: item.konfirmasiDireksiNote, 
+            sub: isDireksiRejected ? 'Ditolak oleh Direksi' : (item.tanggalKonfirmasiDireksi ? `Disetujui: ${formatDate(item.tanggalKonfirmasiDireksi)}` : '') 
+        },
+        { 
+            label: '6. Surat Tugas Terbit',     
+            done: item.statusFlow === 'SURAT_TUGAS_ISSUED',
+            note: item.nomorSuratTugas, 
+            sub: item.nomorSuratTugas ? `No: ${item.nomorSuratTugas}` : '' 
+        },
     ];
 
     const timelineHtml = stages.map(s => {
@@ -806,6 +971,41 @@ async function showDetail(noPengajuan) {
                 </div>
             </div>
 
+            <!-- Dokumen Lampiran Info jika ada -->
+            ${(() => {
+                let lampiranObj = null;
+                try {
+                    const storedLampiran = localStorage.getItem('sipadin_lampiran_' + item.noPengajuan);
+                    if (storedLampiran) lampiranObj = JSON.parse(storedLampiran);
+                } catch (e) {}
+
+                let lampiranName = lampiranObj ? lampiranObj.name : '';
+                if (!lampiranName && item.maksudTujuan && item.maksudTujuan.includes('[Lampiran:')) {
+                    const match = item.maksudTujuan.match(/\[Lampiran:\s*([^\]]+)\]/);
+                    if (match) lampiranName = match[1];
+                }
+
+                if (!lampiranName) return '';
+                return `
+                <div class="bg-surface/40 border border-teal-500/20 rounded-2xl p-3.5 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2.5 overflow-hidden">
+                        <div class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center flex-shrink-0">
+                            <i class="ph-bold ph-paperclip text-base"></i>
+                        </div>
+                        <div class="truncate">
+                            <p class="text-[10px] text-teal-300/80 font-bold uppercase tracking-wider">Dokumen Pendukung / Lampiran</p>
+                            <p class="text-xs font-bold text-white truncate mt-0.5">${lampiranName} ${lampiranObj && lampiranObj.size ? `<span class="text-[10px] text-slate-400 font-normal">(${lampiranObj.size})</span>` : ''}</p>
+                        </div>
+                    </div>
+                    ${lampiranObj && lampiranObj.base64 ? `
+                    <a href="${lampiranObj.base64}" download="${lampiranObj.name}" target="_blank" class="px-3 py-1.5 rounded-xl bg-teal-600/20 hover:bg-teal-600/30 text-teal-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all flex-shrink-0 border border-teal-500/30">
+                        <i class="ph-bold ph-download-simple"></i> Unduh File
+                    </a>` : `
+                    <span class="px-2.5 py-1 rounded-lg bg-white/5 text-slate-400 text-[11px] font-medium">Terlampir</span>
+                    `}
+                </div>`;
+            })()}
+
             <!-- Surat Tugas Resmi Info jika sudah terbit -->
             ${item.nomorSuratTugas ? `
             <div class="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-3.5 flex items-center justify-between gap-3">
@@ -853,16 +1053,14 @@ async function showDetail(noPengajuan) {
     };
 }
 
-const openDetailModal = showDetail;
+function closeDetailModal() {
+    ['modalDetailPengajuan', 'modalDetail', 'modal-detail-pengajuan'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    });
+}
 window.showDetail = showDetail;
 window.openDetailModal = showDetail;
-
-function closeDetailModal() {
-    const modal1 = document.getElementById('modalDetail');
-    if (modal1) modal1.remove();
-    const modal2 = document.getElementById('modal-detail-pengajuan');
-    if (modal2) modal2.remove();
-}
 window.closeDetailModal = closeDetailModal;
 window.closeDetail = closeDetailModal;
 
@@ -872,6 +1070,171 @@ document.addEventListener('keydown', (e) => {
         closeDetailModal();
     }
 });
+
+// ============================================================
+// 3. TABLE EVENT DELEGATION SYSTEM
+// ============================================================
+function initTableEventDelegation() {
+    document.addEventListener('click', async (e) => {
+        const btn = e.target.closest('button[data-action], [data-action]');
+        if (!btn) return;
+
+        const action = btn.getAttribute('data-action');
+        const id     = btn.getAttribute('data-id') || btn.getAttribute('data-no');
+        if (!action) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        switch (action) {
+            case 'detail':
+                showDetail(id);
+                break;
+            case 'approve':
+                if (typeof window.openReviewModal === 'function') {
+                    window.openReviewModal(id);
+                } else {
+                    await approveByAtasan(id);
+                    if (typeof renderAtasanTable === 'function') renderAtasanTable();
+                }
+                break;
+            case 'reject':
+                if (typeof window.openReviewModal === 'function') {
+                    window.openReviewModal(id);
+                } else if (typeof window.openRejectModal === 'function') {
+                    window.openRejectModal(id, 'atasan');
+                } else {
+                    const catatan = prompt('Masukkan alasan penolakan:');
+                    if (catatan) {
+                        await rejectByAtasan(id, catatan);
+                        if (typeof renderAtasanTable === 'function') renderAtasanTable();
+                    }
+                }
+                break;
+            case 'hrd-control':
+                if (typeof window.openVerifikasiModal === 'function') {
+                    window.openVerifikasiModal(id);
+                } else {
+                    await verifyByHRGA(id);
+                    if (typeof renderHRGATable === 'function') renderHRGATable();
+                }
+                break;
+            case 'hrd-reject':
+                if (typeof window.openRejectModal === 'function') {
+                    window.openRejectModal(id, 'hrga');
+                } else {
+                    const catatan = prompt('Masukkan alasan penolakan HRGA:');
+                    if (catatan) {
+                        await rejectByHRGA(id, catatan);
+                        if (typeof renderHRGATable === 'function') renderHRGATable();
+                    }
+                }
+                break;
+            case 'wa-direksi':
+                if (typeof window.openWAModal === 'function') {
+                    window.openWAModal(id);
+                } else {
+                    await sendWADireksi(id);
+                    if (typeof renderHRGATable === 'function') renderHRGATable();
+                }
+                break;
+            case 'confirm-direksi':
+                if (typeof window.openDireksiModal === 'function') {
+                    window.openDireksiModal(id, 'approve');
+                } else {
+                    await confirmDireksi(id);
+                    if (typeof renderHRGATable === 'function') renderHRGATable();
+                }
+                break;
+            case 'direksi-reject':
+                if (typeof window.openDireksiModal === 'function') {
+                    window.openDireksiModal(id, 'reject');
+                } else {
+                    const catatan = prompt('Masukkan alasan penolakan Direksi:');
+                    if (catatan) {
+                        await rejectByDireksi(id, catatan);
+                        if (typeof renderHRGATable === 'function') renderHRGATable();
+                    }
+                }
+                break;
+            case 'surat-tugas':
+                if (typeof window.handleIssueSuratTugas === 'function') {
+                    window.handleIssueSuratTugas(id);
+                } else {
+                    await issueSuratTugas(id);
+                    if (typeof renderHRGATable === 'function') renderHRGATable();
+                }
+                break;
+            case 'print-st':
+                printSuratTugas(id);
+                break;
+            case 'print-sppd':
+                printSPPDSlip(id);
+                break;
+        }
+    });
+}
+
+// ============================================================
+// 4. STATUS TAB FILTER & STATS CALCULATION
+// ============================================================
+function filterDataByTab(statusKey, list) {
+    const data = list || window.cachedPengajuanList || [];
+    const key = String(statusKey || '').toLowerCase();
+
+    if (key === 'semua' || key === 'all' || key === '') {
+        return data;
+    }
+    if (key === 'menunggu' || key === 'pending') {
+        return data.filter(p => {
+            const s = p.statusFlow || p.status;
+            return s === 'SUBMITTED' || s === 'APPROVED_ATASAN' || s === 'pending' || s === 'approved';
+        });
+    }
+    if (key === 'disetujui' || key === 'approved') {
+        return data.filter(p => {
+            const s = p.statusFlow || p.status;
+            return ['CONTROLLED_HRD','WA_SENT_DIREKSI','CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED','verified_hrga','notified_direksi'].includes(s);
+        });
+    }
+    if (key === 'ditolak' || key === 'rejected') {
+        return data.filter(p => {
+            const s = p.statusFlow || p.status;
+            return s === 'REJECTED' || s === 'rejected';
+        });
+    }
+    return data.filter(p => (p.statusFlow || p.status) === statusKey);
+}
+window.filterDataByTab = filterDataByTab;
+
+function calculateStatCards(list) {
+    const data = list || window.cachedPengajuanList || [];
+    let total = data.length;
+    let pending = 0;
+    let approved = 0;
+    let rejected = 0;
+    let urgent = 0;
+    let totalBudget = 0;
+
+    data.forEach(p => {
+        totalBudget += (p.estimasiBiaya || p.totalBiaya || 0);
+        const s = p.statusFlow || p.status;
+        if (s === 'SUBMITTED' || s === 'pending') {
+            pending++;
+            const diff = daysUntil(p.tanggalBerangkat || p.mulai);
+            if (diff >= 0 && diff <= 3) urgent++;
+        } else if (s === 'APPROVED_ATASAN' || s === 'approved') {
+            pending++;
+        } else if (s === 'REJECTED' || s === 'rejected') {
+            rejected++;
+        } else if (['CONTROLLED_HRD','WA_SENT_DIREKSI','CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED','verified_hrga','notified_direksi'].includes(s)) {
+            approved++;
+        }
+    });
+
+    return { total, pending, approved, rejected, urgent, totalBudget };
+}
+window.calculateStatCards = calculateStatCards;
 
 // ============================================================
 // SURAT TUGAS & SPPD PRINT VIEW GENERATOR
@@ -937,43 +1300,12 @@ async function printSuratTugas(noPengajuan) {
 
     setTimeout(() => {
         window.print();
-        // Backup removal after 1 second in case window.print returns or is canceled
         setTimeout(cleanup, 1000);
     }, 150);
 }
 const printSPPDSlip = printSuratTugas;
 window.printSuratTugas = printSuratTugas;
 window.printSPPDSlip = printSuratTugas;
-
-// ============================================================
-// STATS CARDS CALCULATION UTILITY
-// ============================================================
-function calculateStatCards(list) {
-    let total = list.length;
-    let pending = 0;
-    let approved = 0;
-    let rejected = 0;
-    let urgent = 0;
-    let totalBudget = 0;
-
-    list.forEach(p => {
-        totalBudget += (p.estimasiBiaya || p.totalBiaya || 0);
-        const s = p.statusFlow || p.status;
-        if (s === 'SUBMITTED' || s === 'pending') {
-            pending++;
-            const diff = daysUntil(p.tanggalBerangkat || p.mulai);
-            if (diff >= 0 && diff <= 3) urgent++;
-        } else if (s === 'APPROVED_ATASAN' || s === 'approved') {
-            pending++;
-        } else if (s === 'REJECTED' || s === 'rejected' || s === 'rejected_hrga') {
-            rejected++;
-        } else if (['CONTROLLED_HRD','WA_SENT_DIREKSI','CONFIRMED_DIREKSI','SURAT_TUGAS_ISSUED','verified_hrga','notified_direksi'].includes(s)) {
-            approved++;
-        }
-    });
-
-    return { total, pending, approved, rejected, urgent, totalBudget };
-}
 
 // ============================================================
 // PENGAJUAN FORM — Populate Dropdowns from Master API
@@ -1008,7 +1340,7 @@ async function populateMasterDropdowns() {
 }
 
 // ============================================================
-// AUTO INIT ON LOAD
+// AUTO INIT ON LOAD (Profile Sync & Event Delegation)
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
     // Highlight active sidebar link
@@ -1022,7 +1354,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    initSidebarUser();
+    // Run Profile Synchronization
+    syncUserProfile();
+
+    // Initialize Global Table Event Delegation
+    initTableEventDelegation();
 
     if (document.getElementById('area-tujuan') || document.getElementById('kriteria-fasilitas')) {
         populateMasterDropdowns();

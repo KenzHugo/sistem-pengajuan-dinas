@@ -54,17 +54,21 @@ func main() {
 	pengajuan.Put("/:id/approve", controllers.AtasanApprove)
 	pengajuan.Put("/:id/reject", controllers.AtasanReject)
 
-	// Stage 3: HRGA controls & verifies
+	// Stage 3: HRGA controls & verifies / rejects
 	pengajuan.Put("/action/hrd-control", controllers.HRDControl)
 	pengajuan.Put("/:id/hrd-control", controllers.HRDControl)
+	pengajuan.Put("/action/hrd-reject", controllers.HRDReject)
+	pengajuan.Put("/:id/hrd-reject", controllers.HRDReject)
 
 	// Stage 4: HRGA generates WA message → opens WhatsApp
 	pengajuan.Get("/action/wa-text", controllers.GetWAText)
 	pengajuan.Get("/:id/wa-text", controllers.GetWAText)
 
-	// Stage 5: HRGA records Direksi confirmation
+	// Stage 5: HRGA records Direksi confirmation / rejection
 	pengajuan.Put("/action/direksi-confirm", controllers.DireksiConfirm)
 	pengajuan.Put("/:id/direksi-confirm", controllers.DireksiConfirm)
+	pengajuan.Put("/action/direksi-reject", controllers.DireksiReject)
+	pengajuan.Put("/:id/direksi-reject", controllers.DireksiReject)
 
 	// Stage 6: HRGA issues official Surat Tugas
 	pengajuan.Post("/action/surat-tugas", controllers.IssueSuratTugas)

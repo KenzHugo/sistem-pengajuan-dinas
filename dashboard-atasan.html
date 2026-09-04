@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>SiPaDin — Dashboard Atasan & Approval</title>
     <meta name="description" content="Dashboard Verifikasi & Persetujuan Pengajuan Dinas PT Adiprima Suraprinta." />
 
@@ -133,7 +133,7 @@
             </div>
 
             <!-- Stats 4-Grid -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 lg:grid-cols-4 stats-grid-auto gap-4">
                 
                 <div class="stat-card-modern">
                     <div class="flex items-center justify-between mb-2">
@@ -217,7 +217,7 @@
                     </div>
 
                     <!-- Filter Tabs -->
-                    <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 border-t border-white/5">
+                    <div class="tab-filter-scroll flex items-center gap-2 pb-1 pt-1 border-t border-white/5">
                         <button id="mgr-tab-semua" onclick="setAtasanTab('semua')"
                             class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm whitespace-nowrap transition-all">
                             Semua (<span id="mgr-count-tab-semua">0</span>)
@@ -241,7 +241,7 @@
                 </div>
 
                 <!-- Table -->
-                <div class="custom-table-container">
+                <div class="custom-table-container table-responsive">
                     <table class="custom-table">
                         <thead>
                             <tr>

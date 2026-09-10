@@ -161,7 +161,7 @@
                 <!-- Left Column: Form Fields -->
                 <div class="lg:col-span-8 space-y-5">
 
-                    <!-- Section 0: Data Pemohon (Auto-filled & Readonly) -->
+                    <!-- Section 0: Data Pemohon & Rekan Perjalanan -->
                     <div class="app-card p-5 space-y-4">
                         <div class="flex items-center gap-2.5 pb-3 border-b border-white/5">
                             <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base">
@@ -182,14 +182,36 @@
                             <div class="space-y-1">
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Departemen / Divisi</label>
                                 <input type="text" id="inp-pemohon-dept" readonly
-                                    class="form-control-custom text-xs text-slate-300 bg-[#090d16] cursor-not-allowed" />
+                                    class="form-control-custom text-xs font-bold text-indigo-400 bg-[#090d16] cursor-not-allowed" />
+                                <input type="hidden" id="dept_utama" />
                             </div>
                             <div class="space-y-1">
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nomor ID / NIP</label>
                                 <input type="text" id="inp-pemohon-id" readonly
-                                    class="form-control-custom text-xs text-slate-300 bg-[#090d16] cursor-not-allowed" />
+                                    class="form-control-custom text-xs text-slate-300 bg-[#090d16] cursor-not-allowed font-mono" />
                                 <input type="hidden" id="nomor_id" name="nomor_id" />
                             </div>
+                        </div>
+
+                        <!-- Rekan Perjalanan (Opsional) Section -->
+                        <div class="mt-4 pt-4 border-t border-white/5 space-y-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="text-xs font-bold text-white">Rekan Perjalanan (Opsional)</h4>
+                                        <span class="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Khusus 1 Divisi</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Tambahkan anggota tim satu departemen yang berangkat bersama</p>
+                                </div>
+                                <button type="button" onclick="tambahRekan()"
+                                    class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white shadow-sm transition-all flex-shrink-0">
+                                    <i class="ph-bold ph-plus text-xs"></i>
+                                    <span>Tambah Partner</span>
+                                </button>
+                            </div>
+
+                            <!-- Wadah Baris Dinamis Rekan -->
+                            <div id="rekan-container" class="space-y-2.5"></div>
                         </div>
                     </div>
 
@@ -323,13 +345,21 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                             <div class="space-y-1">
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Moda Transportasi <span class="text-rose-400">*</span></label>
-                                <select id="inp-transportasi" required onchange="updateLiveSummary()"
-                                    class="form-control-custom text-xs">
-                                    <option value="Pesawat Terbang (Garuda / Batik Air)">Pesawat Terbang (Garuda / Batik Air)</option>
-                                    <option value="Kereta Api Eksekutif">Kereta Api Eksekutif</option>
-                                    <option value="Mobil Dinas Operasional">Mobil Dinas Operasional</option>
-                                    <option value="Travel / Bus Antar Kota">Travel / Bus Antar Kota</option>
-                                </select>
+                                <div class="relative">
+                                    <select id="inp-transportasi" required onchange="updateLiveSummary()"
+                                        class="w-full appearance-none rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 pr-10 text-xs font-medium text-slate-800 shadow-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-600 dark:bg-[#0b0f19] dark:text-slate-100">
+                                        <option value="Pesawat Terbang (Garuda / Batik Air)" class="bg-white text-slate-800 dark:bg-[#0b0f19] dark:text-slate-100">Pesawat Terbang (Garuda / Batik Air)</option>
+                                        <option value="Kereta Api Eksekutif" class="bg-white text-slate-800 dark:bg-[#0b0f19] dark:text-slate-100">Kereta Api Eksekutif</option>
+                                        <option value="Mobil Dinas Operasional" class="bg-white text-slate-800 dark:bg-[#0b0f19] dark:text-slate-100">Mobil Dinas Operasional</option>
+                                        <option value="Travel / Bus Antar Kota" class="bg-white text-slate-800 dark:bg-[#0b0f19] dark:text-slate-100">Travel / Bus Antar Kota</option>
+                                        <option value="Transportasi Pribadi" class="bg-white text-slate-800 dark:bg-[#0b0f19] dark:text-slate-100">Transportasi Pribadi</option>
+                                        <option value="Transportasi Umum" class="bg-white text-slate-800 dark:bg-[#0b0f19] dark:text-slate-100">Transportasi Umum</option>
+                                        <option value="Lain-lain" class="bg-white text-slate-800 dark:bg-[#0b0f19] dark:text-slate-100">Lain-lain</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                                        <i class="ph-bold ph-caret-down text-sm"></i>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="space-y-1">
@@ -723,8 +753,19 @@
             btn.innerHTML = '<i class="ph-bold ph-circle-notch text-sm animate-spin"></i> Mengirim ke Golang Backend...';
             btn.disabled = true;
 
-            // Build maksud tujuan with attachment note if attached
+            // Build maksud tujuan with attachment note and partners if attached
             let maksudTujuanFull = keperluan + (keterangan ? ' — ' + keterangan : '');
+            const partnerEntries = [];
+            document.querySelectorAll('#rekan-container > div').forEach(row => {
+                const inpNama = row.querySelector('.inp-nama-partner')?.value.trim();
+                const inpNip = row.querySelector('.inp-nip-partner')?.value.trim();
+                if (inpNama) {
+                    partnerEntries.push(inpNip ? `${inpNama} (${inpNip})` : inpNama);
+                }
+            });
+            if (partnerEntries.length > 0) {
+                maksudTujuanFull += ` [Partner: ${partnerEntries.join(', ')}]`;
+            }
             if (selectedFileData) {
                 maksudTujuanFull += ` [Lampiran: ${selectedFileData.name}]`;
             }
@@ -772,6 +813,179 @@
                 btn.disabled = false;
             }
         }
+
+        // ============================================================
+        // LOGIKA REKAN PERJALANAN & AUTOCOMPLETE (FILTER 1 DIVISI)
+        // ============================================================
+        const masterKaryawan = [
+            { nama: "RIZAL ALDI", dept: "PM1", nip: "010220231294" },
+            { nama: "DWI FAJAR SUGIANTO", dept: "PM1", nip: "00708533542" },
+            { nama: "WAHYUDI", dept: "PM1", nip: "010720041038" },
+            { nama: "HERU SETYAWAN", dept: "PM1", nip: "010720191143" },
+            { nama: "MUHAMMAD CHANDRA FERNANDA", dept: "PM1", nip: "011120221241" },
+            { nama: "ABDUL ROCHMAN", dept: "PM1", nip: "011120221244" },
+            { nama: "MUHAMMAD IZZUDIN AR RIFQI", dept: "PM1", nip: "011120221253" },
+            { nama: "M. S. AKMALUDDIN", dept: "PM1", nip: "011120221254" },
+            { nama: "DIMAS ALDITYA PUTRA UUDI", dept: "PM1", nip: "011120221257" },
+            { nama: "MUHAMMAD DAVID RENANDA ARDI", dept: "PM1", nip: "011120221266" },
+            { nama: "ANDHI WAHYU FIRMANSYAH", dept: "PM1", nip: "011120221269" },
+            { nama: "ACHMAD RAFI ZAKARIYAH", dept: "PM1", nip: "020120251329" },
+            { nama: "SAMSUL ARIF", dept: "PM1", nip: "020120251330" },
+            { nama: "TONI", dept: "PM1", nip: "020120251332" },
+            { nama: "YOSSY LINDUNG WIJAYA", dept: "PM1", nip: "020120251333" },
+            { nama: "HENDRA GUNAWAN", dept: "PM2", nip: "020120251341" },
+            { nama: "RIAN HIDAYAT", dept: "PM2", nip: "020120251342" },
+            { nama: "EKO WAHYUDI", dept: "HRGA", nip: "030120251350" },
+            { nama: "SITI NURHALIZA", dept: "HRGA", nip: "030120251351" },
+            { nama: "MAYA KARTIKA", dept: "FINANCE", nip: "040120251360" },
+            { nama: "DEWI ANGGRAINI", dept: "FINANCE", nip: "040120251361" },
+            { nama: "BAMBANG PAMUNGKAS", dept: "MARKETING", nip: "050120251370" }
+        ];
+
+        let partnerCounter = 0;
+
+        function tambahRekan() {
+            const container = document.getElementById('rekan-container');
+            if (!container) return;
+
+            partnerCounter++;
+            const rowId = `partner-row-${partnerCounter}`;
+            const deptUtama = document.getElementById('dept_utama')?.value || document.getElementById('inp-pemohon-dept')?.value || 'PM1';
+
+            const rowElement = document.createElement('div');
+            rowElement.id = rowId;
+            rowElement.className = "bg-slate-50 dark:bg-[#1a2235] border border-slate-200/90 dark:border-slate-700/80 rounded-xl p-3 sm:p-4 transition-all";
+
+            rowElement.innerHTML = `
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                    <!-- Input Cari Nama & Dropdown Autocomplete -->
+                    <div class="sm:col-span-5 relative space-y-1">
+                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                            Cari Nama Partner <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <input type="text" placeholder="Ketik nama karyawan..." autocomplete="off"
+                                oninput="handlePartnerSearch(this, '${rowId}')"
+                                onfocus="handlePartnerSearch(this, '${rowId}')"
+                                class="inp-nama-partner w-full px-3 py-2 text-xs font-medium rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-[#0b0f19] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+                            
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400">
+                                <i class="ph-bold ph-magnifying-glass text-xs"></i>
+                            </div>
+                        </div>
+
+                        <!-- Custom Dropdown Container -->
+                        <div id="dropdown-${rowId}" 
+                            class="dropdown-autocomplete hidden absolute left-0 top-[calc(100%+4px)] w-full max-h-48 overflow-y-auto bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 divide-y divide-slate-100 dark:divide-slate-700/50">
+                        </div>
+                    </div>
+
+                    <!-- Input Departemen (Readonly - Auto Copy Dept Utama) -->
+                    <div class="sm:col-span-3 space-y-1">
+                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                            Departemen
+                        </label>
+                        <input type="text" readonly value="${deptUtama}"
+                            class="w-full px-3 py-2 text-xs font-mono font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-[#0f172a] text-indigo-600 dark:text-indigo-400 cursor-not-allowed focus:outline-none" />
+                    </div>
+
+                    <!-- Input NIP (Readonly) -->
+                    <div class="sm:col-span-3 space-y-1">
+                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                            Nomor ID / NIP
+                        </label>
+                        <input type="text" readonly placeholder="Otomatis..."
+                            class="inp-nip-partner w-full px-3 py-2 text-xs font-mono rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-[#0f172a] text-slate-900 dark:text-slate-200 cursor-not-allowed focus:outline-none" />
+                    </div>
+
+                    <!-- Tombol Hapus Baris -->
+                    <div class="sm:col-span-1 flex justify-end sm:justify-center">
+                        <button type="button" onclick="hapusRekan('${rowId}')" title="Hapus Partner"
+                            class="p-2 text-rose-500 hover:text-white hover:bg-rose-500 rounded-lg transition-colors flex items-center justify-center">
+                            <i class="ph-bold ph-trash text-base"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(rowElement);
+        }
+
+        function hapusRekan(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) {
+                row.remove();
+            }
+        }
+
+        function handlePartnerSearch(inputEl, rowId) {
+            const keyword = inputEl.value.trim().toLowerCase();
+            const deptUtama = document.getElementById('dept_utama')?.value || document.getElementById('inp-pemohon-dept')?.value || 'PM1';
+            const nipUtama = document.getElementById('nip_utama')?.value || document.getElementById('inp-pemohon-id')?.value || '';
+            const dropdown = document.getElementById(`dropdown-${rowId}`);
+
+            const selectedNIPs = Array.from(document.querySelectorAll('.inp-nip-partner'))
+                .map(el => el.value.trim())
+                .filter(nip => nip !== '');
+
+            const hasilFilter = masterKaryawan.filter(karyawan => {
+                const isSameDept = karyawan.dept.toUpperCase() === deptUtama.toUpperCase();
+                const isNotKoordinator = karyawan.nip !== nipUtama;
+                const isNotDuplicate = !selectedNIPs.includes(karyawan.nip) || 
+                    (document.querySelector(`#${rowId} .inp-nip-partner`)?.value === karyawan.nip);
+                const isMatch = karyawan.nama.toLowerCase().includes(keyword) || karyawan.nip.includes(keyword);
+
+                return isSameDept && isNotKoordinator && isNotDuplicate && isMatch;
+            });
+
+            document.querySelectorAll('.dropdown-autocomplete').forEach(d => {
+                if (d !== dropdown) d.classList.add('hidden');
+            });
+
+            if (hasilFilter.length === 0) {
+                dropdown.innerHTML = `
+                    <div class="px-3.5 py-3 text-center text-xs text-slate-500 dark:text-slate-400">
+                        Tidak ditemukan karyawan divisi <span class="font-bold text-indigo-400">${deptUtama}</span>
+                    </div>
+                `;
+                dropdown.classList.remove('hidden');
+                return;
+            }
+
+            dropdown.innerHTML = hasilFilter.map(karyawan => `
+                <div onclick="pilihPartner('${rowId}', '${karyawan.nama}', '${karyawan.nip}')"
+                    class="px-3.5 py-2.5 cursor-pointer transition-colors text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/40">
+                    <p class="text-xs font-bold text-slate-900 dark:text-white">${karyawan.nama}</p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                        ${karyawan.nip} • <span class="font-semibold text-indigo-600 dark:text-indigo-400">${karyawan.dept}</span>
+                    </p>
+                </div>
+            `).join('');
+
+            dropdown.classList.remove('hidden');
+        }
+
+        function pilihPartner(rowId, nama, nip) {
+            const row = document.getElementById(rowId);
+            if (!row) return;
+
+            const inpNama = row.querySelector('.inp-nama-partner');
+            const inpNip = row.querySelector('.inp-nip-partner');
+            const dropdown = document.getElementById(`dropdown-${rowId}`);
+
+            if (inpNama) inpNama.value = nama;
+            if (inpNip) inpNip.value = nip;
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+
+        // Close dropdowns on outside click
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.relative')) {
+                document.querySelectorAll('.dropdown-autocomplete').forEach(d => {
+                    d.classList.add('hidden');
+                });
+            }
+        });
     </script>
 </body>
 

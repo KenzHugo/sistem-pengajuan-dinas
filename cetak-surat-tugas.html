@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Surat Tugas — PT Adiprima Suraprinta</title>
+
+    <!-- TAILWIND CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- PRINT SPECIFIC STYLES -->
+    <style>
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+
+        @media print {
+            body {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+                color: black !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .kertas-sppd {
+                min-height: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-black font-serif antialiased p-4 sm:p-8 flex flex-col items-center">
+
+    <!-- FLOATING PRINT BUTTON -->
+    <div class="no-print mb-6 flex items-center gap-3">
+        <button onclick="window.print()"
+            class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-sans font-bold rounded-xl shadow-md transition-all flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                </path>
+            </svg>
+            Cetak Dokumen (A4)
+        </button>
+        <button onclick="window.close()"
+            class="px-4 py-2.5 bg-white hover:bg-slate-200 text-slate-700 text-xs font-sans font-semibold rounded-xl border border-slate-300 transition-all">
+            Tutup
+        </button>
+    </div>
+
+    <!-- 1. KERTAS SURAT UKURAN A4 PRINT-FRIENDLY -->
+    <div
+        class="kertas-sppd w-full max-w-[21cm] min-h-[29.7cm] bg-white text-black p-10 sm:p-14 shadow-xl border border-slate-200 text-[13px] leading-relaxed flex flex-col justify-between">
+
+        <div>
+            <!-- KOP SURAT RATA TENGAH -->
+            <div class="text-center pb-4 mb-4">
+                <h1 class="text-xl font-bold tracking-wider uppercase border-b-2 border-black inline-block pb-0.5">
+                    SURAT TUGAS
+                </h1>
+                <p class="text-base font-bold tracking-tight uppercase mt-1">
+                    PT ADIPRIMA SURAPRINTA
+                </p>
+                <p class="text-xs font-sans font-medium mt-0.5">
+                    Nomor: <span id="doc-nomor-surat">ST/HRGA/2026/09/014</span>
+                </p>
+            </div>
+
+            <!-- YANG BERTANDA TANGAN DI BAWAH INI (DINAMIS ATASAN / MANAGER DIVISI) -->
+            <div class="space-y-2 mb-4">
+                <p>Yang bertanda tangan di bawah ini:</p>
+                <table class="w-full max-w-md ml-4 text-[13px]">
+                    <tr>
+                        <td class="w-28 py-0.5 font-medium">Nama</td>
+                        <td class="w-4 py-0.5">:</td>
+                        <td class="py-0.5 font-bold" id="doc-pemberi-nama">[NAMA MANAGER DIVISI]</td>
+                    </tr>
+                    <tr>
+                        <td class="py-0.5 font-medium">Jabatan</td>
+                        <td class="py-0.5">:</td>
+                        <td class="py-0.5" id="doc-pemberi-jabatan">Kepala Divisi / Manager</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- PARAGRAF PEMBUKA: MAKSUD & TUJUAN PENUGASAN -->
+            <div class="space-y-2 mb-4 text-justify">
+                <p>
+                    Dengan ini menugaskan kepada pegawai yang namanya tercantum dalam daftar di bawah ini untuk
+                    melaksanakan perjalanan dinas ke <strong class="font-bold" id="doc-kota-tujuan">Jakarta
+                        Pusat</strong> dalam rangka <span id="doc-keperluan" class="italic">Maintenance Mesin Produksi
+                        &amp; Koordinasi Teknis</span>.
+                </p>
+            </div>
+
+            <!-- 3. TABEL DAFTAR PESERTA PENUGASAN (BORDER HITAM TEBAL) -->
+            <div class="mb-5">
+                <table class="w-full border-collapse border-2 border-black text-[12px]">
+                    <thead>
+                        <tr class="bg-slate-100 text-center font-bold">
+                            <th class="border-2 border-black p-2 w-10">No</th>
+                            <th class="border-2 border-black p-2 text-left">Nama Pegawai / NIP</th>
+                            <th class="border-2 border-black p-2 w-28 text-center">Departemen</th>
+                            <th class="border-2 border-black p-2 w-36 text-center">Tanggal</th>
+                            <th class="border-2 border-black p-2 w-32 text-center">Tempat</th>
+                        </tr>
+                    </thead>
+                    <tbody id="doc-table-peserta">
+                        <!-- Baris 1: Pemohon Utama (Koordinator) -->
+                        <tr>
+                            <td class="border-2 border-black p-2 text-center font-medium">1</td>
+                            <td class="border-2 border-black p-2">
+                                <div class="font-bold" id="doc-main-nama">RIZAL ALDI</div>
+                                <div class="text-[11px] font-sans" id="doc-main-nip">NIP: 010220231294</div>
+                            </td>
+                            <td class="border-2 border-black p-2 text-center font-bold font-sans" id="doc-main-dept">PM1
+                            </td>
+                            <td class="border-2 border-black p-2 text-center" id="doc-main-tgl">15 Sep 2026 s/d 18 Sep
+                                2026</td>
+                            <td class="border-2 border-black p-2 text-center" id="doc-main-tempat">Jakarta Pusat</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 4. KEWAJIBAN SELAMA PENUGASAN (6 POIN) -->
+            <div class="mb-5 text-justify">
+                <p class="font-bold mb-2">Kewajiban selama melaksanakan tugas kedinasan:</p>
+                <ol class="list-decimal ml-6 space-y-1 text-[12px] leading-relaxed">
+                    <li> 1. Melaksanakan tugas kedinasan dengan penuh rasa tanggung jawab, integritas, dan dedikasi
+                        tinggi.</li>
+                    <li> 2. Menjaga nama baik, kehormatan, dan kerahasiaan informasi perusahaan selama berada di lokasi
+                        penugasan.</li>
+                    <li> 3. Mematuhi seluruh standar keselamatan kerja (K3) serta peraturan tata tertib yang berlaku di
+                        tempat tujuan.</li>
+                    <li> 4. koordinasi dan pelaporan berkala kepada atasan langsung terkait progres dan kendala
+                        pelaksanaan tugas.</li>
+                    <li> 5. Mengisi dan menyerahkan Laporan Pertanggungjawaban Perjalanan Dinas (LPPD)
+                        selambat-lambatnya 3 (tiga) hari kerja setelah masa penugasan berakhir.</li>
+                    <li> 6. Menyerahkan seluruh bukti sah pengeluaran riil kedinasan kepada bagian Finance/HRGA untuk
+                        proses rekonsiliasi administrasi.</li>
+                </ol>
+            </div>
+
+            <!-- KALIMAT PENUTUP -->
+            <div class="space-y-1.5 text-justify text-[12.5px] mb-8">
+                <p>
+                    Demikian Surat Tugas ini diterbitkan untuk dilaksanakan dengan sebaik-baiknya dan penuh rasa
+                    tanggung jawab oleh yang bersangkutan.
+                </p>
+                <p>
+                    Setelah melaksanakan tugas kedinasan tersebut, yang bersangkutan diwajibkan untuk segera membuat
+                    laporan tertulis mengenai hasil pelaksanaan tugas kepada Pimpinan Perusahaan.
+                </p>
+            </div>
+        </div>
+
+        <!-- 5. FORMAT TANDA TANGAN (DINAMIS 2 KOLOM + PROTEKSI ANTI-PAGE BREAK) -->
+        <div class="grid grid-cols-2 gap-8 text-[13px] pt-4 break-inside-avoid" style="page-break-inside: avoid;">
+
+            <!-- Sisi Kiri: Pihak HRD / HRGA (Rata Kiri) -->
+            <div class="flex flex-col items-start text-left pl-4">
+                <p>Gresik, <span id="doc-tgl-terbit">14 September 2026</span></p>
+                <p class="font-bold uppercase tracking-wide mt-0.5">PT ADIPRIMA SURAPRINTA</p>
+
+                <!-- Jarak Tanda Tangan -->
+                <div class="mb-16"></div>
+
+                <p class="font-bold underline uppercase" id="doc-hrd-nama">HRD</p>
+                <p class="text-xs font-sans mt-0.5" id="doc-hrd-nip">NIP: 198402152008011002</p>
+                <p class="text-xs text-gray-700" id="doc-hrd-jabatan">HRD HRGA</p>
+            </div>
+
+            <!-- Sisi Kanan: Pihak Mengetahui / Atasan Pemohon (Rata Tengah) -->
+            <div class="flex flex-col items-center text-center">
+                <p class="invisible select-none">&nbsp;</p>
+                <p class="font-bold uppercase tracking-wide mt-0.5">MENGETAHUI,</p>
+
+                <!-- Jarak Tanda Tangan Sejajar -->
+                <div class="mb-16"></div>
+
+                <p class="font-bold underline uppercase" id="doc-atasan-nama">Ir. H. Achmad Syafi'i</p>
+                <p class="text-xs font-sans mt-0.5" id="doc-atasan-nip">NIP: 197508121999031001</p>
+                <p class="text-xs text-gray-700" id="doc-atasan-jabatan">Kepala Divisi / Atasan Yang Berwenang</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SCRIPT INTEGRATION -->
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id') || urlParams.get('sppd');
+            if (!id) return;
+
+            try {
+                const item = await apiGetPengajuanByID(id);
+                if (!item) return;
+
+                const nomorSurat = item.nomorSuratTugas || item.nomorSurat || item.noPengajuan || id;
+                const kotaTujuan = item.kotaTujuan || item.tujuan || 'Surabaya';
+                const dept = item.kodeDepartemen || item.dept || '-';
+                const tglBerangkat = formatDate(item.tanggalBerangkat || item.mulai);
+                const tglKembali = formatDate(item.tanggalKembali || item.selesai);
+                const dateRangeStr = `${tglBerangkat} s/d ${tglKembali}`;
+                const tglTerbitStr = formatDateFull(item.updatedAt || item.tanggalDisetujui || new Date().toISOString());
+
+                document.getElementById('doc-nomor-surat').textContent = nomorSurat;
+                document.getElementById('doc-kota-tujuan').textContent = kotaTujuan;
+                document.getElementById('doc-tgl-terbit').textContent = tglTerbitStr;
+
+                const managerMap = {
+                    "PM1": { nama: "Ir. H. Achmad Syafi'i", nip: "197508121999031001", jabatan: "Kepala Divisi PM1" },
+                    "PM2": { nama: "Bambang Wijaya, S.T.", nip: "197805122003121001", jabatan: "Kepala Divisi PM2" },
+                    "HRGA": { nama: "Kusuma Dwi Putra", nip: "198402152008011002", jabatan: "Assistant Manager HRGA" },
+                    "FINANCE": { nama: "Sri Handayani, S.E.", nip: "198003202005012003", jabatan: "Kepala Divisi Finance" },
+                    "MARKETING": { nama: "Agus Setiawan, S.E.", nip: "198211152006041002", jabatan: "Kepala Divisi Marketing" }
+                };
+
+                const atasanInfo = managerMap[dept.toUpperCase()] || {
+                    nama: item.namaAtasan || item.atasan || `Manager ${dept}`,
+                    nip: item.nipAtasan || '-',
+                    jabatan: `Kepala Divisi ${dept}`
+                };
+
+                const elPemberiNama = document.getElementById('doc-pemberi-nama');
+                const elPemberiJabatan = document.getElementById('doc-pemberi-jabatan');
+                const elAtasanNama = document.getElementById('doc-atasan-nama');
+                const elAtasanNip = document.getElementById('doc-atasan-nip');
+                const elAtasanJabatan = document.getElementById('doc-atasan-jabatan');
+
+                if (elPemberiNama) elPemberiNama.textContent = atasanInfo.nama;
+                if (elPemberiJabatan) elPemberiJabatan.textContent = atasanInfo.jabatan;
+                if (elAtasanNama) elAtasanNama.textContent = atasanInfo.nama;
+                if (elAtasanNip) elAtasanNip.textContent = `NIP: ${atasanInfo.nip}`;
+                if (elAtasanJabatan) elAtasanJabatan.textContent = atasanInfo.jabatan;
+
+                // HRD / HRGA Signer
+                let hrdNama = item.namaHrd || item.disetujuiOleh || "Kusuma Dwi Putra";
+                let hrdNip = item.nipHrd || "198402152008011002";
+                let hrdJabatan = item.jabatanHrd || "Assistant Manager HRGA";
+
+                const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : JSON.parse(sessionStorage.getItem('sipadin_user') || '{}');
+                if (currentUser && (currentUser.role === 'hrd' || currentUser.role === 'hrga' || currentUser.role === 'admin')) {
+                    if (currentUser.nama) hrdNama = currentUser.nama;
+                    if (currentUser.nip || currentUser.nomorID) hrdNip = currentUser.nip || currentUser.nomorID;
+                    if (currentUser.jabatan) hrdJabatan = currentUser.jabatan;
+                }
+
+                const elHrdNama = document.getElementById('doc-hrd-nama');
+                const elHrdNip = document.getElementById('doc-hrd-nip');
+                const elHrdJabatan = document.getElementById('doc-hrd-jabatan');
+
+                if (elHrdNama) elHrdNama.textContent = hrdNama;
+                if (elHrdNip) elHrdNip.textContent = `NIP: ${hrdNip}`;
+                if (elHrdJabatan) elHrdJabatan.textContent = hrdJabatan;
+
+                // Lookup table NIP
+                const _karyawanLookup = [
+                    { nama: "RIZAL ALDI", dept: "PM1", nip: "010220231294" },
+                    { nama: "TONI", dept: "PM1", nip: "020120251332" },
+                    { nama: "WAHYUDI", dept: "PM1", nip: "010720041038" },
+                    { nama: "DWI FAJAR SUGIANTO", dept: "PM1", nip: "00708533542" },
+                    { nama: "HERU SETYAWAN", dept: "PM1", nip: "010720191143" },
+                    { nama: "MUHAMMAD CHANDRA FERNANDA", dept: "PM1", nip: "011120221241" },
+                    { nama: "ABDUL ROCHMAN", dept: "PM1", nip: "011120221244" },
+                    { nama: "MUHAMMAD IZZUDIN AR RIFQI", dept: "PM1", nip: "011120221253" },
+                    { nama: "M. S. AKMALUDDIN", dept: "PM1", nip: "011120221254" },
+                    { nama: "DIMAS ALDITYA PUTRA UUDI", dept: "PM1", nip: "011120221257" },
+                    { nama: "MUHAMMAD DAVID RENANDA ARDI", dept: "PM1", nip: "011120221266" },
+                    { nama: "ANDHI WAHYU FIRMANSYAH", dept: "PM1", nip: "011120221269" },
+                    { nama: "ACHMAD RAFI ZAKARIYAH", dept: "PM1", nip: "020120251329" },
+                    { nama: "SAMSUL ARIF", dept: "PM1", nip: "020120251330" },
+                    { nama: "YOSSY LINDUNG WIJAYA", dept: "PM1", nip: "020120251333" },
+                    { nama: "HENDRA GUNAWAN", dept: "PM2", nip: "020120251341" },
+                    { nama: "RIAN HIDAYAT", dept: "PM2", nip: "020120251342" },
+                    { nama: "EKO WAHYUDI", dept: "HRGA", nip: "030120251350" },
+                    { nama: "SITI NURHALIZA", dept: "HRGA", nip: "030120251351" },
+                    { nama: "MAYA KARTIKA", dept: "FINANCE", nip: "040120251360" },
+                    { nama: "DEWI ANGGRAINI", dept: "FINANCE", nip: "040120251361" },
+                    { nama: "BAMBANG PAMUNGKAS", dept: "MARKETING", nip: "050120251370" }
+                ];
+
+                let rawMaksud = item.maksudTujuan || item.keperluan || '-';
+                let partnerList = [];
+
+                const partnerMatch = rawMaksud.match(/\[(?:Partner|Rekan):\s*([^\]]+)\]/i);
+                if (partnerMatch) {
+                    const pEntries = partnerMatch[1].split(',').map(s => s.trim()).filter(Boolean);
+                    pEntries.forEach(entry => {
+                        let pNama = entry;
+                        let pNip = '';
+
+                        const nipInParentheses = entry.match(/^([^(]+)\(([^)]+)\)$/);
+                        if (nipInParentheses) {
+                            pNama = nipInParentheses[1].trim();
+                            pNip = nipInParentheses[2].trim();
+                        }
+
+                        if (!pNip || pNip === '-') {
+                            const found = _karyawanLookup.find(k => k.nama.toUpperCase() === pNama.toUpperCase() || pNama.toUpperCase().includes(k.nama.toUpperCase()));
+                            if (found) pNip = found.nip;
+                        }
+
+                        partnerList.push({ nama: pNama, nip: pNip || '-', dept: dept });
+                    });
+                    rawMaksud = rawMaksud.replace(/\[(?:Partner|Rekan):\s*[^\]]+\]/gi, '').trim();
+                }
+                rawMaksud = rawMaksud.replace(/\[Lampiran:\s*[^\]]+\]/gi, '').trim();
+                if (rawMaksud.startsWith('—')) rawMaksud = rawMaksud.substring(1).trim();
+                if (rawMaksud.endsWith('—')) rawMaksud = rawMaksud.substring(0, rawMaksud.length - 1).trim();
+
+                document.getElementById('doc-keperluan').textContent = rawMaksud;
+
+                let tableHtml = `
+                    <tr>
+                        <td class="border-2 border-black p-2 text-center font-medium">1</td>
+                        <td class="border-2 border-black p-2">
+                            <div class="font-bold">${item.nama}</div>
+                            <div class="text-[11px] font-sans">NIP: ${item.nomorID || item.nip || '-'}</div>
+                        </td>
+                        <td class="border-2 border-black p-2 text-center font-bold font-sans">${dept}</td>
+                        <td class="border-2 border-black p-2 text-center">${dateRangeStr}</td>
+                        <td class="border-2 border-black p-2 text-center">${kotaTujuan}</td>
+                    </tr>
+                `;
+
+                partnerList.forEach((p, idx) => {
+                    tableHtml += `
+                        <tr>
+                            <td class="border-2 border-black p-2 text-center font-medium">${idx + 2}</td>
+                            <td class="border-2 border-black p-2">
+                                <div class="font-bold">${p.nama}</div>
+                                <div class="text-[11px] font-sans">NIP: ${p.nip}</div>
+                            </td>
+                            <td class="border-2 border-black p-2 text-center font-bold font-sans">${p.dept}</td>
+                            <td class="border-2 border-black p-2 text-center">${dateRangeStr}</td>
+                            <td class="border-2 border-black p-2 text-center">${kotaTujuan}</td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('doc-table-peserta').innerHTML = tableHtml;
+            } catch (e) {
+                console.error('Failed to load document data:', e);
+            }
+        });
+    </script>
+</body>
+
+</html>

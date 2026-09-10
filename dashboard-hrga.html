@@ -132,6 +132,7 @@
         <main class="p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
 
             <!-- BANNER INFORMASI PIPELINE HRGA -->
+            <!-- BANNER INFORMASI WORKFLOW HRGA & NOTIFIKASI -->
             <div
                 class="p-5 rounded-3xl bg-gradient-to-r from-amber-950/40 via-surface-card to-surface-card border border-amber-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div class="flex items-start gap-4">
@@ -140,74 +141,70 @@
                         <i class="ph-fill ph-git-merge"></i>
                     </div>
                     <div>
-                        <h3 class="text-base font-bold text-white">Workflow Kontrol 4 Tahap HRGA</h3>
+                        <h3 class="text-base font-bold text-white tracking-tight">Workflow Kontrol HRGA &amp; Notifikasi</h3>
                         <p class="text-xs text-slate-300 mt-1 leading-relaxed max-w-2xl">
-                            Modul ini mengontrol kesesuaian anggaran pengajuan bawahan yang telah disetujui atasan
-                            (Tahap 2) dengan data referensi <strong
-                                class="text-amber-300">PerjalananDinas_Tarif.sql</strong> &amp; <strong
-                                class="text-amber-300">PerjalananDinas_Fasilitas.sql</strong> (Tahap 3), serta memicu
-                            notifikasi teks resmi ke Direksi (Tahap 4).
+                            Alur verifikasi anggaran dinas oleh HRGA, pengiriman notifikasi FYI via WhatsApp ke Direksi, dan penerbitan Surat Tugas resmi secara terpadu tanpa hambatan antrean persetujuan.
                         </p>
                     </div>
                 </div>
                 <div
-                    class="flex items-center gap-2 text-xs font-bold text-amber-300 bg-amber-500/10 px-3 py-2 rounded-xl border border-amber-500/20 whitespace-nowrap">
-                    <i class="ph-bold ph-shield-check"></i> Standard Operating Procedure
+                    class="flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3.5 py-2 rounded-xl border border-emerald-500/20 whitespace-nowrap">
+                    <i class="ph-bold ph-lightning"></i> Fast-Track Approval Active
                 </div>
             </div>
 
-            <!-- KPI SUMMARY CARDS -->
+            <!-- KPI SUMMARY CARDS (3 TAHAP + TOTAL BIAYA) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 stats-grid-auto gap-4">
 
                 <!-- Stat 1: Pending Kontrol HRGA -->
                 <div class="app-card p-5 space-y-3">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-slate-400">Pending Kontrol HRGA</span>
+                        <span class="text-xs font-semibold text-slate-400">1. Pending Kontrol</span>
                         <div
                             class="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
-                            <i class="ph-bold ph-clock text-lg"></i>
+                            <i class="ph-bold ph-hourglass-high text-lg"></i>
                         </div>
                     </div>
                     <div>
                         <p id="hrga-stat-pending" class="text-2xl font-extrabold text-white font-mono">0</p>
-                        <p class="text-[11px] text-blue-400 mt-0.5">Menunggu verifikasi Tahap 3</p>
+                        <p class="text-[11px] text-blue-400 mt-0.5">Menunggu verifikasi tarif &amp; fasilitas</p>
                     </div>
                 </div>
 
-                <!-- Stat 2: Terverifikasi HRGA -->
+                <!-- Stat 2: Siap Kirim Notifikasi WA -->
                 <div class="app-card p-5 space-y-3">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-slate-400">Siap Notifikasi Direksi</span>
+                        <span class="text-xs font-semibold text-slate-400">2. Siap Kirim Notifikasi</span>
                         <div
                             class="w-9 h-9 rounded-xl bg-teal-500/20 border border-teal-500/30 flex items-center justify-center text-teal-400">
-                            <i class="ph-bold ph-shield-check text-lg"></i>
+                            <i class="ph-bold ph-whatsapp-logo text-lg"></i>
                         </div>
                     </div>
                     <div>
                         <p id="hrga-stat-verified" class="text-2xl font-extrabold text-white font-mono">0</p>
-                        <p class="text-[11px] text-teal-400 mt-0.5">Siap kirim WA Tahap 4</p>
+                        <p class="text-[11px] text-teal-400 mt-0.5">Siap kirim WA FYI ke Direksi</p>
                     </div>
                 </div>
 
-                <!-- Stat 3: Notified Direksi -->
+                <!-- Stat 3: Siap Terbitkan ST (Langsung Aktif setelah Kirim WA) -->
                 <div class="app-card p-5 space-y-3">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-slate-400">Diinformasikan ke Direksi</span>
+                        <span class="text-xs font-semibold text-slate-400">3. Siap Terbitkan ST</span>
                         <div
                             class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                            <i class="ph-bold ph-paper-plane-tilt text-lg"></i>
+                            <i class="ph-bold ph-file-text text-lg"></i>
                         </div>
                     </div>
                     <div>
-                        <p id="hrga-stat-notified" class="text-2xl font-extrabold text-white font-mono">0</p>
-                        <p class="text-[11px] text-emerald-400 mt-0.5">Notifikasi WA terkirim</p>
+                        <p id="hrga-stat-ready-st" class="text-2xl font-extrabold text-white font-mono">0</p>
+                        <p class="text-[11px] text-emerald-400 mt-0.5">Otomatis siap cetak Surat Tugas</p>
                     </div>
                 </div>
 
                 <!-- Stat 4: Total Anggaran Kontrol -->
                 <div class="app-card p-5 space-y-3">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-slate-400">Total Biaya Diverifikasi</span>
+                        <span class="text-xs font-semibold text-slate-400">Total Biaya Terkontrol</span>
                         <div
                             class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
                             <i class="ph-bold ph-currency-dollar text-lg"></i>
@@ -215,7 +212,7 @@
                     </div>
                     <div>
                         <p id="hrga-stat-budget" class="text-lg font-extrabold text-amber-300 font-mono">Rp 0</p>
-                        <p class="text-[11px] text-slate-400 mt-0.5">Total estimasi CA terkontrol</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Estimasi anggaran terverifikasi</p>
                     </div>
                 </div>
 
@@ -241,27 +238,21 @@
                         <span id="badge-count-verified-hrga"
                             class="px-1.5 py-0.5 text-[10px] rounded-full bg-teal-500/20 text-teal-300 font-mono">0</span>
                     </button>
-                    <button id="hrga-tab-notified" onclick="setHRGAFilter('WA_SENT_DIREKSI')"
+                    <button id="hrga-tab-ready-st" onclick="setHRGAFilter('READY_ST')"
                         class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
-                        <span>3. Tunggu OK Direksi</span>
-                        <span id="badge-count-notified-hrga"
-                            class="px-1.5 py-0.5 text-[10px] rounded-full bg-purple-500/20 text-purple-300 font-mono">0</span>
-                    </button>
-                    <button id="hrga-tab-confirmed" onclick="setHRGAFilter('CONFIRMED_DIREKSI')"
-                        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
-                        <span>4. Siap Terbitkan ST</span>
-                        <span id="badge-count-confirmed-hrga"
+                        <span>3. Siap Terbitkan ST</span>
+                        <span id="badge-count-ready-st"
                             class="px-1.5 py-0.5 text-[10px] rounded-full bg-emerald-500/20 text-emerald-300 font-mono">0</span>
                     </button>
                     <button id="hrga-tab-issued" onclick="setHRGAFilter('SURAT_TUGAS_ISSUED')"
                         class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
-                        <span>5. Selesai / Terbit</span>
+                        <span>4. Selesai</span>
                         <span id="badge-count-issued-hrga"
                             class="px-1.5 py-0.5 text-[10px] rounded-full bg-indigo-500/20 text-indigo-300 font-mono">0</span>
                     </button>
                     <button id="hrga-tab-rejected" onclick="setHRGAFilter('REJECTED')"
                         class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#090d16] border border-white/5 text-slate-400 hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
-                        <span>6. Ditolak</span>
+                        <span>Ditolak</span>
                         <span id="badge-count-rejected-hrga"
                             class="px-1.5 py-0.5 text-[10px] rounded-full bg-rose-500/20 text-rose-300 font-mono">0</span>
                     </button>
@@ -578,8 +569,7 @@
                 { id: 'hrga-tab-semua', key: 'semua' },
                 { id: 'hrga-tab-approved', key: 'APPROVED_ATASAN' },
                 { id: 'hrga-tab-verified', key: 'CONTROLLED_HRD' },
-                { id: 'hrga-tab-notified', key: 'WA_SENT_DIREKSI' },
-                { id: 'hrga-tab-confirmed', key: 'CONFIRMED_DIREKSI' },
+                { id: 'hrga-tab-ready-st', key: 'READY_ST' },
                 { id: 'hrga-tab-issued', key: 'SURAT_TUGAS_ISSUED' },
                 { id: 'hrga-tab-rejected', key: 'REJECTED' },
             ];
@@ -604,11 +594,10 @@
         async function renderHRGADashboard() {
             const list = await apiGetPengajuan({ role: 'HRGA' });
 
-            // Count per stage
+            // Count per stage (Alur Baru 3 Tahap + Selesai)
             const countPending   = list.filter(p => (p.statusFlow || p.status) === 'APPROVED_ATASAN' || (p.statusFlow || p.status) === 'approved').length;
             const countVerified  = list.filter(p => (p.statusFlow || p.status) === 'CONTROLLED_HRD' || (p.statusFlow || p.status) === 'verified_hrga').length;
-            const countNotified  = list.filter(p => (p.statusFlow || p.status) === 'WA_SENT_DIREKSI' || (p.statusFlow || p.status) === 'notified_direksi').length;
-            const countConfirmed = list.filter(p => (p.statusFlow || p.status) === 'CONFIRMED_DIREKSI').length;
+            const countReadyST   = list.filter(p => ['WA_SENT_DIREKSI', 'CONFIRMED_DIREKSI', 'notified_direksi'].includes(p.statusFlow || p.status)).length;
             const countIssued    = list.filter(p => (p.statusFlow || p.status) === 'SURAT_TUGAS_ISSUED').length;
             const countRejected  = list.filter(p => (p.statusFlow || p.status) === 'REJECTED' || (p.statusFlow || p.status) === 'rejected').length;
 
@@ -616,17 +605,16 @@
                 .reduce((acc, curr) => acc + (curr.estimasiBiaya || curr.totalBiaya || 0), 0);
 
             // Update Stats Cards
-            document.getElementById('hrga-stat-pending').textContent = countPending;
-            document.getElementById('hrga-stat-verified').textContent = countVerified;
-            document.getElementById('hrga-stat-notified').textContent = countNotified;
-            document.getElementById('hrga-stat-budget').textContent = formatRupiah(totalBudgetVerified);
+            if (document.getElementById('hrga-stat-pending')) document.getElementById('hrga-stat-pending').textContent = countPending;
+            if (document.getElementById('hrga-stat-verified')) document.getElementById('hrga-stat-verified').textContent = countVerified;
+            if (document.getElementById('hrga-stat-ready-st')) document.getElementById('hrga-stat-ready-st').textContent = countReadyST;
+            if (document.getElementById('hrga-stat-budget')) document.getElementById('hrga-stat-budget').textContent = formatRupiah(totalBudgetVerified);
 
             // Update Tab Badges
             if (document.getElementById('hrga-count-tab-semua')) document.getElementById('hrga-count-tab-semua').textContent = list.length;
             if (document.getElementById('badge-count-pending-hrga')) document.getElementById('badge-count-pending-hrga').textContent = countPending;
             if (document.getElementById('badge-count-verified-hrga')) document.getElementById('badge-count-verified-hrga').textContent = countVerified;
-            if (document.getElementById('badge-count-notified-hrga')) document.getElementById('badge-count-notified-hrga').textContent = countNotified;
-            if (document.getElementById('badge-count-confirmed-hrga')) document.getElementById('badge-count-confirmed-hrga').textContent = countConfirmed;
+            if (document.getElementById('badge-count-ready-st')) document.getElementById('badge-count-ready-st').textContent = countReadyST;
             if (document.getElementById('badge-count-issued-hrga')) document.getElementById('badge-count-issued-hrga').textContent = countIssued;
             if (document.getElementById('badge-count-rejected-hrga')) document.getElementById('badge-count-rejected-hrga').textContent = countRejected;
 
@@ -637,7 +625,8 @@
                     const s = p.statusFlow || p.status;
                     if (currentHRGAFilter === 'APPROVED_ATASAN') return s === 'APPROVED_ATASAN' || s === 'approved';
                     if (currentHRGAFilter === 'CONTROLLED_HRD') return s === 'CONTROLLED_HRD' || s === 'verified_hrga';
-                    if (currentHRGAFilter === 'WA_SENT_DIREKSI') return s === 'WA_SENT_DIREKSI' || s === 'notified_direksi';
+                    if (currentHRGAFilter === 'READY_ST' || currentHRGAFilter === 'WA_SENT_DIREKSI') return ['WA_SENT_DIREKSI', 'CONFIRMED_DIREKSI', 'notified_direksi'].includes(s);
+                    if (currentHRGAFilter === 'SURAT_TUGAS_ISSUED') return s === 'SURAT_TUGAS_ISSUED';
                     if (currentHRGAFilter === 'REJECTED') return s === 'REJECTED' || s === 'rejected';
                     return s === currentHRGAFilter;
                 });
@@ -671,9 +660,9 @@
 
                 let actionBtn = '';
                 if (s === 'APPROVED_ATASAN' || s === 'approved') {
-                    // Stage 3: Verifikasi HRGA atau Tolak
+                    // Tahap 1: Verifikasi HRGA atau Tolak
                     actionBtn = `
-                        <button data-action="hrd-control" data-id="${item.noPengajuan}" onclick="openVerifikasiModal('${item.noPengajuan}')" class="px-3 py-1.5 rounded-lg bg-teal-gradient hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1" title="Verifikasi Kontrol Kebijakan HRGA">
+                        <button data-action="hrd-control" data-id="${item.noPengajuan}" onclick="openVerifikasiModal('${item.noPengajuan}')" class="px-3 py-1.5 rounded-lg bg-teal-gradient hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1" title="Verifikasi Kontrol Anggaran HRGA">
                             <i class="ph-bold ph-shield-check"></i> Verifikasi HRGA
                         </button>
                         <button data-action="hrd-reject" data-id="${item.noPengajuan}" onclick="openRejectModal('${item.noPengajuan}', 'hrga')" class="px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold shadow-sm transition-all flex items-center gap-1" title="Tolak Pengajuan">
@@ -681,7 +670,7 @@
                         </button>
                     `;
                 } else if (s === 'CONTROLLED_HRD' || s === 'verified_hrga') {
-                    // Stage 4: Kirim WA ke Direksi atau Tolak
+                    // Tahap 2: Kirim WA Notifikasi ke Direksi
                     actionBtn = `
                         <button data-action="wa-direksi" data-id="${item.noPengajuan}" onclick="openWAModal('${item.noPengajuan}')" class="px-3 py-1.5 rounded-lg bg-emerald-gradient hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1">
                             <i class="ph-bold ph-whatsapp-logo"></i> Kirim WA Direksi
@@ -690,31 +679,21 @@
                             <i class="ph-bold ph-x"></i> Tolak
                         </button>
                     `;
-                } else if (s === 'WA_SENT_DIREKSI' || s === 'notified_direksi') {
-                    // Stage 5: Input Konfirmasi OK atau Tolak Direksi
+                } else if (['WA_SENT_DIREKSI', 'CONFIRMED_DIREKSI', 'notified_direksi'].includes(s)) {
+                    // Tahap 3: Siap Terbitkan Surat Tugas (Langsung Aktif setelah Kirim WA)
                     actionBtn = `
-                        <button data-action="confirm-direksi" data-id="${item.noPengajuan}" onclick="openDireksiModal('${item.noPengajuan}', 'approve')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1" title="Verifikasi / Setujui OK Direksi">
-                            <i class="ph-bold ph-seal-check"></i> Input OK Direksi
+                        <button data-action="surat-tugas" data-id="${item.noPengajuan}" onclick="handleIssueSuratTugas('${item.noPengajuan}')" class="px-3 py-1.5 rounded-lg bg-brand-gradient hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1" title="Terbitkan Surat Tugas Resmi">
+                            <i class="ph-bold ph-file-text"></i> Terbitkan ST
                         </button>
-                        <button data-action="direksi-reject" data-id="${item.noPengajuan}" onclick="openDireksiModal('${item.noPengajuan}', 'reject')" class="px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold shadow-sm transition-all flex items-center gap-1" title="Tolak Keputusan Direksi">
-                            <i class="ph-bold ph-x"></i> Tolak Direksi
-                        </button>
-                        <button data-action="wa-direksi" data-id="${item.noPengajuan}" onclick="openWAModal('${item.noPengajuan}')" class="px-2 py-1.5 rounded-lg bg-[#141e33] border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition-all hover:bg-emerald-500/20" title="Buka WhatsApp">
+                        <button data-action="wa-direksi" data-id="${item.noPengajuan}" onclick="openWAModal('${item.noPengajuan}')" class="px-2 py-1.5 rounded-lg bg-[#141e33] border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition-all hover:bg-emerald-500/20" title="Buka WhatsApp Lagi">
                             <i class="ph-bold ph-whatsapp-logo"></i>
                         </button>
                     `;
-                } else if (s === 'CONFIRMED_DIREKSI') {
-                    // Stage 6: Terbitkan Surat Tugas
-                    actionBtn = `
-                        <button data-action="surat-tugas" data-id="${item.noPengajuan}" onclick="handleIssueSuratTugas('${item.noPengajuan}')" class="px-3 py-1.5 rounded-lg bg-brand-gradient hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1">
-                            <i class="ph-bold ph-file-text"></i> Terbitkan Surat Tugas
-                        </button>
-                    `;
                 } else if (s === 'SURAT_TUGAS_ISSUED') {
-                    // Cetak
+                    // Tahap 4: Cetak ST
                     actionBtn = `
                         <button data-action="print-st" data-id="${item.noPengajuan}" onclick="printSuratTugas('${item.noPengajuan}')" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1">
-                            <i class="ph-bold ph-printer"></i> Cetak Surat Tugas
+                            <i class="ph-bold ph-printer"></i> Cetak ST
                         </button>
                     `;
                 } else if (s === 'REJECTED' || s === 'rejected') {
@@ -928,7 +907,8 @@
             if (!currentWAId) return;
             await sendWADireksi(currentWAId);
             closeWAModal();
-            renderHRGADashboard();
+            setHRGAFilter('READY_ST');
+            showToast('success', 'Notifikasi Terkirim', 'Status pengajuan otomatis berpindah ke Siap Terbitkan ST.');
         }
 
         // Quick Stage 5: Input OK Direksi

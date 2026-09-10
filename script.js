@@ -103,21 +103,21 @@ function calculateDuration(startStr, endStr) {
 }
 
 // ============================================================
-// 6-STAGE STATUS PIPELINE DEFINITION
+// STATUS PIPELINE DEFINITION (HRGA WORKFLOW & NOTIFIKASI)
 // ============================================================
 const STATUS_PIPELINE = {
     SUBMITTED:          { label: 'Menunggu Atasan',        icon: 'ph-clock',             color: 'amber',   step: 1 },
-    APPROVED_ATASAN:    { label: 'Pending Kontrol HRGA',   icon: 'ph-check-circle',      color: 'blue',    step: 2 },
-    CONTROLLED_HRD:     { label: 'Terverifikasi HRGA',     icon: 'ph-shield-check',      color: 'teal',    step: 3 },
-    WA_SENT_DIREKSI:    { label: 'WA Terkirim ke Direksi', icon: 'ph-paper-plane-tilt',  color: 'violet',  step: 4 },
-    CONFIRMED_DIREKSI:  { label: 'Disetujui Direksi',      icon: 'ph-seal-check',        color: 'emerald', step: 5 },
-    SURAT_TUGAS_ISSUED: { label: 'Surat Tugas Terbit',     icon: 'ph-file-text',         color: 'indigo',  step: 6 },
+    APPROVED_ATASAN:    { label: 'Pending Kontrol HRGA',   icon: 'ph-check-circle',      color: 'blue',    step: 1 },
+    CONTROLLED_HRD:     { label: 'Terverifikasi HRGA',     icon: 'ph-shield-check',      color: 'teal',    step: 2 },
+    WA_SENT_DIREKSI:    { label: 'Notifikasi Terkirim',    icon: 'ph-seal-check',        color: 'emerald', step: 3 },
+    CONFIRMED_DIREKSI:  { label: 'Notifikasi Terkirim',    icon: 'ph-seal-check',        color: 'emerald', step: 3 },
+    SURAT_TUGAS_ISSUED: { label: 'Surat Tugas Terbit',     icon: 'ph-file-text',         color: 'indigo',  step: 4 },
     REJECTED:           { label: 'Ditolak',                icon: 'ph-x-circle',          color: 'rose',    step: 0 },
     // Backward-compat aliases
     pending:            { label: 'Menunggu Atasan',        icon: 'ph-clock',             color: 'amber',   step: 1 },
-    approved:           { label: 'Pending Kontrol HRGA',   icon: 'ph-check-circle',      color: 'blue',    step: 2 },
-    verified_hrga:      { label: 'Terverifikasi HRGA',     icon: 'ph-shield-check',      color: 'teal',    step: 3 },
-    notified_direksi:   { label: 'WA Terkirim ke Direksi', icon: 'ph-paper-plane-tilt',  color: 'violet',  step: 4 },
+    approved:           { label: 'Pending Kontrol HRGA',   icon: 'ph-check-circle',      color: 'blue',    step: 1 },
+    verified_hrga:      { label: 'Terverifikasi HRGA',     icon: 'ph-shield-check',      color: 'teal',    step: 2 },
+    notified_direksi:   { label: 'Notifikasi Terkirim',    icon: 'ph-seal-check',        color: 'emerald', step: 3 },
     rejected:           { label: 'Ditolak',                icon: 'ph-x-circle',          color: 'rose',    step: 0 },
 };
 
@@ -1237,7 +1237,8 @@ function calculateStatCards(list) {
 window.calculateStatCards = calculateStatCards;
 
 // ============================================================
-// SURAT TUGAS & SPPD PRINT VIEW GENERATOR
+// ============================================================
+// SURAT TUGAS & SPPD PRINT VIEW GENERATOR (RESMI A4)
 // ============================================================
 async function printSuratTugas(noPengajuan) {
     let item;
@@ -1252,40 +1253,230 @@ async function printSuratTugas(noPengajuan) {
     const old = document.getElementById('sppd-print-area');
     if (old) old.remove();
 
-    const dur = calculateDuration(item.tanggalBerangkat, item.tanggalKembali);
+    const tglBerangkat = formatDate(item.tanggalBerangkat || item.mulai);
+    const tglKembali = formatDate(item.tanggalKembali || item.selesai);
+    const dateRangeStr = `${tglBerangkat} s/d ${tglKembali}`;
+    const tglTerbitStr = formatDateFull(item.updatedAt || item.tanggalDisetujui || new Date().toISOString());
+    const nomorSurat = item.nomorSuratTugas || item.nomorSurat || item.noPengajuan || 'ST/HRGA/2026/09/014';
+    const kotaTujuan = item.kotaTujuan || item.tujuan || 'Surabaya';
+    const dept = item.kodeDepartemen || item.dept || '-';
+
+    // Master list karyawan untuk lookup NIP otomatis jika belum tersimpan
+    const _karyawanLookup = [
+        { nama: "RIZAL ALDI", dept: "PM1", nip: "010220231294" },
+        { nama: "TONI", dept: "PM1", nip: "020120251332" },
+        { nama: "WAHYUDI", dept: "PM1", nip: "010720041038" },
+        { nama: "DWI FAJAR SUGIANTO", dept: "PM1", nip: "00708533542" },
+        { nama: "HERU SETYAWAN", dept: "PM1", nip: "010720191143" },
+        { nama: "MUHAMMAD CHANDRA FERNANDA", dept: "PM1", nip: "011120221241" },
+        { nama: "ABDUL ROCHMAN", dept: "PM1", nip: "011120221244" },
+        { nama: "MUHAMMAD IZZUDIN AR RIFQI", dept: "PM1", nip: "011120221253" },
+        { nama: "M. S. AKMALUDDIN", dept: "PM1", nip: "011120221254" },
+        { nama: "DIMAS ALDITYA PUTRA UUDI", dept: "PM1", nip: "011120221257" },
+        { nama: "MUHAMMAD DAVID RENANDA ARDI", dept: "PM1", nip: "011120221266" },
+        { nama: "ANDHI WAHYU FIRMANSYAH", dept: "PM1", nip: "011120221269" },
+        { nama: "ACHMAD RAFI ZAKARIYAH", dept: "PM1", nip: "020120251329" },
+        { nama: "SAMSUL ARIF", dept: "PM1", nip: "020120251330" },
+        { nama: "YOSSY LINDUNG WIJAYA", dept: "PM1", nip: "020120251333" },
+        { nama: "HENDRA GUNAWAN", dept: "PM2", nip: "020120251341" },
+        { nama: "RIAN HIDAYAT", dept: "PM2", nip: "020120251342" },
+        { nama: "EKO WAHYUDI", dept: "HRGA", nip: "030120251350" },
+        { nama: "SITI NURHALIZA", dept: "HRGA", nip: "030120251351" },
+        { nama: "MAYA KARTIKA", dept: "FINANCE", nip: "040120251360" },
+        { nama: "DEWI ANGGRAINI", dept: "FINANCE", nip: "040120251361" },
+        { nama: "BAMBANG PAMUNGKAS", dept: "MARKETING", nip: "050120251370" }
+    ];
+
+    const _managerMap = {
+        "PM1": { nama: "Ir. H. Achmad Syafi'i", nip: "197508121999031001", jabatan: "Kepala Divisi PM1" },
+        "PM2": { nama: "Bambang Wijaya, S.T.", nip: "197805122003121001", jabatan: "Kepala Divisi PM2" },
+        "HRGA": { nama: "Kusuma Dwi Putra", nip: "198402152008011002", jabatan: "Assistant Manager HRGA" },
+        "FINANCE": { nama: "Sri Handayani, S.E.", nip: "198003202005012003", jabatan: "Kepala Divisi Finance" },
+        "MARKETING": { nama: "Agus Setiawan, S.E.", nip: "198211152006041002", jabatan: "Kepala Divisi Marketing" }
+    };
+
+    const _atasan = _managerMap[dept.toUpperCase()] || {
+        nama: item.namaAtasan || item.atasan || `Manager ${dept}`,
+        nip: item.nipAtasan || '197805122003121001',
+        jabatan: `Kepala Divisi ${dept}`
+    };
+    const managerNama = _atasan.nama;
+    const managerJabatan = _atasan.jabatan;
+    const managerNip = _atasan.nip;
+
+    // Parse clean keperluan and partner list
+    let rawMaksud = item.maksudTujuan || item.keperluan || '-';
+    let partnerList = [];
+    
+    const partnerMatch = rawMaksud.match(/\[(?:Partner|Rekan):\s*([^\]]+)\]/i);
+    if (partnerMatch) {
+        const pEntries = partnerMatch[1].split(',').map(s => s.trim()).filter(Boolean);
+        pEntries.forEach(entry => {
+            let pNama = entry;
+            let pNip = '';
+
+            // Check if entry format is "Nama (NIP)"
+            const nipInParentheses = entry.match(/^([^(]+)\(([^)]+)\)$/);
+            if (nipInParentheses) {
+                pNama = nipInParentheses[1].trim();
+                pNip = nipInParentheses[2].trim();
+            }
+
+            // Fallback lookup NIP from master database if NIP is empty or dash
+            if (!pNip || pNip === '-') {
+                const found = _karyawanLookup.find(k => k.nama.toUpperCase() === pNama.toUpperCase() || pNama.toUpperCase().includes(k.nama.toUpperCase()));
+                if (found) {
+                    pNip = found.nip;
+                }
+            }
+
+            partnerList.push({
+                nama: pNama,
+                nip: pNip || '-',
+                dept: dept
+            });
+        });
+        rawMaksud = rawMaksud.replace(/\[(?:Partner|Rekan):\s*[^\]]+\]/gi, '').trim();
+    }
+    rawMaksud = rawMaksud.replace(/\[Lampiran:\s*[^\]]+\]/gi, '').trim();
+    if (rawMaksud.startsWith('—')) rawMaksud = rawMaksud.substring(1).trim();
+    if (rawMaksud.endsWith('—')) rawMaksud = rawMaksud.substring(0, rawMaksud.length - 1).trim();
+
+    // Generate participant rows
+    let tableRowsHtml = `
+        <tr>
+            <td style="border:2px solid #000;padding:8px;text-align:center;font-weight:500;">1</td>
+            <td style="border:2px solid #000;padding:8px;">
+                <div style="font-weight:bold;">${item.nama}</div>
+                <div style="font-size:10pt;font-family:sans-serif;color:#333;">NIP: ${item.nomorID || item.nip || '-'}</div>
+            </td>
+            <td style="border:2px solid #000;padding:8px;text-align:center;font-weight:bold;font-family:sans-serif;">${dept}</td>
+            <td style="border:2px solid #000;padding:8px;text-align:center;">${dateRangeStr}</td>
+            <td style="border:2px solid #000;padding:8px;text-align:center;">${kotaTujuan}</td>
+        </tr>
+    `;
+
+    partnerList.forEach((partner, idx) => {
+        tableRowsHtml += `
+            <tr>
+                <td style="border:2px solid #000;padding:8px;text-align:center;font-weight:500;">${idx + 2}</td>
+                <td style="border:2px solid #000;padding:8px;">
+                    <div style="font-weight:bold;">${partner.nama}</div>
+                    <div style="font-size:10pt;font-family:sans-serif;color:#333;">NIP: ${partner.nip}</div>
+                </td>
+                <td style="border:2px solid #000;padding:8px;text-align:center;font-weight:bold;font-family:sans-serif;">${partner.dept}</td>
+                <td style="border:2px solid #000;padding:8px;text-align:center;">${dateRangeStr}</td>
+                <td style="border:2px solid #000;padding:8px;text-align:center;">${kotaTujuan}</td>
+            </tr>
+        `;
+    });
+
     const printArea = document.createElement('div');
     printArea.id = 'sppd-print-area';
 
     printArea.innerHTML = `
-    <div style="font-family:'Times New Roman',serif;max-width:800px;margin:0 auto;color:#111;padding:20px;line-height:1.6;background:#fff;">
-        <div style="display:flex;align-items:center;border-bottom:3px double #000;padding-bottom:12px;margin-bottom:20px;">
-            <div style="flex:1;text-align:center;">
-                <h2 style="margin:0;font-size:18pt;text-transform:uppercase;font-weight:bold;letter-spacing:1px;color:#000;">PT ADIPRIMA SURAPRINTA</h2>
-                <p style="margin:3px 0;font-size:10pt;color:#333;">Kawasan Industri Driyorejo, Gresik, Jawa Timur — Indonesia</p>
-                <p style="margin:0;font-size:9pt;color:#555;">Telp: (031) 7507888 | Email: corporate@adiprima.co.id | Website: www.adiprima.co.id</p>
+    <div style="font-family:'Times New Roman',Georgia,serif;max-width:21cm;min-height:29.7cm;margin:0 auto;color:#000;padding:35px 45px;line-height:1.6;background:#fff;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;font-size:13px;">
+        <div>
+            <!-- KOP SURAT RATA TENGAH -->
+            <div style="text-align:center;padding-bottom:12px;margin-bottom:16px;">
+                <h1 style="font-size:16pt;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;border-bottom:2px solid #000;display:inline-block;padding-bottom:2px;margin:0;">
+                    SURAT TUGAS
+                </h1>
+                <p style="font-size:13pt;font-weight:bold;text-transform:uppercase;margin:6px 0 2px 0;">
+                    PT ADIPRIMA SURAPRINTA
+                </p>
+                <p style="font-size:10pt;font-family:sans-serif;margin:0;font-weight:500;">
+                    Nomor: ${nomorSurat}
+                </p>
+            </div>
+
+            <!-- YANG BERTANDA TANGAN DI BAWAH INI (DINAMIS MANAGER DIVISI) -->
+            <div style="margin-bottom:16px;">
+                <p style="margin:0 0 6px 0;">Yang bertanda tangan di bawah ini:</p>
+                <table style="width:100%;max-width:400px;margin-left:16px;font-size:13px;border-collapse:collapse;">
+                    <tr>
+                        <td style="width:110px;padding:2px 0;font-weight:500;">Nama</td>
+                        <td style="width:15px;padding:2px 0;">:</td>
+                        <td style="padding:2px 0;font-weight:bold;">${managerNama}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:2px 0;font-weight:500;">Jabatan</td>
+                        <td style="padding:2px 0;">:</td>
+                        <td style="padding:2px 0;">${managerJabatan}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- PARAGRAF PEMBUKA: MAKSUD & TUJUAN -->
+            <div style="margin-bottom:16px;text-align:justify;">
+                <p style="margin:0;">
+                    Dengan ini menugaskan kepada pegawai yang namanya tercantum dalam daftar di bawah ini untuk melaksanakan perjalanan dinas ke <strong style="font-weight:bold;">${kotaTujuan}</strong> dalam rangka <span style="font-style:italic;">${rawMaksud}</span>.
+                </p>
+            </div>
+
+            <!-- TABEL DAFTAR PESERTA PENUGASAN (5 KOLOM BORDER HITAM TEBAL) -->
+            <div style="margin-bottom:18px;">
+                <table style="width:100%;border-collapse:collapse;border:2px solid #000;font-size:12px;">
+                    <thead>
+                        <tr style="background-color:#f1f5f9;text-align:center;font-weight:bold;">
+                            <th style="border:2px solid #000;padding:8px;width:40px;">No</th>
+                            <th style="border:2px solid #000;padding:8px;text-align:left;">Nama Pegawai / NIP</th>
+                            <th style="border:2px solid #000;padding:8px;width:110px;">Departemen</th>
+                            <th style="border:2px solid #000;padding:8px;width:150px;">Tanggal</th>
+                            <th style="border:2px solid #000;padding:8px;width:130px;">Tempat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRowsHtml}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 6 POIN KEWAJIBAN -->
+            <div style="margin-bottom:16px;text-align:justify;">
+                <p style="font-weight:bold;margin:0 0 6px 0;">Kewajiban selama melaksanakan tugas kedinasan:</p>
+                <ol style="margin:0 0 0 20px;padding:0;font-size:12px;line-height:1.5;">
+                    <li style="margin-bottom:4px;">Melaksanakan tugas kedinasan dengan penuh rasa tanggung jawab, integritas, dan dedikasi tinggi.</li>
+                    <li style="margin-bottom:4px;">Menjaga nama baik, kehormatan, dan kerahasiaan informasi perusahaan selama berada di lokasi penugasan.</li>
+                    <li style="margin-bottom:4px;">Mematuhi seluruh standar keselamatan kerja (K3) serta peraturan tata tertib yang berlaku di tempat tujuan.</li>
+                    <li style="margin-bottom:4px;">Melakukan koordinasi dan pelaporan berkala kepada atasan langsung terkait progres dan kendala pelaksanaan tugas.</li>
+                    <li style="margin-bottom:4px;">Mengisi dan menyerahkan Laporan Pertanggungjawaban Perjalanan Dinas (LPPD) selambat-lambatnya 3 (tiga) hari kerja setelah masa penugasan berakhir.</li>
+                    <li style="margin-bottom:4px;">Menyerahkan seluruh bukti sah pengeluaran riil kedinasan kepada bagian Finance/HRGA untuk proses rekonsiliasi administrasi.</li>
+                </ol>
+            </div>
+
+            <!-- KALIMAT PENUTUP -->
+            <div style="margin-bottom:20px;text-align:justify;font-size:12.5px;">
+                <p style="margin:0 0 6px 0;">
+                    Demikian Surat Tugas ini diterbitkan untuk dilaksanakan dengan sebaik-baiknya dan penuh rasa tanggung jawab oleh yang bersangkutan.
+                </p>
+                <p style="margin:0;">
+                    Setelah melaksanakan tugas kedinasan tersebut, yang bersangkutan diwajibkan untuk segera membuat laporan tertulis mengenai hasil pelaksanaan tugas kepada Pimpinan Perusahaan.
+                </p>
             </div>
         </div>
-        <div style="text-align:center;margin-bottom:25px;">
-            <h3 style="margin:0;font-size:14pt;text-decoration:underline;font-weight:bold;text-transform:uppercase;color:#000;">SURAT TUGAS PERJALANAN DINAS</h3>
-            <p style="margin:4px 0 0 0;font-size:11pt;color:#222;">Nomor: <strong>${item.nomorSuratTugas || item.noPengajuan}</strong></p>
-        </div>
-        <table style="width:100%;border-collapse:collapse;margin-bottom:25px;font-size:11pt;color:#000;" border="1" cellpadding="8">
-            <tr><td style="width:5%;text-align:center;font-weight:bold;">1</td><td style="width:35%;">Nama / Nomor ID Pegawai</td><td><strong>${item.nama}</strong> / ${item.nomorID}</td></tr>
-            <tr><td style="text-align:center;font-weight:bold;">2</td><td>Departemen / Jabatan</td><td>${item.kodeDepartemen} / ${item.kodeJabatan}</td></tr>
-            <tr><td style="text-align:center;font-weight:bold;">3</td><td>Tujuan Perjalanan Dinas</td><td><strong>${item.kotaTujuan}</strong> (${item.areaTujuan || 'Jawa'})</td></tr>
-            <tr><td style="text-align:center;font-weight:bold;">4</td><td>Maksud / Keperluan</td><td>${item.maksudTujuan}</td></tr>
-            <tr><td style="text-align:center;font-weight:bold;">5</td><td>Kriteria Fasilitas</td><td>${item.kriteriaFasilitas}</td></tr>
-            <tr><td style="text-align:center;font-weight:bold;">6</td>
-                <td>a. Tanggal Berangkat<br>b. Tanggal Kembali<br>c. Lama Perjalanan</td>
-                <td>a. ${formatDateFull(item.tanggalBerangkat)}<br>b. ${formatDateFull(item.tanggalKembali)}<br>c. ${dur} Hari</td></tr>
-            <tr><td style="text-align:center;font-weight:bold;">7</td><td>Estimasi Biaya</td><td><strong>${formatRupiah(item.estimasiBiaya)}</strong></td></tr>
-            <tr><td style="text-align:center;font-weight:bold;">8</td><td>Catatan HRD/HRGA</td><td>${item.catatanHRD || 'Sesuai kebijakan perusahaan.'}</td></tr>
-            <tr><td style="text-align:center;font-weight:bold;">9</td><td>Persetujuan Direksi</td><td>${item.konfirmasiDireksiNote || 'Disetujui'}</td></tr>
-        </table>
-        <div style="display:flex;justify-content:space-between;margin-top:40px;font-size:11pt;color:#000;">
-            <div style="text-align:center;width:30%;"><p style="margin-bottom:60px;">Pegawai yang Melaksanakan Tugas,</p><p style="margin:0;font-weight:bold;text-decoration:underline;">${item.nama}</p><p style="margin:0;font-size:9pt;">NIP: ${item.nomorID}</p></div>
-            <div style="text-align:center;width:30%;"><p style="margin:0 0 60px 0;">Dikeluarkan di: Gresik<br>Pada tanggal: ${formatDateFull(new Date().toISOString())}</p><p style="margin:0;font-weight:bold;text-decoration:underline;">${item.atasanNama || 'Atasan Langsung'}</p><p style="margin:0;font-size:9pt;">Atasan Langsung</p></div>
-            <div style="text-align:center;width:30%;"><p style="margin:0 0 60px 0;">Mengetahui,<br>HRD/HRGA PT Adiprima Suraprinta</p><p style="margin:0;font-weight:bold;text-decoration:underline;">Dewi Rahayu</p><p style="margin:0;font-size:9pt;">HRGA Supervisor</p></div>
+
+        <!-- FORMAT TANDA TANGAN (DINAMIS 2 KOLOM + PROTEKSI ANTI-PAGE BREAK) -->
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding-top:10px;break-inside:avoid;page-break-inside:avoid;">
+            <!-- Sisi Kiri: HRGA Penyetuju (Rata Kiri) -->
+            <div style="width:45%;display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding-left:16px;">
+                <p style="margin:0;">Gresik, ${tglTerbitStr}</p>
+                <p style="font-weight:bold;text-transform:uppercase;margin:2px 0 0 0;letter-spacing:0.5px;">PT ADIPRIMA SURAPRINTA</p>
+                <div style="height:65px;"></div>
+                <p style="font-weight:bold;text-decoration:underline;text-transform:uppercase;margin:0;">Kusuma Dwi Putra</p>
+                <p style="font-size:11px;font-family:sans-serif;margin:2px 0 0 0;">NIP: 198402152008011002</p>
+                <p style="font-size:11px;color:#333;margin:1px 0 0 0;">Assistant Manager HRGA</p>
+            </div>
+
+            <!-- Sisi Kanan: Kepala Divisi / Atasan (Rata Tengah) -->
+            <div style="width:45%;display:flex;flex-direction:column;align-items:center;text-align:center;">
+                <p style="margin:0;visibility:hidden;">&nbsp;</p>
+                <p style="font-weight:bold;text-transform:uppercase;margin:2px 0 0 0;letter-spacing:0.5px;">MENGETAHUI,</p>
+                <div style="height:65px;"></div>
+                <p style="font-weight:bold;text-decoration:underline;text-transform:uppercase;margin:0;">${managerNama}</p>
+                <p style="font-size:11px;font-family:sans-serif;margin:2px 0 0 0;">NIP: ${managerNip}</p>
+                <p style="font-size:11px;color:#333;margin:1px 0 0 0;">Kepala Divisi / Atasan Yang Berwenang</p>
+            </div>
         </div>
     </div>`;
 

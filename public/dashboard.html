@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIPADIN — Dashboard Karyawan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: #0a0f1e; }
+    .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+    .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+    .gradient-text { background: linear-gradient(135deg,#818cf8,#38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .btn-primary { background: linear-gradient(135deg,#6366f1,#4f46e5); transition: all .3s; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,.4); }
+    .btn-danger { background: linear-gradient(135deg,#ef4444,#dc2626); transition: all .3s; }
+    .btn-danger:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(239,68,68,.3); }
+    .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; transition: .2s; }
+    .input-field:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.2); }
+    .input-field::placeholder { color: rgba(255,255,255,0.3); }
+    select.input-field option { background: #1e293b; }
+    .table-row { border-bottom: 1px solid rgba(255,255,255,0.05); transition: background .2s; }
+    .table-row:hover { background: rgba(255,255,255,0.03); }
+    .modal-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
+    .stepper-line { height: 2px; background: linear-gradient(90deg, #6366f1, rgba(99,102,241,0.2)); }
+    .stepper-active { background: #6366f1; box-shadow: 0 0 12px rgba(99,102,241,0.6); }
+    .stepper-done { background: #10b981; box-shadow: 0 0 12px rgba(16,185,129,0.4); }
+    .stepper-rejected { background: #ef4444; box-shadow: 0 0 12px rgba(239,68,68,0.4); }
+    #toast { transition: all .4s cubic-bezier(0.175,0.885,0.32,1.275); transform: translateY(80px); opacity: 0; }
+    #toast.show { transform: translateY(0); opacity: 1; }
+  </style>
+</head>
+<body class="text-white min-h-screen">
+<div id="sidebarContainer"></div>
+
+<main class="lg:ml-64 min-h-screen">
+  <div class="p-6 md:p-8">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Dashboard <span class="gradient-text">Pengajuan Saya</span></h1>
+        <p id="greetingText" class="text-slate-400 text-sm mt-1"></p>
+      </div>
+      <button onclick="openCreateModal()" id="btnCreate"
+        class="btn-primary px-5 py-2.5 rounded-xl text-white text-sm font-semibold flex items-center gap-2 self-start sm:self-auto">
+        <i class="ph-bold ph-plus"></i> Buat Pengajuan
+      </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" id="statsGrid">
+      <div class="glass-card rounded-2xl p-4 col-span-2 lg:col-span-1 animate-pulse">
+        <div class="h-4 bg-white/5 rounded w-3/4 mb-3"></div>
+        <div class="h-8 bg-white/5 rounded w-1/2"></div>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="glass-card rounded-2xl p-4 mb-5 flex flex-wrap gap-3 items-center">
+      <select id="filterStatus" onchange="loadList()"
+        class="input-field rounded-xl px-3 py-2 text-sm flex-1 min-w-40">
+        <option value="">Semua Status</option>
+        <option value="draft">Draft</option>
+        <option value="pending_manager">Menunggu Manager</option>
+        <option value="pending_hrga">Menunggu HRGA</option>
+        <option value="pending_finance">Menunggu Finance</option>
+        <option value="ready_to_send">Siap Dikirim</option>
+        <option value="approved">Disetujui</option>
+        <option value="rejected">Ditolak</option>
+      </select>
+      <button onclick="loadList()" class="px-4 py-2 rounded-xl border border-white/10 text-slate-300 text-sm hover:bg-white/5 transition flex items-center gap-2">
+        <i class="ph-bold ph-arrows-clockwise"></i> Refresh
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="glass-card rounded-2xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-white/10">
+              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">No. SPPD</th>
+              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Tujuan</th>
+              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Tanggal</th>
+              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Status</th>
+              <th class="text-center px-4 py-3.5 text-slate-400 font-medium">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="sppdTableBody">
+            <tr><td colspan="5" class="text-center py-12 text-slate-500">
+              <i class="ph-bold ph-spinner-gap text-3xl mb-2 block animate-spin"></i>Memuat data...
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      <div class="flex items-center justify-between px-4 py-3 border-t border-white/5">
+        <p id="paginationInfo" class="text-slate-500 text-xs"></p>
+        <div class="flex gap-2" id="paginationBtns"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ─── Modal Buat / Edit SPPD ─────────────────────────────────────────────── -->
+<div id="modalSppd" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-overlay">
+  <div class="glass border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between p-6 border-b border-white/10 sticky top-0 glass">
+      <h2 id="modalTitle" class="text-lg font-bold text-white">Buat Pengajuan SPPD</h2>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1">
+        <i class="ph-bold ph-x text-xl"></i>
+      </button>
+    </div>
+    <form id="sppdForm" class="p-6 space-y-5">
+      <input type="hidden" id="editId" />
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="text-xs font-medium text-slate-400 mb-1.5 block">Kota Tujuan *</label>
+          <input id="f_kota" type="text" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="Contoh: Surabaya" required />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-400 mb-1.5 block">Instansi / Lokasi *</label>
+          <input id="f_instansi" type="text" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="Nama instansi atau lokasi" required />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-400 mb-1.5 block">Tanggal Berangkat *</label>
+          <input id="f_tgl_berangkat" type="date" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" required />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-400 mb-1.5 block">Tanggal Kembali *</label>
+          <input id="f_tgl_kembali" type="date" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" required />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-400 mb-1.5 block">Transportasi</label>
+          <select id="f_transportasi" class="input-field w-full rounded-xl px-3 py-2.5 text-sm">
+            <option value="">-- Pilih --</option>
+            <option>Pesawat</option>
+            <option>Kereta</option>
+            <option>Mobil Dinas</option>
+            <option>Travel</option>
+            <option>Bus</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-400 mb-1.5 block">Akomodasi</label>
+          <select id="f_akomodasi" class="input-field w-full rounded-xl px-3 py-2.5 text-sm">
+            <option value="">-- Pilih --</option>
+            <option>Hotel</option>
+            <option>Mess</option>
+            <option>Tidak perlu</option>
+          </select>
+        </div>
+        <div class="sm:col-span-2">
+          <label class="text-xs font-medium text-slate-400 mb-1.5 block">Estimasi Biaya (Rp)</label>
+          <input id="f_biaya" type="number" min="0" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="0" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="text-xs font-medium text-slate-400 mb-1.5 block">Maksud & Tujuan Dinas *</label>
+          <textarea id="f_maksud" rows="3" class="input-field w-full rounded-xl px-3 py-2.5 text-sm resize-none"
+            placeholder="Jelaskan keperluan perjalanan dinas..." required></textarea>
+        </div>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeModal()"
+          class="flex-1 py-2.5 rounded-xl border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/5 transition">
+          Batal
+        </button>
+        <button type="button" onclick="saveDraft()"
+          class="flex-1 py-2.5 rounded-xl border border-indigo-500/40 text-indigo-300 text-sm font-medium hover:bg-indigo-500/10 transition flex items-center justify-center gap-2">
+          <i class="ph-bold ph-floppy-disk"></i> Simpan Draft
+        </button>
+        <button type="submit"
+          class="flex-1 btn-primary py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2">
+          <i class="ph-bold ph-paper-plane-right"></i> Ajukan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ─── Modal Detail / Stepper ─────────────────────────────────────────────── -->
+<div id="modalDetail" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-overlay">
+  <div class="glass border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between p-6 border-b border-white/10 sticky top-0 glass">
+      <h2 class="text-lg font-bold text-white">Detail Pengajuan SPPD</h2>
+      <button onclick="closeDetail()" class="text-slate-400 hover:text-white transition p-1">
+        <i class="ph-bold ph-x text-xl"></i>
+      </button>
+    </div>
+    <div id="detailContent" class="p-6"></div>
+  </div>
+</div>
+
+<div id="toast" class="fixed bottom-6 right-6 z-[9999] px-5 py-3 rounded-xl glass border text-sm font-medium flex items-center gap-2.5 min-w-64">
+  <i id="toastIcon" class="ph-bold text-lg"></i><span id="toastMsg"></span>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/sidebar.js"></script>
+<script>
+  requireAuth();
+  const user = getCurrentUser();
+  renderSidebar('dashboard');
+
+  // Sembunyikan tombol buat untuk Direksi
+  if (user.role_sistem === 'Direksi') {
+    document.getElementById('btnCreate').classList.add('hidden');
+  }
+
+  // Greeting
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Selamat Pagi' : hour < 15 ? 'Selamat Siang' : hour < 18 ? 'Selamat Sore' : 'Selamat Malam';
+  document.getElementById('greetingText').textContent = `${greet}, ${user.nama_lengkap}. Berikut daftar pengajuan Anda.`;
+
+  let currentPage = 1;
+  let totalData   = 0;
+  const LIMIT     = 10;
+
+  // ── Load Stats ──────────────────────────────────────────────────────────────
+  async function loadStats() {
+    const res = await api.getMyList({ limit: 100 });
+    if (!res?.success) return;
+    const items = res.data || [];
+    const counts = { all: items.length, draft: 0, pending: 0, approved: 0, rejected: 0 };
+    items.forEach(s => {
+      if (s.status_dokumen === 'draft') counts.draft++;
+      else if (s.status_dokumen.startsWith('pending') || s.status_dokumen === 'ready_to_send') counts.pending++;
+      else if (s.status_dokumen === 'approved') counts.approved++;
+      else if (s.status_dokumen === 'rejected') counts.rejected++;
+    });
+    const statCards = [
+      { label: 'Total Pengajuan', val: counts.all,      icon: 'ph-files',         color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+      { label: 'Draft',           val: counts.draft,     icon: 'ph-file-dashed',   color: 'text-slate-400',  bg: 'bg-slate-500/10' },
+      { label: 'Dalam Proses',    val: counts.pending,   icon: 'ph-clock',         color: 'text-amber-400',  bg: 'bg-amber-500/10' },
+      { label: 'Disetujui',       val: counts.approved,  icon: 'ph-check-circle',  color: 'text-emerald-400',bg: 'bg-emerald-500/10' },
+    ];
+    document.getElementById('statsGrid').innerHTML = statCards.map(s => `
+      <div class="glass-card rounded-2xl p-4">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="${s.bg} w-9 h-9 rounded-xl flex items-center justify-center">
+            <i class="ph-bold ${s.icon} ${s.color} text-base"></i>
+          </div>
+          <p class="text-slate-400 text-xs font-medium">${s.label}</p>
+        </div>
+        <p class="text-3xl font-bold text-white">${s.val}</p>
+      </div>`).join('');
+  }
+
+  // ── Load List ───────────────────────────────────────────────────────────────
+  async function loadList() {
+    const status = document.getElementById('filterStatus').value;
+    const res = await api.getMyList({ status, page: currentPage, limit: LIMIT });
+    const tbody = document.getElementById('sppdTableBody');
+    if (!res?.success) {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-red-400">Gagal memuat data</td></tr>';
+      return;
+    }
+    const items = res.data || [];
+    totalData = res.total || 0;
+    if (!items.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-12 text-slate-500"><i class="ph-bold ph-inbox text-4xl mb-2 block"></i>Belum ada pengajuan</td></tr>';
+      renderPagination();
+      return;
+    }
+    tbody.innerHTML = items.map(s => `
+      <tr class="table-row">
+        <td class="px-4 py-3.5">
+          <p class="text-white text-xs font-mono font-medium">${s.no_sppd || '<span class="text-slate-600 italic">Belum diajukan</span>'}</p>
+          <p class="text-slate-500 text-xs">${formatDate(s.created_at)}</p>
+        </td>
+        <td class="px-4 py-3.5">
+          <p class="text-white text-sm font-medium">${s.kota_tujuan}</p>
+          <p class="text-slate-500 text-xs truncate max-w-xs">${s.instansi_tujuan}</p>
+        </td>
+        <td class="px-4 py-3.5">
+          <p class="text-slate-300 text-xs">${formatDateShort(s.tgl_berangkat)}</p>
+          <p class="text-slate-500 text-xs">s/d ${formatDateShort(s.tgl_kembali)} (${s.durasi_hari}h)</p>
+        </td>
+        <td class="px-4 py-3.5">${statusBadge(s.status_dokumen)}</td>
+        <td class="px-4 py-3.5">
+          <div class="flex items-center justify-center gap-2">
+            <button onclick="openDetail(${s.id_sppd})" title="Lihat Detail"
+              class="p-2 rounded-lg hover:bg-indigo-500/20 text-slate-400 hover:text-indigo-300 transition">
+              <i class="ph-bold ph-eye text-base"></i>
+            </button>
+            ${s.status_dokumen === 'draft' ? `
+            <button onclick="openEdit(${s.id_sppd})" title="Edit"
+              class="p-2 rounded-lg hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 transition">
+              <i class="ph-bold ph-pencil text-base"></i>
+            </button>
+            <button onclick="deleteSppd(${s.id_sppd})" title="Hapus"
+              class="p-2 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-300 transition">
+              <i class="ph-bold ph-trash text-base"></i>
+            </button>` : ''}
+          </div>
+        </td>
+      </tr>`).join('');
+    renderPagination();
+  }
+
+  function renderPagination() {
+    const totalPages = Math.ceil(totalData / LIMIT);
+    document.getElementById('paginationInfo').textContent =
+      `Menampilkan ${Math.min((currentPage-1)*LIMIT+1, totalData)}–${Math.min(currentPage*LIMIT, totalData)} dari ${totalData} data`;
+    document.getElementById('paginationBtns').innerHTML = `
+      <button onclick="goPage(${currentPage-1})" ${currentPage<=1?'disabled':''} class="px-3 py-1.5 rounded-lg border border-white/10 text-slate-400 text-xs disabled:opacity-30 hover:bg-white/5 transition">
+        <i class="ph-bold ph-caret-left"></i>
+      </button>
+      <span class="px-3 py-1.5 text-xs text-slate-400">${currentPage} / ${totalPages||1}</span>
+      <button onclick="goPage(${currentPage+1})" ${currentPage>=totalPages?'disabled':''} class="px-3 py-1.5 rounded-lg border border-white/10 text-slate-400 text-xs disabled:opacity-30 hover:bg-white/5 transition">
+        <i class="ph-bold ph-caret-right"></i>
+      </button>`;
+  }
+
+  function goPage(p) { if(p>=1) { currentPage=p; loadList(); } }
+
+  // ── Modal Handlers ───────────────────────────────────────────────────────────
+  function openCreateModal() {
+    document.getElementById('editId').value = '';
+    document.getElementById('modalTitle').textContent = 'Buat Pengajuan SPPD';
+    document.getElementById('sppdForm').reset();
+    document.getElementById('modalSppd').classList.remove('hidden');
+    document.getElementById('modalSppd').classList.add('flex');
+  }
+
+  async function openEdit(id) {
+    const res = await api.getSppdByID(id);
+    if (!res?.success) return showToast('Gagal memuat data', 'error');
+    const s = res.data;
+    document.getElementById('editId').value = id;
+    document.getElementById('modalTitle').textContent = 'Edit Draft SPPD';
+    document.getElementById('f_kota').value      = s.kota_tujuan;
+    document.getElementById('f_instansi').value  = s.instansi_tujuan;
+    document.getElementById('f_maksud').value    = s.maksud_tujuan;
+    document.getElementById('f_tgl_berangkat').value = s.tgl_berangkat?.split('T')[0];
+    document.getElementById('f_tgl_kembali').value   = s.tgl_kembali?.split('T')[0];
+    document.getElementById('f_transportasi').value  = s.transportasi;
+    document.getElementById('f_akomodasi').value     = s.akomodasi;
+    document.getElementById('f_biaya').value         = s.estimasi_biaya;
+    document.getElementById('modalSppd').classList.remove('hidden');
+    document.getElementById('modalSppd').classList.add('flex');
+  }
+
+  function closeModal() {
+    document.getElementById('modalSppd').classList.add('hidden');
+    document.getElementById('modalSppd').classList.remove('flex');
+  }
+
+  function getFormData() {
+    return {
+      kota_tujuan:     document.getElementById('f_kota').value.trim(),
+      instansi_tujuan: document.getElementById('f_instansi').value.trim(),
+      maksud_tujuan:   document.getElementById('f_maksud').value.trim(),
+      tgl_berangkat:   document.getElementById('f_tgl_berangkat').value,
+      tgl_kembali:     document.getElementById('f_tgl_kembali').value,
+      transportasi:    document.getElementById('f_transportasi').value,
+      akomodasi:       document.getElementById('f_akomodasi').value,
+      estimasi_biaya:  parseFloat(document.getElementById('f_biaya').value) || 0,
+    };
+  }
+
+  async function saveDraft() {
+    const body = getFormData();
+    const editId = document.getElementById('editId').value;
+    const res = editId
+      ? await api.updateSppd(editId, body)
+      : await api.createSppd(body);
+    if (!res?.success) { showToast(res?.message || 'Gagal menyimpan', 'error'); return; }
+    showToast('Draft berhasil disimpan', 'success');
+    closeModal(); loadList(); loadStats();
+  }
+
+  document.getElementById('sppdForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const body = getFormData();
+    const editId = document.getElementById('editId').value;
+    let res;
+    if (editId) {
+      res = await api.updateSppd(editId, body);
+      if (res?.success) {
+        const submitRes = await api.submitSppd(editId);
+        res = submitRes;
+      }
+    } else {
+      res = await api.createSppd(body);
+      if (res?.success) {
+        const submitRes = await api.submitSppd(res.data.id_sppd);
+        res = submitRes;
+      }
+    }
+    if (!res?.success) { showToast(res?.message || 'Gagal mengajukan', 'error'); return; }
+    showToast('SPPD berhasil diajukan ke Manager!', 'success');
+    closeModal(); loadList(); loadStats();
+  });
+
+  async function deleteSppd(id) {
+    showConfirm('Hapus pengajuan ini? Data yang dihapus tidak dapat dikembalikan.', async () => {
+      const res = await api.deleteSppd(id);
+      if (!res?.success) { showToast(res?.message || 'Gagal menghapus', 'error'); return; }
+      showToast('Pengajuan berhasil dihapus', 'success');
+      loadList(); loadStats();
+    });
+  }
+
+  // ── Detail & Stepper ─────────────────────────────────────────────────────────
+  async function openDetail(id) {
+    document.getElementById('detailContent').innerHTML = '<div class="flex justify-center py-8"><i class="ph-bold ph-spinner-gap text-3xl text-indigo-400 animate-spin"></i></div>';
+    document.getElementById('modalDetail').classList.remove('hidden');
+    document.getElementById('modalDetail').classList.add('flex');
+
+    const res = await api.getSppdByID(id);
+    if (!res?.success) {
+      document.getElementById('detailContent').innerHTML = '<p class="text-red-400 text-center py-8">Gagal memuat data</p>';
+      return;
+    }
+    const s = res.data;
+    const logs = s.approval_logs || [];
+
+    const steppers = [
+      { key: 'Manager',  label: 'Manager',  icon: 'ph-user-check' },
+      { key: 'HRGA',     label: 'HRGA',     icon: 'ph-shield-check' },
+      { key: 'Finance',  label: 'Finance',  icon: 'ph-currency-dollar' },
+      { key: 'Direksi',  label: 'Direksi',  icon: 'ph-crown' },
+    ];
+
+    const getStepStatus = (key) => {
+      const log = logs.find(l => l.tahap_approval === key);
+      if (!log) return 'pending';
+      if (log.status_tindakan === 'Rejected') return 'rejected';
+      return 'done';
+    };
+
+    document.getElementById('detailContent').innerHTML = `
+      <div class="space-y-5">
+        <!-- Info Utama -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="glass-card rounded-xl p-3 col-span-2">
+            <p class="text-xs text-slate-500 mb-1">Nomor SPPD</p>
+            <p class="text-white font-mono font-semibold">${s.no_sppd || '<span class="text-slate-500 italic text-sm">Belum diajukan</span>'}</p>
+          </div>
+          <div class="glass-card rounded-xl p-3">
+            <p class="text-xs text-slate-500 mb-1">Kota Tujuan</p>
+            <p class="text-white text-sm font-medium">${s.kota_tujuan}</p>
+          </div>
+          <div class="glass-card rounded-xl p-3">
+            <p class="text-xs text-slate-500 mb-1">Instansi</p>
+            <p class="text-white text-sm">${s.instansi_tujuan}</p>
+          </div>
+          <div class="glass-card rounded-xl p-3">
+            <p class="text-xs text-slate-500 mb-1">Berangkat</p>
+            <p class="text-white text-sm">${formatDate(s.tgl_berangkat)}</p>
+          </div>
+          <div class="glass-card rounded-xl p-3">
+            <p class="text-xs text-slate-500 mb-1">Kembali (${s.durasi_hari} hari)</p>
+            <p class="text-white text-sm">${formatDate(s.tgl_kembali)}</p>
+          </div>
+          <div class="glass-card rounded-xl p-3">
+            <p class="text-xs text-slate-500 mb-1">Transportasi</p>
+            <p class="text-white text-sm">${s.transportasi || '-'}</p>
+          </div>
+          <div class="glass-card rounded-xl p-3">
+            <p class="text-xs text-slate-500 mb-1">Estimasi Biaya</p>
+            <p class="text-emerald-400 text-sm font-semibold">${formatRupiah(s.estimasi_biaya)}</p>
+          </div>
+          <div class="glass-card rounded-xl p-3 col-span-2">
+            <p class="text-xs text-slate-500 mb-1">Status</p>
+            ${statusBadge(s.status_dokumen)}
+          </div>
+        </div>
+
+        <!-- Stepper Approval -->
+        <div>
+          <p class="text-xs font-medium text-slate-400 mb-4">Alur Persetujuan</p>
+          <div class="flex items-center gap-2">
+            ${steppers.map((step, i) => {
+              const st = getStepStatus(step.key);
+              const log = logs.find(l => l.tahap_approval === step.key);
+              return `
+                <div class="flex-1 flex flex-col items-center gap-2">
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center text-base
+                    ${st === 'done' ? 'stepper-done text-white' : st === 'rejected' ? 'stepper-rejected text-white' : 'bg-white/5 text-slate-500 border border-white/10'}">
+                    <i class="ph-bold ${st === 'done' ? 'ph-check' : st === 'rejected' ? 'ph-x' : step.icon}"></i>
+                  </div>
+                  <div class="text-center">
+                    <p class="text-xs font-medium ${st === 'done' ? 'text-emerald-400' : st === 'rejected' ? 'text-red-400' : 'text-slate-500'}">${step.label}</p>
+                    ${log ? `<p class="text-xs text-slate-600">${formatDateShort(log.tgl_tindakan)}</p>` : ''}
+                    ${log?.status_tindakan === 'Rejected' && log.catatan ? `<p class="text-xs text-red-400/70 italic">"${log.catatan}"</p>` : ''}
+                  </div>
+                </div>
+                ${i < steppers.length - 1 ? '<div class="flex-1 h-0.5 bg-white/5 mt-[-24px]"></div>' : ''}
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function closeDetail() {
+    document.getElementById('modalDetail').classList.add('hidden');
+    document.getElementById('modalDetail').classList.remove('flex');
+  }
+
+  // Toast helper
+  function showToast(msg, type='info') {
+    const t = document.getElementById('toast');
+    const icon = document.getElementById('toastIcon');
+    document.getElementById('toastMsg').textContent = msg;
+    const c = { success:{border:'rgba(34,197,94,.4)',cls:'ph-check-circle text-emerald-400'},
+                 error:{border:'rgba(239,68,68,.4)',cls:'ph-x-circle text-red-400'},
+                 info:{border:'rgba(99,102,241,.4)',cls:'ph-info text-indigo-400'} };
+    const cfg = c[type]||c.info;
+    t.style.borderColor = cfg.border;
+    icon.className = `ph-bold ${cfg.cls} text-lg`;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 3500);
+  }
+
+  loadStats();
+  loadList();
+</script>
+</body>
+</html>

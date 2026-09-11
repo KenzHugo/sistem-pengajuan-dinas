@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIPADIN — Laporan & Rekap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: #0a0f1e; }
+    .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+    .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+    .gradient-text { background: linear-gradient(135deg,#34d399,#38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .table-row { border-bottom: 1px solid rgba(255,255,255,0.05); transition: background .2s; }
+    .table-row:hover { background: rgba(255,255,255,0.03); }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .btn-export { background: linear-gradient(135deg,#10b981,#059669); transition: all .3s; }
+    .btn-export:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,.3); }
+    .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; transition: .2s; }
+    .input-field:focus { outline: none; border-color: #6366f1; }
+    select.input-field option { background: #1e293b; }
+  </style>
+</head>
+<body class="text-white min-h-screen">
+<div id="sidebarContainer"></div>
+<main class="lg:ml-64 min-h-screen">
+  <div class="p-6 md:p-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Laporan & <span class="gradient-text">Rekapitulasi</span></h1>
+        <p class="text-slate-400 text-sm mt-1">Rekap seluruh SPPD yang telah disetujui maupun ditolak</p>
+      </div>
+      <button onclick="exportCSV()" class="btn-export px-5 py-2.5 rounded-xl text-white text-sm font-semibold flex items-center gap-2 self-start sm:self-auto">
+        <i class="ph-bold ph-download-simple"></i> Export CSV
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" id="statsGrid">
+      <div class="glass-card rounded-2xl p-4 animate-pulse col-span-2 lg:col-span-1">
+        <div class="h-4 bg-white/5 rounded w-3/4 mb-3"></div>
+        <div class="h-8 bg-white/5 rounded w-1/2"></div>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="glass-card rounded-2xl p-4 mb-5 flex flex-wrap gap-3 items-center">
+      <select id="filterStatus" onchange="loadList()" class="input-field rounded-xl px-3 py-2 text-sm flex-1 min-w-40">
+        <option value="">Semua Status Final</option>
+        <option value="approved">Disetujui</option>
+        <option value="rejected">Ditolak</option>
+      </select>
+      <button onclick="loadList()" class="px-4 py-2 rounded-xl border border-white/10 text-slate-300 text-sm hover:bg-white/5 transition flex items-center gap-2">
+        <i class="ph-bold ph-arrows-clockwise"></i>
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="glass-card rounded-2xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm" id="laporanTable">
+          <thead>
+            <tr class="border-b border-white/10">
+              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">No. SPPD</th>
+              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Pemohon</th>
+              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Tujuan</th>
+              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Tanggal</th>
+              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Biaya</th>
+              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Status</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="6" class="text-center py-12 text-slate-500">
+              <i class="ph-bold ph-spinner-gap text-3xl mb-2 block animate-spin"></i>Memuat data...
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="flex items-center justify-between px-4 py-3 border-t border-white/5">
+        <p id="paginationInfo" class="text-slate-500 text-xs"></p>
+        <div class="flex gap-2" id="paginationBtns"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="/js/api.js"></script>
+<script src="/js/sidebar.js"></script>
+<script>
+  requireAuth();
+  const user = getCurrentUser();
+  renderSidebar('laporan');
+
+  let currentPage = 1;
+  let totalData = 0;
+  const LIMIT = 15;
+  let allData = [];
+
+  async function loadStats() {
+    const res = await api.getAllList({ limit: 1000 });
+    if (!res?.success) return;
+    const items = res.data || [];
+    const approved = items.filter(s => s.status_dokumen === 'approved');
+    const rejected = items.filter(s => s.status_dokumen === 'rejected');
+    const totalBiaya = approved.reduce((sum, s) => sum + (s.estimasi_biaya || 0), 0);
+    const cards = [
+      { label: 'Total Disetujui', val: approved.length,    icon: 'ph-check-circle',   color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+      { label: 'Total Ditolak',   val: rejected.length,    icon: 'ph-x-circle',       color: 'text-red-400',     bg: 'bg-red-500/10' },
+      { label: 'Total Semua',     val: items.length,       icon: 'ph-files',           color: 'text-indigo-400',  bg: 'bg-indigo-500/10' },
+      { label: 'Total Biaya',     val: formatRupiah(totalBiaya), icon: 'ph-currency-dollar', color: 'text-violet-400', bg: 'bg-violet-500/10', isText: true },
+    ];
+    document.getElementById('statsGrid').innerHTML = cards.map(c => `
+      <div class="glass-card rounded-2xl p-4">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="${c.bg} w-9 h-9 rounded-xl flex items-center justify-center">
+            <i class="ph-bold ${c.icon} ${c.color} text-base"></i>
+          </div>
+          <p class="text-slate-400 text-xs font-medium">${c.label}</p>
+        </div>
+        <p class="font-bold text-white ${c.isText ? 'text-base' : 'text-3xl'}">${c.val}</p>
+      </div>`).join('');
+  }
+
+  async function loadList() {
+    const status = document.getElementById('filterStatus').value;
+    const statuses = status ? [status] : ['approved', 'rejected'];
+    const res = await api.getQueue('laporan');
+    const tbody = document.getElementById('tableBody');
+    if (!res?.success) { tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-400">Gagal memuat</td></tr>'; return; }
+    let items = res.data || [];
+    if (status) items = items.filter(s => s.status_dokumen === status);
+    allData = items;
+    totalData = items.length;
+    const start = (currentPage - 1) * LIMIT;
+    const pageItems = items.slice(start, start + LIMIT);
+    if (!pageItems.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500"><i class="ph-bold ph-chart-bar text-4xl mb-2 block"></i>Belum ada data laporan</td></tr>';
+      renderPagination();
+      return;
+    }
+    tbody.innerHTML = pageItems.map(s => `
+      <tr class="table-row">
+        <td class="px-4 py-3.5"><p class="text-white text-xs mono">${s.no_sppd || '-'}</p></td>
+        <td class="px-4 py-3.5">
+          <p class="text-white text-sm font-medium">${s.pemohon?.nama_lengkap || '-'}</p>
+          <p class="text-slate-500 text-xs">${s.pemohon?.kode_departemen || ''}</p>
+        </td>
+        <td class="px-4 py-3.5">
+          <p class="text-white text-sm">${s.kota_tujuan}</p>
+          <p class="text-slate-500 text-xs truncate max-w-48">${s.instansi_tujuan}</p>
+        </td>
+        <td class="px-4 py-3.5">
+          <p class="text-slate-300 text-xs">${formatDateShort(s.tgl_berangkat)}</p>
+          <p class="text-slate-500 text-xs">${s.durasi_hari} hari</p>
+        </td>
+        <td class="px-4 py-3.5"><p class="text-white text-sm font-semibold">${formatRupiah(s.estimasi_biaya)}</p></td>
+        <td class="px-4 py-3.5">${statusBadge(s.status_dokumen)}</td>
+      </tr>`).join('');
+    renderPagination();
+  }
+
+  function renderPagination() {
+    const totalPages = Math.ceil(totalData / LIMIT);
+    document.getElementById('paginationInfo').textContent = `Menampilkan ${Math.min((currentPage-1)*LIMIT+1,totalData)}–${Math.min(currentPage*LIMIT,totalData)} dari ${totalData} data`;
+    document.getElementById('paginationBtns').innerHTML = `
+      <button onclick="goPage(${currentPage-1})" ${currentPage<=1?'disabled':''} class="px-3 py-1.5 rounded-lg border border-white/10 text-slate-400 text-xs disabled:opacity-30 hover:bg-white/5 transition">
+        <i class="ph-bold ph-caret-left"></i>
+      </button>
+      <span class="px-3 py-1.5 text-xs text-slate-400">${currentPage}/${totalPages||1}</span>
+      <button onclick="goPage(${currentPage+1})" ${currentPage>=totalPages?'disabled':''} class="px-3 py-1.5 rounded-lg border border-white/10 text-slate-400 text-xs disabled:opacity-30 hover:bg-white/5 transition">
+        <i class="ph-bold ph-caret-right"></i>
+      </button>`;
+  }
+
+  function goPage(p) { if(p>=1) { currentPage=p; loadList(); } }
+
+  // ── Client-side CSV Export ────────────────────────────────────────────────────
+  function exportCSV() {
+    if (!allData.length) { showToast('Tidak ada data untuk diekspor', 'warning'); return; }
+    const headers = ['No. SPPD','Pemohon','Departemen','Kota Tujuan','Instansi','Tgl Berangkat','Tgl Kembali','Durasi (Hari)','Transportasi','Akomodasi','Estimasi Biaya','Status'];
+    const rows = allData.map(s => [
+      s.no_sppd || '',
+      s.pemohon?.nama_lengkap || '',
+      s.pemohon?.kode_departemen || '',
+      s.kota_tujuan,
+      s.instansi_tujuan,
+      s.tgl_berangkat?.split('T')[0] || '',
+      s.tgl_kembali?.split('T')[0] || '',
+      s.durasi_hari,
+      s.transportasi || '',
+      s.akomodasi || '',
+      s.estimasi_biaya,
+      s.status_dokumen,
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `SPPD_Laporan_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV berhasil diekspor', 'success');
+  }
+
+  loadStats();
+  loadList();
+</script>
+</body>
+</html>

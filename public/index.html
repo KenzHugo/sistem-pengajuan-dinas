@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIPADIN — Login</title>
+  <meta name="description" content="Sistem Pengajuan Perjalanan Dinas — Login" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: #0a0f1e; min-height: 100vh; }
+    .glass {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .glow-blue { box-shadow: 0 0 40px rgba(99,102,241,0.3); }
+    .gradient-text {
+      background: linear-gradient(135deg, #818cf8, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      transition: all 0.3s ease;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99,102,241,0.5); }
+    .btn-primary:active { transform: translateY(0); }
+    .input-field {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+    }
+    .input-field::placeholder { color: rgba(255,255,255,0.3); }
+    .orbit { animation: orbit 20s linear infinite; }
+    @keyframes orbit {
+      from { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+      to   { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+    }
+    .float-anim { animation: floatUp 3s ease-in-out infinite; }
+    @keyframes floatUp {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
+    }
+    #toast {
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform: translateY(80px);
+      opacity: 0;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 relative overflow-hidden">
+
+  <!-- Background Decoration -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-sky-600/10 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-violet-600/5 rounded-full blur-2xl"></div>
+  </div>
+
+  <!-- Login Card -->
+  <div class="glass rounded-3xl p-8 md:p-10 w-full max-w-md glow-blue relative z-10">
+
+    <!-- Logo & Header -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 mb-4 float-anim">
+        <i class="ph-bold ph-airplane-takeoff text-3xl text-indigo-400"></i>
+      </div>
+      <h1 class="text-2xl font-bold text-white mb-1">
+        <span class="gradient-text">SIPADIN</span>
+      </h1>
+      <p class="text-slate-400 text-sm">Sistem Pengajuan Perjalanan Dinas</p>
+      <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
+        <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+        <span class="text-xs text-slate-400">v2.0 Online</span>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form id="loginForm" class="space-y-5">
+      <!-- Identifier (Nama Lengkap) -->
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">
+          Nama Lengkap
+        </label>
+        <div class="relative">
+          <i class="ph-bold ph-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+          <input
+            id="identifier"
+            type="text"
+            placeholder="Masukkan Nama Lengkap Anda"
+            class="input-field w-full rounded-xl pl-10 pr-4 py-3 text-sm"
+            autocomplete="name"
+            required
+          />
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+        <div class="relative">
+          <i class="ph-bold ph-lock-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+          <input
+            id="password"
+            type="password"
+            placeholder="Masukkan password"
+            class="input-field w-full rounded-xl pl-10 pr-12 py-3 text-sm"
+            autocomplete="current-password"
+            required
+          />
+          <button type="button" id="togglePassword"
+            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors">
+            <i class="ph-bold ph-eye text-lg" id="eyeIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button
+        id="loginBtn"
+        type="submit"
+        class="btn-primary w-full py-3.5 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <i class="ph-bold ph-sign-in text-lg"></i>
+        <span id="loginBtnText">Masuk ke Sistem</span>
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <p class="text-center text-xs text-slate-600 mt-6">
+      Sistem Perjalanan Dinas Internal &copy; 2026
+    </p>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl glass border text-sm font-medium flex items-center gap-2.5 min-w-64">
+    <i id="toastIcon" class="ph-bold text-lg"></i>
+    <span id="toastMsg"></span>
+  </div>
+
+  <script>
+    const API = '/api';
+
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', () => {
+      const pwd = document.getElementById('password');
+      const icon = document.getElementById('eyeIcon');
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.className = 'ph-bold ph-eye-slash text-lg';
+      } else {
+        pwd.type = 'password';
+        icon.className = 'ph-bold ph-eye text-lg';
+      }
+    });
+
+    // Toast
+    function showToast(msg, type = 'error') {
+      const toast = document.getElementById('toast');
+      const icon  = document.getElementById('toastIcon');
+      const msgEl = document.getElementById('toastMsg');
+      msgEl.textContent = msg;
+      if (type === 'error') {
+        toast.className = toast.className.replace(/border-\S+/g, '');
+        toast.style.borderColor = 'rgba(239,68,68,0.4)';
+        icon.className = 'ph-bold ph-x-circle text-lg text-red-400';
+      } else {
+        toast.style.borderColor = 'rgba(34,197,94,0.4)';
+        icon.className = 'ph-bold ph-check-circle text-lg text-emerald-400';
+      }
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn     = document.getElementById('loginBtn');
+      const btnText = document.getElementById('loginBtnText');
+      const identifier = document.getElementById('identifier').value.trim();
+      const password   = document.getElementById('password').value;
+
+      btn.disabled = true;
+      btnText.textContent = 'Memverifikasi...';
+
+      try {
+        const res  = await fetch(`${API}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier, password })
+        });
+        const data = await res.json();
+
+        if (!data.success) {
+          showToast(data.message || 'Login gagal', 'error');
+          return;
+        }
+
+        localStorage.setItem('sppd_token', data.data.token);
+        localStorage.setItem('sppd_user',  JSON.stringify(data.data.user));
+
+        showToast('Login berhasil! Mengalihkan...', 'success');
+
+        // Redirect sesuai role
+        const role = data.data.user.role_sistem;
+        const redirectMap = {
+          'Karyawan' : '/dashboard.html',
+          'Manager'  : '/manager.html',
+          'HRGA'     : '/hrga.html',
+          'Finance'  : '/finance.html',
+          'Direksi'  : '/laporan.html',
+        };
+        setTimeout(() => {
+          window.location.href = redirectMap[role] || '/dashboard.html';
+        }, 1200);
+
+      } catch (err) {
+        showToast('Tidak dapat terhubung ke server', 'error');
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = 'Masuk ke Sistem';
+      }
+    });
+
+    // Redirect jika sudah login
+    if (localStorage.getItem('sppd_token')) {
+      const user = JSON.parse(localStorage.getItem('sppd_user') || '{}');
+      const redirectMap = {
+        'Karyawan' : '/dashboard.html',
+        'Manager'  : '/manager.html',
+        'HRGA'     : '/hrga.html',
+        'Finance'  : '/finance.html',
+        'Direksi'  : '/laporan.html',
+      };
+      window.location.href = redirectMap[user.role_sistem] || '/dashboard.html';
+    }
+  </script>
+</body>
+</html>

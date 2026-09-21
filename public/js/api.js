@@ -28,27 +28,37 @@ function requireAuth() {
   return true;
 }
 
-// Wrapper fetch dengan auth header otomatis
+// Wrapper fetch dengan auth header otomatis dan penanganan error/expired token
 async function apiFetch(endpoint, options = {}) {
   const token = getToken();
   const headers = {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
     ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     ...(options.headers || {})
   };
 
-  const res = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers
-  });
+  try {
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers
+    });
 
-  if (res.status === 401 && endpoint !== '/auth/login') {
-    logout();
-    return null;
+    if (res.status === 401 && endpoint !== '/auth/login') {
+      console.warn('[API] Token expired atau unauthorized. Mengalihkan ke login.');
+      logout();
+      return null;
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error(`[API Error] Request failed on ${endpoint}:`, err);
+    return { success: false, message: 'Gagal terhubung ke server backend' };
   }
-
-  return res.json();
 }
+
+// Ekspor helper apiRequest global
+window.apiRequest = apiFetch;
 
 // ── API Methods ──────────────────────────────────────────────────────────────
 
@@ -75,24 +85,58 @@ const api = {
   updateSppd: (id, body) => apiFetch(`/sppd/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   submitSppd: (id) => apiFetch(`/sppd/${id}/submit`, { method: 'POST' }),
   deleteSppd: (id) => apiFetch(`/sppd/${id}`, { method: 'DELETE' }),
+  hitungBiaya: (body) => apiFetch('/sppd/hitung-biaya', { method: 'POST', body: JSON.stringify(body) }),
+  uploadLampiran: async (formData) => {
+    const token = getToken();
+    try {
+      const res = await fetch(`${API_BASE}/sppd/upload-lampiran`, {
+        method: 'POST',
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: formData,
+      });
+      return await res.json();
+    } catch (err) {
+      console.error('[API Error] Upload lampiran gagal:', err);
+      return { success: false, message: 'Gagal mengunggah file lampiran' };
+    }
+  },
 
   // Approval
   managerAction:  (id, body) => apiFetch(`/approval/${id}/manager`, { method: 'POST', body: JSON.stringify(body) }),
   hrgaAction:     (id, body) => apiFetch(`/approval/${id}/hrga`, { method: 'POST', body: JSON.stringify(body) }),
   financeAction:  (id, body) => apiFetch(`/approval/${id}/finance`, { method: 'POST', body: JSON.stringify(body) }),
   sendToDirector: (id) =>       apiFetch(`/approval/${id}/send`, { method: 'POST' }),
+  getFinanceLedger: (id) =>     apiFetch(`/finance/sppd-ledger/${id}`),
 
-  // Tarif
-  getAllTarif:  ()        => apiFetch('/tarif'),
-  createTarif: (body)    => apiFetch('/tarif', { method: 'POST', body: JSON.stringify(body) }),
-  updateTarif: (id, body) => apiFetch(`/tarif/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
-  deleteTarif: (id)      => apiFetch(`/tarif/${id}`, { method: 'DELETE' }),
+  // Tarif (perjalanandinas_tarif & perjalanandinas_fasilitas)
+  getAllTarif:  (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/tarif${q ? '?' + q : ''}`);
+  },
+  getFasilitas: () => apiFetch('/tarif/fasilitas'),
+  createTarif:  (body) => apiFetch('/tarif', { method: 'POST', body: JSON.stringify(body) }),
+  updateTarif:  (body) => apiFetch('/tarif', { method: 'PUT', body: JSON.stringify(body) }),
+  deleteTarif:  (area, jabatan) => apiFetch(`/tarif?area=${encodeURIComponent(area)}&jabatan=${encodeURIComponent(jabatan)}`, { method: 'DELETE' }),
 
   // Users
   getAllUsers:  ()         => apiFetch('/users'),
   createUser:  (body)     => apiFetch('/users', { method: 'POST', body: JSON.stringify(body) }),
   updateUser:  (id, body) => apiFetch(`/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   deleteUser:  (id)       => apiFetch(`/users/${id}`, { method: 'DELETE' }),
+
+  // Karyawan (karyawan_copy1)
+  getKaryawan: (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return apiFetch(`/karyawan${q ? '?' + q : ''}`);
+  },
+  getKaryawanByID: (id) => apiFetch(`/karyawan/${encodeURIComponent(id)}`),
+  createKaryawan: (body) => apiFetch('/karyawan', { method: 'POST', body: JSON.stringify(body) }),
+  updateKaryawan: (id, body) => apiFetch(`/karyawan/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) }),
+  deleteKaryawan: (id) => apiFetch(`/karyawan/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  getKaryawanDepartemens: () => apiFetch('/karyawan/meta/departemen'),
+  getKaryawanStats: () => apiFetch('/karyawan/meta/stats'),
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

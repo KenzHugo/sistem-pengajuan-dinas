@@ -6,54 +6,99 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+  <script>
+    // Anti-FOUC theme initialization
+    (function() {
+      const saved = localStorage.getItem('sipadin_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+  </script>
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
   <style>
     * { font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background: #0a0f1e; }
-    .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
-    .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
-    .gradient-text { background: linear-gradient(135deg,#c084fc,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-    .btn-primary { background: linear-gradient(135deg,#6366f1,#4f46e5); transition: all .3s; }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,.4); }
-    .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; transition: .2s; }
-    .input-field:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.2); }
-    .input-field::placeholder { color: rgba(255,255,255,0.3); }
-    select.input-field option { background: #1e293b; }
-    .table-row { border-bottom: 1px solid rgba(255,255,255,0.05); transition: background .2s; }
-    .table-row:hover { background: rgba(255,255,255,0.03); }
-    .modal-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
+    body { background: #f8fafc; color: #1e293b; }
+    html.dark body { background: #1a2235; color: #ffffff; }
+    .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(226,232,240,0.8); }
+    html.dark .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+    .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+    html.dark .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+    .gradient-text { background: linear-gradient(135deg,#0284c7,#10b981); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    html.dark .gradient-text { background: linear-gradient(135deg,#c084fc,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .btn-primary { background: linear-gradient(135deg,#059669,#0d9488); transition: all .3s; }
+    html.dark .btn-primary { background: linear-gradient(135deg,#6366f1,#4f46e5); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,.3); }
+    html.dark .btn-primary:hover { box-shadow: 0 6px 20px rgba(99,102,241,.4); }
+    .input-field { background: #ffffff; border: 1px solid #cbd5e1; color: #1e293b; transition: .2s; }
+    html.dark .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; }
+    .input-field:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.2); }
+    html.dark .input-field:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.2); }
+    .input-field::placeholder { color: #94a3b8; }
+    html.dark .input-field::placeholder { color: rgba(255,255,255,0.3); }
+    select.input-field option { background: #ffffff; color: #1e293b; }
+    html.dark select.input-field option { background: #1e293b; color: white; }
+    .table-row { border-bottom: 1px solid #e2e8f0; transition: background .2s; }
+    html.dark .table-row { border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .table-row:hover { background: #f1f5f9; }
+    html.dark .table-row:hover { background: rgba(255,255,255,0.03); }
+    .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
   </style>
 </head>
-<body class="text-white min-h-screen">
+<body class="min-h-screen transition-colors duration-300">
 <div id="sidebarContainer"></div>
 <main class="lg:ml-64 min-h-screen">
   <div class="p-6 md:p-8">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
       <div>
-        <h1 class="text-2xl font-bold text-white">Manajemen <span class="gradient-text">User</span></h1>
-        <p class="text-slate-400 text-sm mt-1">Kelola akun karyawan dan hak akses sistem</p>
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Manajemen <span class="gradient-text">User</span></h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Kelola akun karyawan dan hak akses sistem</p>
       </div>
-      <button onclick="openModal()" class="btn-primary px-5 py-2.5 rounded-xl text-white text-sm font-semibold flex items-center gap-2 self-start sm:self-auto">
-        <i class="ph-bold ph-user-plus"></i> Tambah User
-      </button>
+      <div class="flex items-center gap-3">
+        <!-- Theme Toggle Button -->
+        <button id="themeToggleBtn" type="button" class="p-2.5 rounded-xl border transition-all duration-300 bg-white hover:bg-slate-100 border-slate-200 text-amber-500 shadow-sm dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10 dark:text-sky-400 self-start sm:self-auto" title="Ganti Mode Tema">
+          <svg class="theme-icon-sun w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z" />
+          </svg>
+          <svg class="theme-icon-moon w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+
+        <button onclick="handleRefresh(this)" class="px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5 text-sm font-medium transition flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer" title="Refresh Data User">
+          <i class="ph-bold ph-arrows-clockwise text-base"></i> <span class="hidden sm:inline">Refresh</span>
+        </button>
+
+        <button onclick="openModal()" class="btn-primary px-5 py-2.5 rounded-xl text-white text-sm font-semibold flex items-center gap-2 self-start sm:self-auto shadow-lg shadow-emerald-600/20 dark:shadow-indigo-600/20">
+          <i class="ph-bold ph-user-plus"></i> Tambah User
+        </button>
+      </div>
     </div>
 
-    <div class="glass-card rounded-2xl overflow-hidden">
+    <div class="bg-white border border-slate-200 shadow-md rounded-xl overflow-hidden dark:bg-slate-800/90 dark:border-slate-700/80 dark:shadow-none transition-all duration-300">
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-white/10">
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Karyawan</th>
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Nomor ID</th>
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Departemen</th>
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Role</th>
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Status</th>
-              <th class="text-center px-4 py-3.5 text-slate-400 font-medium">Aksi</th>
+        <table class="w-full text-sm border-collapse text-left">
+          <thead class="bg-blue-50/80 border-b-2 border-blue-500 dark:bg-slate-900/60 dark:border-b-2 dark:border-emerald-500 transition-colors duration-300">
+            <tr>
+              <th class="text-left px-4 py-3.5 text-blue-900 dark:text-emerald-300 font-semibold uppercase text-xs tracking-wider">Karyawan</th>
+              <th class="text-left px-4 py-3.5 text-blue-900 dark:text-emerald-300 font-semibold uppercase text-xs tracking-wider">Nomor ID</th>
+              <th class="text-left px-4 py-3.5 text-blue-900 dark:text-emerald-300 font-semibold uppercase text-xs tracking-wider">Departemen</th>
+              <th class="text-left px-4 py-3.5 text-blue-900 dark:text-emerald-300 font-semibold uppercase text-xs tracking-wider">Role</th>
+              <th class="text-left px-4 py-3.5 text-blue-900 dark:text-emerald-300 font-semibold uppercase text-xs tracking-wider">Status</th>
+              <th class="text-center px-4 py-3.5 text-blue-900 dark:text-emerald-300 font-semibold uppercase text-xs tracking-wider">Aksi</th>
             </tr>
           </thead>
-          <tbody id="tableBody">
+          <tbody id="tableBody" class="divide-y divide-slate-100 dark:divide-slate-700/50">
             <tr><td colspan="6" class="text-center py-12 text-slate-500">
-              <i class="ph-bold ph-spinner-gap text-3xl mb-2 block animate-spin"></i>Memuat...
+              <i class="ph-bold ph-spinner-gap text-3xl mb-2 block animate-spin text-emerald-600 dark:text-indigo-400"></i>Memuat...
             </td></tr>
           </tbody>
         </table>
@@ -64,36 +109,36 @@
 
 <!-- Modal Tambah/Edit User -->
 <div id="modalUser" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-overlay">
-  <div class="glass border border-white/10 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-    <div class="flex items-center justify-between p-5 border-b border-white/10 sticky top-0 glass">
-      <h2 id="modalTitle" class="text-base font-bold text-white">Tambah User Baru</h2>
-      <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1"><i class="ph-bold ph-x text-xl"></i></button>
+  <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl dark:bg-slate-800 dark:border-slate-700">
+    <div class="flex items-center justify-between p-5 border-b border-slate-200 dark:border-white/10 sticky top-0 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md z-10">
+      <h2 id="modalTitle" class="text-base font-bold text-slate-800 dark:text-white">Tambah User Baru</h2>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition"><i class="ph-bold ph-x text-xl"></i></button>
     </div>
     <form id="userForm" class="p-5 space-y-4">
       <input type="hidden" id="editId" />
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">Nomor ID *</label>
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Nomor ID *</label>
           <input id="f_nomor_id" type="text" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="11-12 digit" />
         </div>
         <div>
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">NIK Pendek</label>
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">NIK Pendek</label>
           <input id="f_nik" type="text" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="Nomor mesin" />
         </div>
         <div class="col-span-2">
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">Nama Lengkap *</label>
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Nama Lengkap *</label>
           <input id="f_nama" type="text" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="Nama lengkap karyawan" />
         </div>
         <div>
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">Kode Departemen</label>
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Kode Departemen</label>
           <input id="f_dept" type="text" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="Contoh: PROD" />
         </div>
         <div>
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">Kode Jabatan</label>
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Kode Jabatan</label>
           <input id="f_jabatan" type="text" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="Contoh: MGT" />
         </div>
         <div>
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">Role Sistem *</label>
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Role Sistem *</label>
           <select id="f_role" class="input-field w-full rounded-xl px-3 py-2.5 text-sm">
             <option value="Karyawan">Karyawan</option>
             <option value="Manager">Manager</option>
@@ -103,23 +148,23 @@
           </select>
         </div>
         <div>
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">Status</label>
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Status</label>
           <select id="f_status" class="input-field w-full rounded-xl px-3 py-2.5 text-sm">
             <option value="1">Aktif</option>
             <option value="0">Non-aktif</option>
           </select>
         </div>
         <div class="col-span-2">
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">No. WhatsApp</label>
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">No. WhatsApp</label>
           <input id="f_wa" type="text" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="628xxxxxxxxxx" />
         </div>
         <div class="col-span-2">
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">Password <span id="pwdLabel" class="text-slate-600">(kosongkan jika tidak ingin mengubah)</span></label>
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Password <span id="pwdLabel" class="text-slate-400 dark:text-slate-500 text-[11px]">(kosongkan jika tidak ingin mengubah)</span></label>
           <input id="f_pwd" type="password" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="Minimal 6 karakter" />
         </div>
       </div>
       <div class="flex gap-3 pt-2">
-        <button type="button" onclick="closeModal()" class="flex-1 py-2.5 rounded-xl border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/5 transition">Batal</button>
+        <button type="button" onclick="closeModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5 transition">Batal</button>
         <button type="submit" class="flex-1 btn-primary py-2.5 rounded-xl text-white text-sm font-semibold">Simpan</button>
       </div>
     </form>
@@ -127,7 +172,7 @@
 </div>
 
 <script src="/js/api.js"></script>
-<script src="/js/sidebar.js"></script>
+<script src="/js/sidebar.js?v=2"></script>
 <script>
   requireAuth();
   const user = getCurrentUser();
@@ -137,12 +182,20 @@
   renderSidebar('users');
 
   const ROLE_COLORS = {
-    'Karyawan' : 'bg-slate-500/20 text-slate-300 border-slate-500/30',
-    'Manager'  : 'bg-amber-500/20  text-amber-300  border-amber-500/30',
-    'HRGA'     : 'bg-blue-500/20   text-blue-300   border-blue-500/30',
-    'Finance'  : 'bg-violet-500/20 text-violet-300 border-violet-500/30',
-    'Direksi'  : 'bg-rose-500/20   text-rose-300   border-rose-500/30',
+    'Karyawan' : 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/20 dark:text-slate-300 dark:border-slate-500/30',
+    'Manager'  : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30',
+    'HRGA'     : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30',
+    'Finance'  : 'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-500/20 dark:text-violet-300 dark:border-violet-500/30',
+    'Direksi'  : 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30',
   };
+
+  async function handleRefresh(btn) {
+    const icon = btn?.querySelector('i');
+    if (icon) icon.classList.add('animate-spin');
+    await loadList();
+    if (icon) setTimeout(() => icon.classList.remove('animate-spin'), 400);
+    showToast('Data user berhasil diperbarui', 'info');
+  }
 
   async function loadList() {
     const res = await api.getAllUsers();
@@ -155,40 +208,40 @@
       <tr class="table-row">
         <td class="px-4 py-3.5">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
-              <i class="ph-bold ph-user text-indigo-300 text-sm"></i>
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 dark:bg-indigo-500/20 dark:text-indigo-300 flex items-center justify-center flex-shrink-0">
+              <i class="ph-bold ph-user text-sm"></i>
             </div>
             <div>
-              <p class="text-white text-sm font-medium">${u.nama_lengkap}</p>
-              <p class="text-slate-500 text-xs">${u.no_whatsapp || '-'}</p>
+              <p class="text-slate-800 dark:text-white text-sm font-medium">${u.nama_lengkap}</p>
+              <p class="text-slate-500 dark:text-slate-400 text-xs">${u.no_whatsapp || '-'}</p>
             </div>
           </div>
         </td>
         <td class="px-4 py-3.5">
-          <p class="text-slate-300 text-sm">${u.nomor_id}</p>
-          <p class="text-slate-500 text-xs">${u.nik_pendek || '-'}</p>
+          <p class="text-slate-800 dark:text-slate-300 text-sm font-medium">${u.nomor_id}</p>
+          <p class="text-slate-500 dark:text-slate-400 text-xs">${u.nik_pendek || '-'}</p>
         </td>
-        <td class="px-4 py-3.5"><p class="text-slate-300 text-sm">${u.kode_departemen || '-'}</p></td>
+        <td class="px-4 py-3.5"><p class="text-slate-700 dark:text-slate-300 text-sm font-medium">${u.kode_departemen || '-'}</p></td>
         <td class="px-4 py-3.5">
-          <span class="inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-medium ${ROLE_COLORS[u.role_sistem] || 'bg-slate-500/20 text-slate-300'}">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-semibold ${ROLE_COLORS[u.role_sistem] || 'bg-slate-100 text-slate-700 border-slate-200'}">
             ${u.role_sistem}
           </span>
         </td>
         <td class="px-4 py-3.5">
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium
-            ${u.status_aktif ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-red-500/20 text-red-300 border-red-500/30'}">
-            <span class="w-1.5 h-1.5 rounded-full ${u.status_aktif ? 'bg-emerald-400' : 'bg-red-400'}"></span>
+            ${u.status_aktif ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30' : 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-red-500/20 dark:text-red-300 dark:border-red-500/30'}">
+            <span class="w-1.5 h-1.5 rounded-full ${u.status_aktif ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
             ${u.status_aktif ? 'Aktif' : 'Non-aktif'}
           </span>
         </td>
         <td class="px-4 py-3.5">
           <div class="flex items-center justify-center gap-2">
             <button onclick="openEdit(${JSON.stringify(u).replace(/"/g,"'")})" title="Edit"
-              class="p-2 rounded-lg hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 transition">
+              class="p-2 rounded-lg hover:bg-amber-100 text-slate-500 hover:text-amber-600 dark:hover:bg-amber-500/20 dark:text-slate-400 dark:hover:text-amber-300 transition">
               <i class="ph-bold ph-pencil text-base"></i>
             </button>
             <button onclick="deleteUser(${u.id_user}, '${u.nama_lengkap}')" title="Hapus"
-              class="p-2 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-300 transition">
+              class="p-2 rounded-lg hover:bg-rose-100 text-slate-500 hover:text-rose-600 dark:hover:bg-red-500/20 dark:text-slate-400 dark:hover:text-red-300 transition">
               <i class="ph-bold ph-trash text-base"></i>
             </button>
           </div>

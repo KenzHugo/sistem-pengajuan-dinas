@@ -6,7 +6,7 @@ import (
 	"sipadin/models"
 )
 
-// Migrate menjalankan auto-migration untuk semua 5 tabel sesuai PRD v2.0
+// Migrate menjalankan auto-migration untuk tabel transaksi sistem
 func Migrate() {
 	db := config.DB
 
@@ -15,11 +15,11 @@ func Migrate() {
 		&models.SppdPengajuan{},
 		&models.SppdApprovalLog{},
 		&models.SppdAnggota{},
-		&models.MasterTarifFasilitas{},
+		&models.SppdDetailBiaya{},
 	)
 	if err != nil {
 		log.Fatalf("[Migrate] Gagal auto-migrate: %v", err)
 	}
 
-	log.Println("[Migrate] Auto-migration selesai untuk 5 tabel")
+	log.Println("[Migrate] Auto-migration selesai untuk tabel master & transaksi")
 }

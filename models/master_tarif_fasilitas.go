@@ -1,17 +1,35 @@
 package models
 
-// MasterTarifFasilitas merepresentasikan tabel `master_tarif_fasilitas` — referensi tarif.
-// Kolom persis sesuai PRD v2.0. TIDAK ada kolom tambahan.
-type MasterTarifFasilitas struct {
-	IDTarif         int     `gorm:"column:id_tarif;primaryKey;autoIncrement"          json:"id_tarif"`
-	AreaTujuan      string  `gorm:"column:area_tujuan;type:varchar(50);not null"      json:"area_tujuan"`
-	KriteriaJabatan string  `gorm:"column:kriteria_jabatan;type:varchar(50);not null" json:"kriteria_jabatan"`
-	HakTransport    float64 `gorm:"column:hak_transport;type:decimal(20,4)"          json:"hak_transport"`
-	HakHotel        float64 `gorm:"column:hak_hotel;type:decimal(20,4)"              json:"hak_hotel"`
-	TarifUangMakan  float64 `gorm:"column:tarif_uang_makan;type:decimal(20,4)"       json:"tarif_uang_makan"`
-	TarifUangSaku   float64 `gorm:"column:tarif_uang_saku;type:decimal(20,4)"        json:"tarif_uang_saku"`
+// PerjalananDinasTarif merepresentasikan tabel master tarif `perjalanandinas_tarif`
+type PerjalananDinasTarif struct {
+	NoUrut    string  `gorm:"column:NoUrut;type:decimal(10,4)" json:"no_urut"`
+	Area      string  `gorm:"column:Area;primaryKey;type:varchar(32)" json:"area"`
+	Jabatan   string  `gorm:"column:Jabatan;primaryKey;type:varchar(32)" json:"jabatan"`
+	MataUang  string  `gorm:"column:MataUang;type:varchar(10)" json:"mata_uang"`
+	UangMakan float64 `gorm:"column:UangMakan;type:decimal(20,4)" json:"uang_makan"`
+	UangSaku  float64 `gorm:"column:UangSaku;type:decimal(20,4)" json:"uang_saku"`
+	Hotel     float64 `gorm:"column:Hotel;type:decimal(20,4)" json:"hotel"`
+	Transport float64 `gorm:"column:Transport;type:decimal(20,4)" json:"transport"`
+	Tiket     float64 `gorm:"column:Tiket;type:decimal(20,4)" json:"tiket"`
 }
 
-func (MasterTarifFasilitas) TableName() string {
-	return "master_tarif_fasilitas"
+func (PerjalananDinasTarif) TableName() string {
+	return "perjalanandinas_tarif"
 }
+
+// PerjalananDinasFasilitas merepresentasikan tabel ketentuan fasilitas `perjalanandinas_fasilitas`
+type PerjalananDinasFasilitas struct {
+	Kriteria     string `gorm:"column:Kriteria;primaryKey;type:varchar(128)" json:"kriteria"`
+	HakTransport int16  `gorm:"column:HakTransport;type:smallint" json:"hak_transport"`
+	HakUangMakan int16  `gorm:"column:HakUangMakan;type:smallint" json:"hak_uang_makan"`
+	HakUangSaku  int16  `gorm:"column:HakUangSaku;type:smallint" json:"hak_uang_saku"`
+	HakTiket     int16  `gorm:"column:HakTiket;type:smallint" json:"hak_tiket"`
+	HakHotel     int16  `gorm:"column:HakHotel;type:smallint" json:"hak_hotel"`
+}
+
+func (PerjalananDinasFasilitas) TableName() string {
+	return "perjalanandinas_fasilitas"
+}
+
+// Alias tipe untuk kompatibilitas
+type MasterTarifFasilitas = PerjalananDinasTarif

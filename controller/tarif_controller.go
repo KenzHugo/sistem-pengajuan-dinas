@@ -3,12 +3,11 @@ package controller
 import (
 	"sipadin/dto"
 	"sipadin/service"
-	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-// TarifController menangani HTTP request untuk master tarif fasilitas
+// TarifController menangani HTTP request untuk master tarif perjalanan dinas
 type TarifController struct {
 	tarifSvc service.TarifService
 }
@@ -19,64 +18,83 @@ func NewTarifController(tarifSvc service.TarifService) *TarifController {
 
 // GetAll - GET /api/tarif
 func (c *TarifController) GetAll(ctx *fiber.Ctx) error {
-	data, err := c.tarifSvc.GetAll()
+	area := ctx.Query("area", "")
+	tarifs, err := c.tarifSvc.GetAll(area)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.Fail("Gagal mengambil data tarif"))
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.Fail("Gagal mengambil data tarif: " + err.Error()))
 	}
-	return ctx.Status(fiber.StatusOK).JSON(dto.OK("Daftar tarif fasilitas", data))
+
+	fasilitas, _ := c.tarifSvc.GetFasilitas()
+	areas, _ := c.tarifSvc.GetAreas()
+
+	responsePayload := fiber.Map{
+		"tarifs":    tarifs,
+		"fasilitas": fasilitas,
+		"areas":     areas,
+		"total":     len(tarifs),
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(dto.OK("Daftar master tarif perjalanandinas_tarif", responsePayload))
 }
 
-// GetByID - GET /api/tarif/:id
-func (c *TarifController) GetByID(ctx *fiber.Ctx) error {
-	id, err := strconv.Atoi(ctx.Params("id"))
+// GetFasilitas - GET /api/tarif/fasilitas
+func (c *TarifController) GetFasilitas(ctx *fiber.Ctx) error {
+	fasilitas, err := c.tarifSvc.GetFasilitas()
 	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("ID tidak valid"))
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.Fail("Gagal mengambil data fasilitas: " + err.Error()))
 	}
-	data, err := c.tarifSvc.GetByID(id)
-	if err != nil {
-		return ctx.Status(fiber.StatusNotFound).JSON(dto.Fail(err.Error()))
-	}
-	return ctx.Status(fiber.StatusOK).JSON(dto.OK("Data tarif ditemukan", data))
+	return ctx.Status(fiber.StatusOK).JSON(dto.OK("Daftar fasilitas perjalanan dinas", fasilitas))
 }
 
-// Create - POST /api/tarif
+// GetAreas - GET /api/tarif/areas
+func (c *TarifController) GetAreas(ctx *fiber.Ctx) error {
+	areas, err := c.tarifSvc.GetAreas()
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.Fail("Gagal mengambil daftar area: " + err.Error()))
+	}
+	return ctx.Status(fiber.StatusOK).JSON(dto.OK("Daftar area tarif", areas))
+}
+
+// CreateOrUpdate - POST /api/tarif
 func (c *TarifController) Create(ctx *fiber.Ctx) error {
-	var req dto.CreateTarifRequest
+	var req dto.TarifRequest
 	if err := ctx.BodyParser(&req); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("Format request tidak valid"))
 	}
-	data, err := c.tarifSvc.Create(req)
+	data, err := c.tarifSvc.CreateOrUpdate(req)
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail(err.Error()))
 	}
-	return ctx.Status(fiber.StatusCreated).JSON(dto.OK("Data tarif berhasil ditambahkan", data))
+	return ctx.Status(fiber.StatusOK).JSON(dto.OK("Data tarif berhasil disimpan", data))
 }
 
-// Update - PUT /api/tarif/:id
+// Update - PUT /api/tarif
 func (c *TarifController) Update(ctx *fiber.Ctx) error {
-	id, err := strconv.Atoi(ctx.Params("id"))
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("ID tidak valid"))
-	}
-	var req dto.UpdateTarifRequest
+	var req dto.TarifRequest
 	if err := ctx.BodyParser(&req); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("Format request tidak valid"))
 	}
-	data, err := c.tarifSvc.Update(id, req)
+	data, err := c.tarifSvc.CreateOrUpdate(req)
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail(err.Error()))
 	}
 	return ctx.Status(fiber.StatusOK).JSON(dto.OK("Data tarif berhasil diperbarui", data))
 }
 
-// Delete - DELETE /api/tarif/:id
+// Delete - DELETE /api/tarif
 func (c *TarifController) Delete(ctx *fiber.Ctx) error {
-	id, err := strconv.Atoi(ctx.Params("id"))
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("ID tidak valid"))
+	area := ctx.Query("area")
+	jabatan := ctx.Query("jabatan")
+	if area == "" || jabatan == "" {
+		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("Parameter area dan jabatan wajib diisi"))
 	}
-	if err := c.tarifSvc.Delete(id); err != nil {
+	if err := c.tarifSvc.Delete(area, jabatan); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail(err.Error()))
 	}
 	return ctx.Status(fiber.StatusOK).JSON(dto.OK("Data tarif berhasil dihapus", nil))
+}
+
+// GetByID untuk backward compatibility
+func (c *TarifController) GetByID(ctx *fiber.Ctx) error {
+	return c.GetAll(ctx)
 }

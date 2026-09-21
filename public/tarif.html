@@ -1,118 +1,267 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SIPADIN — Master Tarif Fasilitas</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIPADIN — Master Tarif & Fasilitas Perjalanan Dinas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+  <script>
+    // Anti-FOUC theme initialization
+    (function() {
+      const saved = localStorage.getItem('sipadin_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+  </script>
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
   <style>
     * { font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background: #0a0f1e; }
-    .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
-    .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
-    .gradient-text { background: linear-gradient(135deg,#fb923c,#f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-    .btn-primary { background: linear-gradient(135deg,#6366f1,#4f46e5); transition: all .3s; }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,.4); }
-    .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; transition: .2s; }
-    .input-field:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.2); }
-    .input-field::placeholder { color: rgba(255,255,255,0.3); }
-    .table-row { border-bottom: 1px solid rgba(255,255,255,0.05); transition: background .2s; }
-    .table-row:hover { background: rgba(255,255,255,0.03); }
-    .modal-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
+    body { background: #f8fafc; color: #1e293b; }
+    html.dark body { background: #1a2235; color: #ffffff; }
+    .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(226,232,240,0.8); }
+    html.dark .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+    .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+    html.dark .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+    .gradient-text { background: linear-gradient(135deg,#ea580c,#d97706); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    html.dark .gradient-text { background: linear-gradient(135deg,#fb923c,#f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .btn-primary { background: linear-gradient(135deg,#059669,#0d9488); transition: all .2s; }
+    html.dark .btn-primary { background: linear-gradient(135deg,#6366f1,#4f46e5); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,.3); }
+    html.dark .btn-primary:hover { box-shadow: 0 6px 20px rgba(99,102,241,.4); }
+    .input-field { background: #ffffff; border: 1px solid #cbd5e1; color: #1e293b; transition: .2s; }
+    html.dark .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; }
+    .input-field:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.2); }
+    html.dark .input-field:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.2); }
+    .input-field::placeholder { color: #94a3b8; }
+    html.dark .input-field::placeholder { color: rgba(255,255,255,0.3); }
+    select.input-field option { background: #ffffff; color: #1e293b; }
+    html.dark select.input-field option { background: #1e293b; color: white; }
+    .table-row { border-bottom: 1px solid #e2e8f0; transition: background .2s; }
+    html.dark .table-row { border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .table-row:hover { background: #f1f5f9; }
+    html.dark .table-row:hover { background: rgba(255,255,255,0.03); }
+    .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
     .disabled-btn { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+    button, a { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+    button:active:not(:disabled) { transform: scale(0.97); }
   </style>
 </head>
-<body class="text-white min-h-screen">
+<body class="min-h-screen transition-colors duration-300">
 <div id="sidebarContainer"></div>
+
 <main class="lg:ml-64 min-h-screen">
   <div class="p-6 md:p-8">
+
+    <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
       <div>
-        <h1 class="text-2xl font-bold text-white">Master <span class="gradient-text">Tarif Fasilitas</span></h1>
-        <p class="text-slate-400 text-sm mt-1">Referensi plafon anggaran berdasarkan area dan kriteria jabatan</p>
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Master <span class="gradient-text">Tarif & Fasilitas</span></h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Data resmi plafon anggaran & ketentuan fasilitas perjalanan dinas (<span class="text-emerald-600 dark:text-indigo-300 font-mono text-xs">perjalanandinas_tarif</span>)</p>
       </div>
-      <button id="btnAdd" onclick="openModal()" class="btn-primary px-5 py-2.5 rounded-xl text-white text-sm font-semibold flex items-center gap-2 self-start sm:self-auto">
-        <i class="ph-bold ph-plus"></i> Tambah Tarif
-      </button>
+      <div class="flex items-center gap-3">
+        <!-- Theme Toggle Button -->
+        <button id="themeToggleBtn" type="button" class="p-2.5 rounded-xl border transition-all duration-300 bg-white hover:bg-slate-100 border-slate-200 text-amber-500 shadow-sm dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10 dark:text-sky-400 self-start sm:self-auto" title="Ganti Mode Tema">
+          <svg class="theme-icon-sun w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z" />
+          </svg>
+          <svg class="theme-icon-moon w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+
+        <button id="btnAdd" onclick="openCreateModal()" class="btn-primary px-5 py-2.5 rounded-xl text-white text-sm font-semibold flex items-center gap-2 self-start sm:self-auto cursor-pointer active:scale-95 shadow-lg shadow-emerald-600/20 dark:shadow-indigo-600/20 transition">
+          <i class="ph-bold ph-plus text-base"></i> + Tambah Tarif
+        </button>
+      </div>
     </div>
 
+    <!-- Info RBAC -->
     <div id="viewOnlyBanner" class="hidden mb-5 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-3">
       <i class="ph-bold ph-eye text-amber-400 text-lg"></i>
-      <p class="text-amber-300 text-sm">Anda hanya memiliki akses <strong>View Only</strong> di halaman ini. Tombol tambah/edit/hapus dinonaktifkan.</p>
+      <p class="text-amber-300 text-sm">Anda hanya memiliki akses <strong>View Only</strong> di halaman ini. Pengubahan data tarif hanya dapat dilakukan oleh HRGA.</p>
     </div>
 
-    <div class="glass-card rounded-2xl overflow-hidden">
+    <!-- Section 1: Ringkasan Ketentuan Fasilitas (perjalanandinas_fasilitas) -->
+    <div class="bg-white border border-slate-200 shadow-md rounded-xl p-5 mb-8 dark:bg-slate-800/90 dark:border-slate-700/80 dark:shadow-none transition-all duration-300">
+      <div class="flex items-center justify-between mb-4 border-b border-slate-200 dark:border-white/5 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 dark:bg-indigo-600/20 dark:text-indigo-400 flex items-center justify-center">
+            <i class="ph-bold ph-shield-check text-lg"></i>
+          </div>
+          <div>
+            <h2 class="font-bold text-slate-800 dark:text-white text-sm">Ketentuan Hak Fasilitas & Durasi Dinas</h2>
+            <p class="text-slate-500 dark:text-slate-400 text-xs">Tabel referensi <span class="font-mono text-emerald-600 dark:text-indigo-300">perjalanandinas_fasilitas</span></p>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5" id="fasilitasGrid">
+        <div class="p-4 rounded-xl bg-slate-100 dark:bg-white/5 animate-pulse h-24"></div>
+      </div>
+    </div>
+
+    <!-- Section 2: Filter & Tabel Master Tarif -->
+    <div class="bg-white border border-slate-200 shadow-md rounded-xl overflow-hidden dark:bg-slate-800/90 dark:border-slate-700/80 dark:shadow-none transition-all duration-300">
+      <!-- Toolbar Filter -->
+      <div class="p-4 border-b border-slate-200 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+          <label class="text-xs text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1.5">
+            <i class="ph-bold ph-funnel text-blue-600 dark:text-indigo-400"></i> Filter Area:
+          </label>
+          <select id="filterArea" onchange="loadList()" class="input-field rounded-xl px-3 py-1.5 text-xs sm:text-sm font-medium">
+            <option value="">Semua Area</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <span id="totalBadge" class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-transparent text-xs font-semibold">
+            0 Data Tarif
+          </span>
+          <button onclick="handleRefresh(this)" class="px-3.5 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-slate-400 dark:hover:text-white text-xs dark:hover:bg-white/5 cursor-pointer active:scale-95 transition flex items-center gap-1.5 shadow-sm">
+            <i class="ph-bold ph-arrows-clockwise"></i> <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Data -->
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-white/10">
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Area Tujuan</th>
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Kriteria</th>
-              <th class="text-right px-4 py-3.5 text-slate-400 font-medium">Hak Transport</th>
-              <th class="text-right px-4 py-3.5 text-slate-400 font-medium">Hak Hotel/mlm</th>
-              <th class="text-right px-4 py-3.5 text-slate-400 font-medium">Uang Makan/hr</th>
-              <th class="text-right px-4 py-3.5 text-slate-400 font-medium">Uang Saku/hr</th>
-              <th class="text-center px-4 py-3.5 text-slate-400 font-medium">Aksi</th>
+        <table class="w-full text-sm border-collapse text-left">
+          <thead class="bg-blue-50/80 border-b-2 border-blue-500 dark:bg-slate-900/60 dark:border-b-2 dark:border-emerald-500 transition-colors duration-300">
+            <tr>
+              <th class="text-left px-4 py-3.5 text-blue-900 dark:text-emerald-300 font-semibold uppercase text-xs tracking-wider">Area Tujuan</th>
+              <th class="text-left px-4 py-3.5 text-blue-900 dark:text-emerald-300 font-semibold uppercase text-xs tracking-wider">Jenjang Jabatan</th>
+              <th class="text-center px-4 py-3.5 text-blue-900 dark:text-emerald-300 font-semibold uppercase text-xs tracking-wider">Mata Uang</th>
+              <th class="text-right px-4 py-3.5 text-blue-900 dark:text-emerald-300 font-semibold uppercase text-xs tracking-wider">Uang Makan / hr</th>
+              <th class="text-right px-4 py-3.5 text-blue-900 dark:text-emerald-300 font-semibold uppercase text-xs tracking-wider">Uang Saku / hr</th>
+              <th class="text-right px-4 py-3.5 text-blue-900 dark:text-emerald-300 font-semibold uppercase text-xs tracking-wider">Hotel / mlm</th>
+              <th class="text-right px-4 py-3.5 text-blue-900 dark:text-emerald-300 font-semibold uppercase text-xs tracking-wider">Transport</th>
+              <th class="text-center px-4 py-3.5 text-blue-900 dark:text-emerald-300 font-semibold uppercase text-xs tracking-wider">Aksi</th>
             </tr>
           </thead>
-          <tbody id="tableBody">
-            <tr><td colspan="7" class="text-center py-12 text-slate-500">
-              <i class="ph-bold ph-spinner-gap text-3xl mb-2 block animate-spin"></i>Memuat...
+          <tbody id="tableBody" class="divide-y divide-slate-100 dark:divide-slate-700/50">
+            <tr><td colspan="8" class="text-center py-12 text-slate-500">
+              <i class="ph-bold ph-spinner-gap text-3xl mb-2 block animate-spin text-emerald-600 dark:text-indigo-400"></i>Memuat master tarif...
             </td></tr>
           </tbody>
         </table>
       </div>
     </div>
+
   </div>
 </main>
 
-<!-- Modal Tambah/Edit -->
+<!-- Modal Tambah / Edit Tarif -->
 <div id="modalTarif" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-overlay">
-  <div class="glass border border-white/10 rounded-2xl w-full max-w-lg">
-    <div class="flex items-center justify-between p-5 border-b border-white/10">
-      <h2 id="modalTitle" class="text-base font-bold text-white">Tambah Data Tarif</h2>
-      <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1"><i class="ph-bold ph-x text-xl"></i></button>
+  <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-lg shadow-2xl dark:bg-slate-800 dark:border-slate-700 overflow-hidden">
+    <div class="flex items-center justify-between p-5 border-b border-slate-200 dark:border-white/10">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 dark:bg-indigo-600/20 dark:text-indigo-400 flex items-center justify-center">
+          <i class="ph-bold ph-currency-dollar text-lg"></i>
+        </div>
+        <h2 id="modalTitle" class="text-base font-bold text-slate-800 dark:text-white">Tambah Data Tarif</h2>
+      </div>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer">
+        <i class="ph-bold ph-x text-xl"></i>
+      </button>
     </div>
+
     <form id="tarifForm" class="p-5 space-y-4">
-      <input type="hidden" id="editId" />
-      <div class="grid grid-cols-2 gap-4">
-        <div class="col-span-2">
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">Area Tujuan *</label>
-          <input id="f_area" type="text" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="Contoh: Area 1 (Jatim)" required />
-        </div>
-        <div class="col-span-2">
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">Kriteria Jabatan *</label>
-          <input id="f_kriteria" type="text" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="Contoh: Grade A" required />
-        </div>
+      <input type="hidden" id="isEditMode" value="0" />
+      <input type="hidden" id="origArea" value="" />
+      <input type="hidden" id="origJabatan" value="" />
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Area Tujuan -->
         <div>
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">Hak Transport (Rp)</label>
-          <input id="f_transport" type="number" min="0" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="0" />
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Area Tujuan <span class="text-rose-500">*</span></label>
+          <input id="f_area" list="areaListDatalist" type="text" class="input-field w-full rounded-xl px-3.5 py-2.5 text-sm" placeholder="Contoh: Jawa" required />
+          <datalist id="areaListDatalist">
+            <option value="Jawa">
+            <option value="Jakarta / Luar Jawa">
+            <option value="Asia">
+            <option value="Jepang">
+            <option value="Amerika / Singapura">
+            <option value="Eropa">
+          </datalist>
         </div>
+
+        <!-- Jenjang Jabatan -->
         <div>
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">Hak Hotel/mlm (Rp)</label>
-          <input id="f_hotel" type="number" min="0" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="0" />
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Jenjang Jabatan <span class="text-rose-500">*</span></label>
+          <input id="f_jabatan" list="jabatanListDatalist" type="text" class="input-field w-full rounded-xl px-3.5 py-2.5 text-sm" placeholder="Contoh: Operator - Karu" required />
+          <datalist id="jabatanListDatalist">
+            <option value="Operator - Karu">
+            <option value="Assup - Supervisor">
+            <option value="Assman - Manager">
+            <option value="GM - Wadir">
+            <option value="Direktur - Dirut">
+          </datalist>
         </div>
+
+        <!-- Mata Uang -->
         <div>
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">Uang Makan/hari (Rp)</label>
-          <input id="f_makan" type="number" min="0" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="0" />
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Mata Uang</label>
+          <select id="f_mata_uang" class="input-field w-full rounded-xl px-3.5 py-2.5 text-sm">
+            <option value="IDR">IDR (Rupiah)</option>
+            <option value="USD">USD (Dollar)</option>
+          </select>
         </div>
+
+        <!-- No Urut -->
         <div>
-          <label class="text-xs text-slate-400 mb-1.5 block font-medium">Uang Saku/hari (Rp)</label>
-          <input id="f_saku" type="number" min="0" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="0" />
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">No. Urut Tingkatan</label>
+          <input id="f_no_urut" type="number" step="1" min="1" max="10" class="input-field w-full rounded-xl px-3.5 py-2.5 text-sm" placeholder="1" />
+        </div>
+
+        <!-- Uang Makan -->
+        <div>
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Uang Makan / hari</label>
+          <input id="f_makan" type="number" step="any" min="0" class="input-field w-full rounded-xl px-3.5 py-2.5 text-sm" placeholder="0" />
+        </div>
+
+        <!-- Uang Saku -->
+        <div>
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Uang Saku / hari</label>
+          <input id="f_saku" type="number" step="any" min="0" class="input-field w-full rounded-xl px-3.5 py-2.5 text-sm" placeholder="0" />
+        </div>
+
+        <!-- Hotel -->
+        <div>
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Hak Hotel / malam</label>
+          <input id="f_hotel" type="number" step="any" min="0" class="input-field w-full rounded-xl px-3.5 py-2.5 text-sm" placeholder="0" />
+        </div>
+
+        <!-- Transportasi Lokal -->
+        <div>
+          <label class="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Transportasi</label>
+          <input id="f_transport" type="number" step="any" min="0" class="input-field w-full rounded-xl px-3.5 py-2.5 text-sm" placeholder="0" />
         </div>
       </div>
-      <div class="flex gap-3 pt-2">
-        <button type="button" onclick="closeModal()" class="flex-1 py-2.5 rounded-xl border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/5 transition">Batal</button>
-        <button type="submit" class="flex-1 btn-primary py-2.5 rounded-xl text-white text-sm font-semibold">Simpan</button>
+
+      <div class="flex gap-3 pt-3 border-t border-slate-200 dark:border-white/10">
+        <button type="button" onclick="closeModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5 cursor-pointer active:scale-95 transition">
+          Batal
+        </button>
+        <button type="submit" id="btnSubmitTarif" class="flex-1 btn-primary py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer active:scale-95 shadow-lg transition">
+          <i class="ph-bold ph-floppy-disk"></i> Simpan Tarif
+        </button>
       </div>
     </form>
   </div>
 </div>
 
 <script src="/js/api.js"></script>
-<script src="/js/sidebar.js"></script>
+<script src="/js/sidebar.js?v=2"></script>
 <script>
   requireAuth();
   const user = getCurrentUser();
@@ -121,56 +270,162 @@
   const isFullAccess = user.role_sistem === 'HRGA';
   if (!isFullAccess) {
     document.getElementById('viewOnlyBanner').classList.remove('hidden');
-    document.getElementById('btnAdd').classList.add('disabled-btn');
+    document.getElementById('btnAdd').classList.add('hidden');
+  }
+
+  let allTarifs = [];
+  let allFasilitas = [];
+  let tarifMap = {};
+
+  function formatTarifValue(val, curr) {
+    if (!val || val === 0) return '-';
+    if (curr === 'USD') {
+      return `$ ${parseFloat(val).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+    }
+    return formatRupiah(val);
+  }
+
+  async function handleRefresh(btn) {
+    const icon = btn?.querySelector('i');
+    if (icon) icon.classList.add('animate-spin');
+    await loadList();
+    if (icon) setTimeout(() => icon.classList.remove('animate-spin'), 400);
+    showToast('Data master tarif berhasil diperbarui', 'info');
   }
 
   async function loadList() {
-    const res = await api.getAllTarif();
+    const filterArea = document.getElementById('filterArea').value;
+    const res = await api.getAllTarif(filterArea ? { area: filterArea } : {});
     const tbody = document.getElementById('tableBody');
-    if (!res?.success || !res.data?.length) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-slate-500">Belum ada data tarif</td></tr>';
+
+    if (!res?.success) {
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center py-12 text-rose-400">Gagal memuat master tarif</td></tr>';
       return;
     }
-    tbody.innerHTML = res.data.map(t => `
-      <tr class="table-row">
-        <td class="px-4 py-3.5"><p class="text-white text-sm font-medium">${t.area_tujuan}</p></td>
-        <td class="px-4 py-3.5"><span class="px-2 py-1 rounded-lg bg-orange-500/15 text-orange-300 text-xs font-medium border border-orange-500/20">${t.kriteria_jabatan}</span></td>
-        <td class="px-4 py-3.5 text-right text-slate-300 text-sm">${formatRupiah(t.hak_transport)}</td>
-        <td class="px-4 py-3.5 text-right text-slate-300 text-sm">${formatRupiah(t.hak_hotel)}</td>
-        <td class="px-4 py-3.5 text-right text-slate-300 text-sm">${formatRupiah(t.tarif_uang_makan)}</td>
-        <td class="px-4 py-3.5 text-right text-slate-300 text-sm">${formatRupiah(t.tarif_uang_saku)}</td>
-        <td class="px-4 py-3.5">
-          <div class="flex items-center justify-center gap-2">
-            <button onclick="openEdit(${JSON.stringify(t).replace(/"/g,"'")})" title="Edit"
-              class="${isFullAccess ? 'p-2 rounded-lg hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 transition' : 'disabled-btn p-2 rounded-lg text-slate-600'}">
-              <i class="ph-bold ph-pencil text-base"></i>
-            </button>
-            <button onclick="deleteTarif(${t.id_tarif})" title="Hapus"
-              class="${isFullAccess ? 'p-2 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-300 transition' : 'disabled-btn p-2 rounded-lg text-slate-600'}">
-              <i class="ph-bold ph-trash text-base"></i>
-            </button>
-          </div>
-        </td>
-      </tr>`).join('');
+
+    const payload = res.data || {};
+    allTarifs = payload.tarifs || [];
+    allFasilitas = payload.fasilitas || [];
+    const areas = payload.areas || [];
+
+    // Isi dropdown area jika baru pertama kali
+    const areaSelect = document.getElementById('filterArea');
+    if (areaSelect.options.length <= 1 && areas.length > 0) {
+      areas.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a;
+        opt.textContent = a;
+        areaSelect.appendChild(opt);
+      });
+      if (filterArea) areaSelect.value = filterArea;
+    }
+
+    document.getElementById('totalBadge').textContent = `${allTarifs.length} Data Tarif`;
+
+    // Render Fasilitas
+    renderFasilitas(allFasilitas);
+
+    // Render Tabel Tarif
+    tarifMap = {};
+    if (!allTarifs.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center py-12 text-slate-500">Tidak ada data tarif untuk filter ini</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = allTarifs.map((t, idx) => {
+      const key = `${t.area}___${t.jabatan}`;
+      tarifMap[key] = t;
+      const isUSD = t.mata_uang === 'USD';
+      const currencyBadge = isUSD
+        ? `<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 font-mono text-xs border border-emerald-300 dark:border-emerald-500/20 font-semibold">USD</span>`
+        : `<span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 dark:bg-indigo-500/10 dark:text-indigo-300 font-mono text-xs border border-blue-200 dark:border-indigo-500/20 font-semibold">IDR</span>`;
+
+      const actionButtons = isFullAccess ? `
+        <div class="flex items-center justify-center gap-1.5">
+          <button onclick="openEditModal('${key}')" title="Edit Tarif"
+            class="p-2 rounded-xl hover:bg-amber-100 text-slate-500 hover:text-amber-600 dark:hover:bg-amber-500/20 dark:text-slate-400 dark:hover:text-amber-300 cursor-pointer active:scale-90 transition">
+            <i class="ph-bold ph-pencil text-base"></i>
+          </button>
+          <button onclick="deleteTarifRow('${t.area}', '${t.jabatan}')" title="Hapus Tarif"
+            class="p-2 rounded-xl hover:bg-rose-100 text-slate-500 hover:text-rose-600 dark:hover:bg-rose-500/20 dark:text-slate-400 dark:hover:text-rose-400 cursor-pointer active:scale-90 transition">
+            <i class="ph-bold ph-trash text-base"></i>
+          </button>
+        </div>` : `
+        <div class="flex items-center justify-center text-slate-400 dark:text-slate-600 gap-1 text-xs">
+          <i class="ph-bold ph-lock text-sm"></i>
+          <span class="text-[11px]">View Only</span>
+        </div>`;
+
+      return `
+        <tr class="table-row">
+          <td class="px-4 py-3.5">
+            <p class="text-slate-800 dark:text-white text-sm font-semibold">${t.area}</p>
+          </td>
+          <td class="px-4 py-3.5">
+            <span class="px-2.5 py-1 rounded-lg bg-orange-50 text-orange-700 dark:bg-orange-500/10 dark:text-orange-300 text-xs font-medium border border-orange-200 dark:border-orange-500/20">
+              ${t.jabatan}
+            </span>
+          </td>
+          <td class="px-4 py-3.5 text-center">${currencyBadge}</td>
+          <td class="px-4 py-3.5 text-right font-medium text-slate-800 dark:text-slate-200 text-sm">${formatTarifValue(t.uang_makan, t.mata_uang)}</td>
+          <td class="px-4 py-3.5 text-right font-medium text-slate-800 dark:text-slate-200 text-sm">${formatTarifValue(t.uang_saku, t.mata_uang)}</td>
+          <td class="px-4 py-3.5 text-right font-medium text-slate-800 dark:text-slate-200 text-sm">${formatTarifValue(t.hotel, t.mata_uang)}</td>
+          <td class="px-4 py-3.5 text-right text-slate-500 dark:text-slate-400 text-xs font-medium">${formatTarifValue(t.transport, t.mata_uang)}</td>
+          <td class="px-4 py-3.5 text-center">${actionButtons}</td>
+        </tr>`;
+    }).join('');
   }
 
-  function openModal() {
-    document.getElementById('editId').value = '';
+  function renderFasilitas(list) {
+    const container = document.getElementById('fasilitasGrid');
+    if (!list || !list.length) {
+      container.innerHTML = '<p class="text-slate-500 text-xs col-span-4">Belum ada data fasilitas</p>';
+      return;
+    }
+    container.innerHTML = list.map(f => {
+      const check = (val) => val === 1
+        ? `<span class="text-emerald-600 dark:text-emerald-400 font-bold">✔</span>`
+        : `<span class="text-slate-400 dark:text-slate-500 font-bold">✖</span>`;
+      return `
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 dark:bg-slate-900/60 dark:border-slate-700/80 transition-all duration-300">
+          <p class="text-xs font-bold text-slate-900 dark:text-emerald-300 mb-2 truncate">${f.kriteria}</p>
+          <div class="grid grid-cols-2 gap-1.5 text-[11px] text-slate-600 dark:text-slate-300 font-medium">
+            <div>Transport: ${check(f.hak_transport)}</div>
+            <div>Makan: ${check(f.hak_uang_makan)}</div>
+            <div>Saku: ${check(f.hak_uang_saku)}</div>
+            <div>Hotel: ${check(f.hak_hotel)}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function openCreateModal() {
+    document.getElementById('isEditMode').value = '0';
+    document.getElementById('origArea').value = '';
+    document.getElementById('origJabatan').value = '';
     document.getElementById('modalTitle').textContent = 'Tambah Data Tarif';
     document.getElementById('tarifForm').reset();
     document.getElementById('modalTarif').classList.remove('hidden');
     document.getElementById('modalTarif').classList.add('flex');
   }
 
-  function openEdit(t) {
-    document.getElementById('editId').value    = t.id_tarif;
-    document.getElementById('modalTitle').textContent = 'Edit Data Tarif';
-    document.getElementById('f_area').value      = t.area_tujuan;
-    document.getElementById('f_kriteria').value  = t.kriteria_jabatan;
-    document.getElementById('f_transport').value = t.hak_transport;
-    document.getElementById('f_hotel').value     = t.hak_hotel;
-    document.getElementById('f_makan').value     = t.tarif_uang_makan;
-    document.getElementById('f_saku').value      = t.tarif_uang_saku;
+  function openEditModal(key) {
+    const t = tarifMap[key];
+    if (!t) return;
+    document.getElementById('isEditMode').value = '1';
+    document.getElementById('origArea').value = t.area;
+    document.getElementById('origJabatan').value = t.jabatan;
+    document.getElementById('modalTitle').textContent = `Edit Tarif: ${t.area} (${t.jabatan})`;
+
+    document.getElementById('f_area').value = t.area;
+    document.getElementById('f_jabatan').value = t.jabatan;
+    document.getElementById('f_mata_uang').value = t.mata_uang || 'IDR';
+    document.getElementById('f_no_urut').value = parseFloat(t.no_urut) || 1;
+    document.getElementById('f_makan').value = t.uang_makan || 0;
+    document.getElementById('f_saku').value = t.uang_saku || 0;
+    document.getElementById('f_hotel').value = t.hotel || 0;
+    document.getElementById('f_transport').value = t.transport || 0;
+
     document.getElementById('modalTarif').classList.remove('hidden');
     document.getElementById('modalTarif').classList.add('flex');
   }
@@ -182,26 +437,46 @@
 
   document.getElementById('tarifForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const body = {
-      area_tujuan:      document.getElementById('f_area').value.trim(),
-      kriteria_jabatan: document.getElementById('f_kriteria').value.trim(),
-      hak_transport:    parseFloat(document.getElementById('f_transport').value) || 0,
-      hak_hotel:        parseFloat(document.getElementById('f_hotel').value) || 0,
-      tarif_uang_makan: parseFloat(document.getElementById('f_makan').value) || 0,
-      tarif_uang_saku:  parseFloat(document.getElementById('f_saku').value) || 0,
-    };
-    const editId = document.getElementById('editId').value;
-    const res = editId ? await api.updateTarif(editId, body) : await api.createTarif(body);
-    if (!res?.success) { showToast(res?.message || 'Gagal menyimpan', 'error'); return; }
-    showToast(editId ? 'Data tarif diperbarui' : 'Data tarif ditambahkan', 'success');
-    closeModal(); loadList();
+    const btn = document.getElementById('btnSubmitTarif');
+    const origText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...`;
+
+    try {
+      const payload = {
+        area: document.getElementById('f_area').value.trim(),
+        jabatan: document.getElementById('f_jabatan').value.trim(),
+        mata_uang: document.getElementById('f_mata_uang').value,
+        no_urut: String(document.getElementById('f_no_urut').value || 1),
+        uang_makan: parseFloat(document.getElementById('f_makan').value) || 0,
+        uang_saku: parseFloat(document.getElementById('f_saku').value) || 0,
+        hotel: parseFloat(document.getElementById('f_hotel').value) || 0,
+        transport: parseFloat(document.getElementById('f_transport').value) || 0,
+        tiket: 0,
+      };
+
+      const res = await api.createTarif(payload);
+      if (!res?.success) {
+        showToast(res?.message || 'Gagal menyimpan tarif', 'error');
+        return;
+      }
+      showToast('Data master tarif berhasil disimpan', 'success');
+      closeModal();
+      loadList();
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = origText;
+    }
   });
 
-  async function deleteTarif(id) {
-    showConfirm('Hapus data tarif ini?', async () => {
-      const res = await api.deleteTarif(id);
-      if (!res?.success) { showToast(res?.message || 'Gagal', 'error'); return; }
-      showToast('Data tarif dihapus', 'success');
+  async function deleteTarifRow(area, jabatan) {
+    showConfirm(`Hapus tarif untuk area "${area}" jenjang "${jabatan}"?`, async () => {
+      const res = await api.deleteTarif(area, jabatan);
+      if (!res?.success) {
+        showToast(res?.message || 'Gagal menghapus tarif', 'error');
+        return;
+      }
+      showToast('Data tarif berhasil dihapus', 'success');
       loadList();
     });
   }

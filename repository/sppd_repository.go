@@ -20,6 +20,8 @@ type SppdRepository interface {
 	UpdateStatus(id int, status string) error
 	Delete(id int) error
 	GenerateNoSppd() (string, error)
+	FindDetailBiayaByPengajuan(idPengajuan int) ([]models.SppdDetailBiaya, error)
+	SaveDetailBiayaSnapshot(tx *gorm.DB, idPengajuan int, list []models.SppdDetailBiaya) error
 }
 
 type sppdRepository struct {
@@ -42,6 +44,7 @@ func (r *sppdRepository) FindByID(id int) (*models.SppdPengajuan, error) {
 		Preload("ApprovalLogs.Approver").
 		Preload("Anggota").
 		Preload("Anggota.User").
+		Preload("DetailBiaya").
 		First(&sppd, id).Error
 	if err != nil {
 		return nil, err
@@ -50,10 +53,19 @@ func (r *sppdRepository) FindByID(id int) (*models.SppdPengajuan, error) {
 }
 
 func (r *sppdRepository) FindAll(filter dto.SppdListFilter) ([]models.SppdPengajuan, int64, error) {
-	var sppds []models.SppdPengajuan
+	sppds := make([]models.SppdPengajuan, 0)
 	var total int64
 
-	query := r.db.Model(&models.SppdPengajuan{}).Preload("Pemohon")
+	query := r.db.Model(&models.SppdPengajuan{}).
+		Preload("Pemohon").
+		Preload("Anggota").
+		Preload("Anggota.User").
+		Preload("ApprovalLogs")
+
+	if filter.IDPemohon > 0 {
+		query = query.Where("id_pemohon = ?", filter.IDPemohon)
+	}
+
 	if filter.Status != "" {
 		query = query.Where("status_dokumen = ?", filter.Status)
 	}
@@ -70,12 +82,16 @@ func (r *sppdRepository) FindAll(filter dto.SppdListFilter) ([]models.SppdPengaj
 }
 
 func (r *sppdRepository) FindByPemohon(idPemohon int, filter dto.SppdListFilter) ([]models.SppdPengajuan, int64, error) {
-	var sppds []models.SppdPengajuan
+	sppds := make([]models.SppdPengajuan, 0)
 	var total int64
 
 	query := r.db.Model(&models.SppdPengajuan{}).
 		Preload("Pemohon").
+		Preload("Anggota").
+		Preload("Anggota.User").
+		Preload("ApprovalLogs").
 		Where("id_pemohon = ?", idPemohon)
+
 	if filter.Status != "" {
 		query = query.Where("status_dokumen = ?", filter.Status)
 	}
@@ -92,17 +108,24 @@ func (r *sppdRepository) FindByPemohon(idPemohon int, filter dto.SppdListFilter)
 }
 
 func (r *sppdRepository) FindByStatus(statuses []string, filter dto.SppdListFilter) ([]models.SppdPengajuan, int64, error) {
-	var sppds []models.SppdPengajuan
+	sppds := make([]models.SppdPengajuan, 0)
 	var total int64
 
 	query := r.db.Model(&models.SppdPengajuan{}).
 		Preload("Pemohon").
+		Preload("Anggota").
+		Preload("Anggota.User").
+		Preload("ApprovalLogs").
 		Where("status_dokumen IN ?", statuses)
+
+	if filter.IDPemohon > 0 {
+		query = query.Where("id_pemohon = ?", filter.IDPemohon)
+	}
 
 	query.Count(&total)
 
 	page, limit := parsePagination(filter.Page, filter.Limit)
-	err := query.Order("created_at ASC").
+	err := query.Order("created_at DESC").
 		Offset((page - 1) * limit).
 		Limit(limit).
 		Find(&sppds).Error
@@ -122,6 +145,44 @@ func (r *sppdRepository) UpdateStatus(id int, status string) error {
 
 func (r *sppdRepository) Delete(id int) error {
 	return r.db.Delete(&models.SppdPengajuan{}, id).Error
+}
+
+// FindDetailBiayaByPengajuan mengambil seluruh baris snapshot financial ledger berdasarkan id_pengajuan
+func (r *sppdRepository) FindDetailBiayaByPengajuan(idPengajuan int) ([]models.SppdDetailBiaya, error) {
+	if idPengajuan <= 0 {
+		return []models.SppdDetailBiaya{}, nil
+	}
+	var details []models.SppdDetailBiaya
+	err := r.db.Where("id_pengajuan = ?", idPengajuan).Order("id_detail ASC").Find(&details).Error
+	return details, err
+}
+
+// SaveDetailBiayaSnapshot menyimpan list snapshot ledger dalam konteks transaksi database (tx)
+func (r *sppdRepository) SaveDetailBiayaSnapshot(tx *gorm.DB, idPengajuan int, list []models.SppdDetailBiaya) error {
+	if idPengajuan <= 0 {
+		return nil
+	}
+
+	dbInstance := r.db
+	if tx != nil {
+		dbInstance = tx
+	}
+
+	// 1. Mutlak bersihkan data snapshot lama untuk id_pengajuan ini agar tidak terjadi duplikasi data (Double Insert)
+	if err := dbInstance.Where("id_pengajuan = ?", idPengajuan).Delete(&models.SppdDetailBiaya{}).Error; err != nil {
+		return err
+	}
+
+	if len(list) == 0 {
+		return nil
+	}
+
+	// Pastikan Foreign Key id_pengajuan terpasang mutlak di setiap item
+	for i := range list {
+		list[i].IDPengajuan = idPengajuan
+	}
+
+	return dbInstance.Create(&list).Error
 }
 
 // GenerateNoSppd membuat nomor SPPD dengan format SPPD/YYYYMM/NNNN

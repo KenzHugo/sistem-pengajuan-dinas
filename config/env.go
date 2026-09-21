@@ -18,6 +18,10 @@ type Config struct {
 	JWTSecret      string
 	JWTExpireHours int
 	AppPort        string
+	WAGatewayURL   string
+	WAToken        string
+	WAApiKey       string
+	WAProvider     string
 }
 
 // AppConfig adalah instance global konfigurasi
@@ -45,6 +49,10 @@ func LoadConfig() {
 		JWTSecret:      getEnv("JWT_SECRET", "secret-fallback"),
 		JWTExpireHours: expireHours,
 		AppPort:        getEnv("APP_PORT", "3000"),
+		WAGatewayURL:   getEnv("WA_GATEWAY_URL", ""),
+		WAToken:        getEnv("WA_TOKEN", getEnv("FONNTE_TOKEN", "")),
+		WAApiKey:       getEnv("WA_API_KEY", ""),
+		WAProvider:     getEnv("WA_PROVIDER", "fonnte"),
 	}
 
 	log.Println("[Config] Konfigurasi berhasil dimuat")

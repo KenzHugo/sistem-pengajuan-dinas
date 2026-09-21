@@ -1,10 +1,15 @@
 package controller
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"sipadin/dto"
 	"sipadin/middleware"
 	"sipadin/service"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -91,7 +96,7 @@ func (c *SppdController) GetAll(ctx *fiber.Ctx) error {
 		Limit:  parseInt(ctx.Query("limit"), 20),
 	}
 
-	var data []interface{}
+	data := make([]interface{}, 0)
 	var total int64
 
 	// Karyawan hanya lihat milik sendiri
@@ -124,6 +129,7 @@ func (c *SppdController) GetAll(ctx *fiber.Ctx) error {
 
 // GetQueue - GET /api/sppd/queue?stage=manager|hrga|finance (untuk halaman approval)
 func (c *SppdController) GetQueue(ctx *fiber.Ctx) error {
+	claims := middleware.GetClaims(ctx)
 	stage := ctx.Query("stage")
 	filter := dto.SppdListFilter{
 		Page:  parseInt(ctx.Query("page"), 1),
@@ -140,6 +146,11 @@ func (c *SppdController) GetQueue(ctx *fiber.Ctx) error {
 	statuses, ok := stageStatusMap[stage]
 	if !ok {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("Stage tidak valid"))
+	}
+
+	// Karyawan hanya boleh melihat antrian/laporan miliknya sendiri
+	if claims.RoleSistem == "Karyawan" {
+		filter.IDPemohon = claims.IDUser
 	}
 
 	data, total, err := c.sppdSvc.GetByStatus(statuses, filter)
@@ -186,6 +197,68 @@ func (c *SppdController) Delete(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail(err.Error()))
 	}
 	return ctx.Status(fiber.StatusOK).JSON(dto.OK("Pengajuan berhasil dihapus", nil))
+}
+
+// HitungBiaya - POST /api/sppd/hitung-biaya
+func (c *SppdController) HitungBiaya(ctx *fiber.Ctx) error {
+	claims := middleware.GetClaims(ctx)
+	var req dto.KalkulasiBiayaRequest
+	if err := ctx.BodyParser(&req); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("Format request tidak valid"))
+	}
+
+	res, err := c.sppdSvc.HitungEstimasiBiaya(claims.IDUser, req)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail(err.Error()))
+	}
+	return ctx.Status(fiber.StatusOK).JSON(dto.OK("Kalkulasi estimasi biaya berhasil", res))
+}
+
+// UploadLampiran - POST /api/sppd/upload-lampiran
+func (c *SppdController) UploadLampiran(ctx *fiber.Ctx) error {
+	file, err := ctx.FormFile("lampiran")
+	if err != nil || file == nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("File lampiran tidak ditemukan"))
+	}
+
+	// Validasi ukuran (maks 5MB)
+	if file.Size > 5*1024*1024 {
+		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("Ukuran file maksimal 5MB"))
+	}
+
+	// Validasi ekstensi
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	allowed := map[string]bool{
+		".pdf":  true,
+		".jpg":  true,
+		".jpeg": true,
+		".png":  true,
+		".doc":  true,
+		".docx": true,
+	}
+	if !allowed[ext] {
+		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("Format file tidak didukung. Gunakan PDF, JPG, PNG, atau DOC."))
+	}
+
+	// Pastikan direktori penyimpanan ada
+	uploadDir := "./public/uploads/lampiran"
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.Fail("Gagal membuat folder penyimpanan lampiran"))
+	}
+
+	// Nama file unik
+	uniqueName := fmt.Sprintf("lampiran_%d_%s", time.Now().UnixNano(), filepath.Base(file.Filename))
+	savePath := filepath.Join(uploadDir, uniqueName)
+
+	if err := ctx.SaveFile(file, savePath); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.Fail("Gagal menyimpan file lampiran"))
+	}
+
+	relativeURL := "/uploads/lampiran/" + uniqueName
+	return ctx.Status(fiber.StatusOK).JSON(dto.OK("File lampiran berhasil diunggah", fiber.Map{
+		"file_url":  relativeURL,
+		"file_name": file.Filename,
+	}))
 }
 
 func parseInt(s string, defaultVal int) int {

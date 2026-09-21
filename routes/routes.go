@@ -15,6 +15,7 @@ func RegisterRoutes(
 	approvalCtrl *controller.ApprovalController,
 	tarifCtrl *controller.TarifController,
 	userCtrl *controller.UserController,
+	karyawanCtrl *controller.KaryawanController,
 ) {
 	api := app.Group("/api")
 
@@ -34,6 +35,8 @@ func RegisterRoutes(
 	sppd.Get("/queue", sppdCtrl.GetQueue)
 	sppd.Get("/:id", sppdCtrl.GetByID)
 	sppd.Get("/", sppdCtrl.GetAll)
+	sppd.Post("/hitung-biaya", sppdCtrl.HitungBiaya)
+	sppd.Post("/upload-lampiran", sppdCtrl.UploadLampiran)
 
 	// Karyawan: membuat, mengedit, menghapus, mengajukan
 	sppd.Post("/",
@@ -73,12 +76,21 @@ func RegisterRoutes(
 		approvalCtrl.SendToDirector,
 	)
 
+	// ─── Finance & Audit Ledger Routes ─────────────────────────────────────────
+	finance := protected.Group("/finance")
+	finance.Get("/sppd-ledger/:id", approvalCtrl.GetSppdLedger)
+	finance.Get("/export-csv", approvalCtrl.ExportFinancialCSV)
+
 	// ─── Tarif Routes (HRGA Full Access, semua lainnya GET only) ──────────────
 	tarif := protected.Group("/tarif")
+	tarif.Get("/fasilitas", tarifCtrl.GetFasilitas)
+	tarif.Get("/areas", tarifCtrl.GetAreas)
 	tarif.Get("/", tarifCtrl.GetAll)
 	tarif.Get("/:id", tarifCtrl.GetByID)
 	tarif.Post("/", middleware.RequireRole(middleware.RoleHRGA), tarifCtrl.Create)
+	tarif.Put("/", middleware.RequireRole(middleware.RoleHRGA), tarifCtrl.Update)
 	tarif.Put("/:id", middleware.RequireRole(middleware.RoleHRGA), tarifCtrl.Update)
+	tarif.Delete("/", middleware.RequireRole(middleware.RoleHRGA), tarifCtrl.Delete)
 	tarif.Delete("/:id", middleware.RequireRole(middleware.RoleHRGA), tarifCtrl.Delete)
 
 	// ─── User Management Routes (HRGA Full Access) ────────────────────────────
@@ -89,4 +101,19 @@ func RegisterRoutes(
 	users.Post("/", middleware.RequireRole(middleware.RoleHRGA), userCtrl.Create)
 	users.Put("/:id", middleware.RequireRole(middleware.RoleHRGA), userCtrl.Update)
 	users.Delete("/:id", middleware.RequireRole(middleware.RoleHRGA), userCtrl.Delete)
+
+	// ─── Karyawan Routes (karyawan_copy1) ─────────────────────────────────────
+	karyawan := protected.Group("/karyawan", middleware.RequireRole(
+		middleware.RoleManager,
+		middleware.RoleHRGA,
+		middleware.RoleFinance,
+		middleware.RoleDireksi,
+	))
+	karyawan.Get("/meta/departemen", karyawanCtrl.GetDepartemens)
+	karyawan.Get("/meta/stats", karyawanCtrl.GetStats)
+	karyawan.Get("/", karyawanCtrl.GetAll)
+	karyawan.Get("/:id", karyawanCtrl.GetByID)
+	karyawan.Post("/", middleware.RequireRole(middleware.RoleHRGA, middleware.RoleManager), karyawanCtrl.Create)
+	karyawan.Put("/:id", middleware.RequireRole(middleware.RoleHRGA, middleware.RoleManager), karyawanCtrl.Update)
+	karyawan.Delete("/:id", middleware.RequireRole(middleware.RoleHRGA), karyawanCtrl.Delete)
 }

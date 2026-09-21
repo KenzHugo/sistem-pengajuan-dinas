@@ -2,70 +2,103 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SIPADIN — Antrian Manager</title>
+  <title>SIPADIN — Verifikasi Manager</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+  <script>
+    // Anti-FOUC theme initialization
+    (function() {
+      const saved = localStorage.getItem('sipadin_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+  </script>
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
   <style>
     * { font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background: #0a0f1e; }
-    .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
-    .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
-    .gradient-text { background: linear-gradient(135deg,#fbbf24,#f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    body { background: #f8fafc; color: #1e293b; }
+    html.dark body { background: #1a2235; color: #ffffff; }
+    .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(226,232,240,0.8); }
+    html.dark .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+    .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+    html.dark .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+    .gradient-text { background: linear-gradient(135deg,#f59e0b,#d97706); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    html.dark .gradient-text { background: linear-gradient(135deg,#fbbf24,#f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
     .btn-approve { background: linear-gradient(135deg,#10b981,#059669); transition: all .3s; }
     .btn-approve:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,.4); }
     .btn-reject  { background: linear-gradient(135deg,#ef4444,#dc2626); transition: all .3s; }
     .btn-reject:hover  { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(239,68,68,.3); }
-    .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; transition: .2s; }
-    .input-field:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.2); }
-    .input-field::placeholder { color: rgba(255,255,255,0.3); }
-    .table-row { border-bottom: 1px solid rgba(255,255,255,0.05); transition: background .2s; }
-    .table-row:hover { background: rgba(255,255,255,0.03); }
-    .modal-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
+    .input-field { background: #ffffff; border: 1px solid #cbd5e1; color: #1e293b; transition: .2s; }
+    html.dark .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; }
+    .table-row { border-bottom: 1px solid #e2e8f0; transition: background .2s; }
+    html.dark .table-row { border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .table-row:hover { background: #f1f5f9; }
+    html.dark .table-row:hover { background: rgba(255,255,255,0.03); }
+    .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
     .disabled-btn { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
   </style>
 </head>
-<body class="text-white min-h-screen">
+<body class="min-h-screen transition-colors duration-300">
 <div id="sidebarContainer"></div>
 <main class="lg:ml-64 min-h-screen">
   <div class="p-6 md:p-8">
-    <div class="mb-8">
-      <h1 class="text-2xl font-bold text-white">Antrian <span class="gradient-text">Persetujuan Manager</span></h1>
-      <p class="text-slate-400 text-sm mt-1">SPPD menunggu cross-check dan persetujuan Anda</p>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Verifikasi <span class="gradient-text">Manager</span></h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">SPPD menunggu cross-check dan persetujuan Anda</p>
+      </div>
+      <!-- Theme Toggle Button -->
+      <button id="themeToggleBtn" type="button" class="p-2.5 rounded-xl border transition-all duration-300 bg-white hover:bg-slate-100 border-slate-200 text-amber-500 shadow-sm dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10 dark:text-sky-400 self-start sm:self-auto" title="Ganti Mode Tema">
+        <svg class="theme-icon-sun w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z" />
+        </svg>
+        <svg class="theme-icon-moon w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
     </div>
 
     <!-- Info RBAC -->
     <div id="viewOnlyBanner" class="hidden mb-5 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-3">
-      <i class="ph-bold ph-eye text-amber-400 text-lg"></i>
-      <p class="text-amber-300 text-sm">Anda hanya memiliki akses <strong>View Only</strong> di halaman ini. Tombol aksi dinonaktifkan.</p>
+      <i class="ph-bold ph-eye text-amber-500 text-lg"></i>
+      <p class="text-amber-700 dark:text-amber-300 text-sm">Anda hanya memiliki akses <strong>View Only</strong> di halaman ini. Tombol aksi dinonaktifkan.</p>
     </div>
 
-    <div class="glass-card rounded-2xl overflow-hidden">
-      <div class="p-4 border-b border-white/5 flex items-center justify-between">
+    <div class="bg-white border border-slate-200 shadow-md rounded-xl overflow-hidden dark:bg-slate-800/90 dark:border-slate-700/80 dark:shadow-none transition-all duration-300">
+      <div class="p-4 border-b border-slate-200 dark:border-slate-700/60 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/30">
         <div class="flex items-center gap-2">
-          <div class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
-          <span class="text-slate-300 text-sm font-medium">Menunggu Manager</span>
-          <span id="queueCount" class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs font-medium">0</span>
+          <div class="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse"></div>
+          <span class="text-slate-800 dark:text-slate-200 text-sm font-semibold">Menunggu Verifikasi Manager</span>
+          <span id="queueCount" class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 text-xs font-semibold">0</span>
         </div>
-        <button onclick="loadList()" class="px-3 py-1.5 rounded-lg border border-white/10 text-slate-400 text-xs hover:bg-white/5 transition flex items-center gap-1.5">
-          <i class="ph-bold ph-arrows-clockwise"></i> Refresh
+        <button onclick="handleRefresh(this)" class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-slate-400 text-xs dark:hover:bg-white/5 transition flex items-center gap-1.5 font-medium shadow-sm active:scale-95 cursor-pointer">
+          <i class="ph-bold ph-arrows-clockwise"></i> <span>Refresh</span>
         </button>
       </div>
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-white/10">
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Pemohon</th>
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Tujuan</th>
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Tanggal</th>
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Est. Biaya</th>
-              <th class="text-center px-4 py-3.5 text-slate-400 font-medium">Tindakan</th>
+        <table class="w-full text-sm border-collapse text-left">
+          <thead class="bg-blue-50/80 border-b-2 border-blue-500 dark:bg-slate-900/60 dark:border-b-2 dark:border-emerald-500 transition-colors duration-300">
+            <tr>
+              <th class="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-blue-900 dark:text-emerald-300">Pemohon</th>
+              <th class="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-blue-900 dark:text-emerald-300">Tujuan</th>
+              <th class="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-blue-900 dark:text-emerald-300">Tanggal</th>
+              <th class="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-blue-900 dark:text-emerald-300">Est. Biaya</th>
+              <th class="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-blue-900 dark:text-emerald-300 text-center">Tindakan</th>
             </tr>
           </thead>
-          <tbody id="tableBody">
+          <tbody id="tableBody" class="divide-y divide-slate-100 dark:divide-slate-700/50">
             <tr><td colspan="5" class="text-center py-12 text-slate-500">
-              <i class="ph-bold ph-spinner-gap text-3xl mb-2 block animate-spin"></i>Memuat antrian...
+              <i class="ph-bold ph-spinner-gap text-3xl mb-2 block animate-spin text-emerald-600 dark:text-indigo-400"></i>Memuat antrian...
             </td></tr>
           </tbody>
         </table>
@@ -75,78 +108,103 @@
 </main>
 
 <!-- Modal Aksi -->
-<div id="modalAksi" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-overlay">
-  <div class="glass border border-white/10 rounded-2xl w-full max-w-lg">
-    <div class="flex items-center justify-between p-5 border-b border-white/10">
-      <h2 id="modalAksiTitle" class="text-base font-bold text-white"></h2>
-      <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1">
-        <i class="ph-bold ph-x text-xl"></i>
+<div id="modalAksi" class="fixed inset-0 z-50 hidden overflow-y-auto flex justify-center items-center p-4 modal-overlay">
+  <div class="bg-white border border-slate-200 dark:bg-slate-800 dark:border-white/10 rounded-2xl w-full max-w-lg shadow-2xl transition-all duration-300 max-h-[90vh] flex flex-col my-auto">
+    <!-- Modal Header (Fixed) -->
+    <div class="flex items-center justify-between p-5 border-b border-slate-200 dark:border-white/10 flex-shrink-0">
+      <h2 id="modalAksiTitle" class="text-base font-bold text-slate-900 dark:text-white"></h2>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition p-1 cursor-pointer">
+        <i class="ph-bold ph-x text-lg"></i>
       </button>
     </div>
-    <div class="p-5">
-      <div id="modalAksiInfo" class="glass-card rounded-xl p-4 mb-4 space-y-2 text-sm"></div>
-      <label class="text-xs text-slate-400 font-medium mb-1.5 block">Catatan <span id="catatanLabel" class="text-slate-600">(opsional)</span></label>
-      <textarea id="catatanInput" rows="3" class="input-field w-full rounded-xl px-3 py-2.5 text-sm resize-none" placeholder="Tambahkan catatan..."></textarea>
-      <div class="flex gap-3 mt-4">
-        <button onclick="closeModal()" class="flex-1 py-2.5 rounded-xl border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/5 transition">Batal</button>
-        <button id="btnConfirmAksi" class="flex-1 py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 transition">
-        </button>
+
+    <!-- Modal Body (Scrollable Content & Table) -->
+    <div class="overflow-y-auto p-5 sm:p-6 flex-1 space-y-4">
+      <div id="modalAksiInfo" class="bg-slate-50 border border-slate-200 dark:bg-slate-900/40 dark:border-slate-700 rounded-xl p-4 space-y-2 text-sm"></div>
+      <div>
+        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
+          Catatan / Alasan <span id="catatanLabel" class="text-slate-400 font-normal"></span>
+        </label>
+        <textarea id="catatanInput" rows="3" class="input-field w-full rounded-xl px-3 py-2.5 text-sm resize-none" placeholder="Tulis catatan atau alasan di sini..."></textarea>
       </div>
+    </div>
+
+    <!-- Modal Footer (Fixed Actions) -->
+    <div class="p-4 sm:p-5 border-t border-slate-200 dark:border-white/10 flex gap-3 flex-shrink-0 bg-slate-50/50 dark:bg-slate-800/80 rounded-b-2xl">
+      <button onclick="closeModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 dark:border-white/10 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer active:scale-95">
+        Batal
+      </button>
+      <button id="btnConfirmAksi" class="flex-1 py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 transition shadow-lg cursor-pointer active:scale-95"></button>
     </div>
   </div>
 </div>
 
-<script src="/js/api.js"></script>
-<script src="/js/sidebar.js"></script>
+<div id="toast" class="fixed bottom-6 right-6 z-[9999] px-5 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white shadow-xl text-sm font-medium flex items-center gap-2.5 min-w-64 hidden">
+  <i id="toastIcon" class="ph-bold text-lg"></i><span id="toastMsg"></span>
+</div>
+
+<script src="/js/api.js?v=3"></script>
+<script src="/js/sidebar.js?v=3"></script>
 <script>
   requireAuth();
   const user = getCurrentUser();
+  const isFullAccess = isFullAccessPage('manager', user.role_sistem);
   renderSidebar('manager');
-
-  const isFullAccess = user.role_sistem === 'Manager';
   if (!isFullAccess) document.getElementById('viewOnlyBanner').classList.remove('hidden');
 
   let currentAction = null;
   let currentID     = null;
+  let sppdMap = {};
+
+  async function handleRefresh(btn) {
+    const icon = btn?.querySelector('i');
+    if (icon) icon.classList.add('animate-spin');
+    await loadList();
+    if (icon) setTimeout(() => icon.classList.remove('animate-spin'), 400);
+    showToast('Data antrian berhasil diperbarui', 'info');
+  }
 
   async function loadList() {
     const res = await api.getQueue('manager');
     const tbody = document.getElementById('tableBody');
     if (!res?.success) {
-      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-red-400">Gagal memuat data</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-rose-500">Gagal memuat antrian</td></tr>';
       return;
     }
     const items = res.data || [];
-    document.getElementById('queueCount').textContent = res.total || 0;
+    sppdMap = {};
+    items.forEach(s => { sppdMap[s.id_sppd] = s; });
+
+    document.getElementById('queueCount').textContent = res.total || items.length;
     if (!items.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-12 text-slate-500"><i class="ph-bold ph-check-circle text-4xl mb-2 block text-emerald-500/40"></i>Tidak ada antrian saat ini</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-12 text-slate-500"><i class="ph-bold ph-check-circle text-4xl mb-2 block text-emerald-500/60"></i>Tidak ada antrian saat ini</td></tr>';
       return;
     }
     tbody.innerHTML = items.map(s => `
-      <tr class="table-row">
-        <td class="px-4 py-3.5">
-          <p class="text-white text-sm font-medium">${s.pemohon?.nama_lengkap || '-'}</p>
-          <p class="text-slate-500 text-xs">${s.pemohon?.nomor_id || ''}</p>
+      <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors border-b border-slate-100 dark:border-slate-700/50">
+        <td class="px-5 py-4">
+          <p class="text-slate-900 dark:text-white text-sm font-semibold">${s.pemohon?.nama_lengkap || '-'}</p>
+          <p class="text-slate-500 dark:text-slate-400 text-xs font-mono mt-0.5">${s.pemohon?.nomor_id || ''}</p>
         </td>
-        <td class="px-4 py-3.5">
-          <p class="text-white text-sm">${s.kota_tujuan}</p>
-          <p class="text-slate-500 text-xs truncate max-w-xs">${s.instansi_tujuan}</p>
+        <td class="px-5 py-4">
+          <p class="text-slate-800 dark:text-slate-100 text-sm font-medium">${s.kota_tujuan}</p>
+          <p class="text-slate-500 dark:text-slate-400 text-xs truncate max-w-xs mt-0.5">${s.instansi_tujuan}</p>
         </td>
-        <td class="px-4 py-3.5">
-          <p class="text-slate-300 text-xs">${formatDateShort(s.tgl_berangkat)}</p>
-          <p class="text-slate-500 text-xs">s/d ${formatDateShort(s.tgl_kembali)} · ${s.durasi_hari}h</p>
+        <td class="px-5 py-4">
+          <p class="text-slate-700 dark:text-slate-300 text-xs font-medium">${formatDateShort(s.tgl_berangkat)}</p>
+          <p class="text-slate-500 dark:text-slate-400 text-xs mt-0.5">s/d ${formatDateShort(s.tgl_kembali)} · ${s.durasi_hari}h</p>
         </td>
-        <td class="px-4 py-3.5">
-          <p class="text-emerald-400 text-sm font-semibold">${formatRupiah(s.estimasi_biaya)}</p>
+        <td class="px-5 py-4">
+          <p class="text-emerald-700 dark:text-emerald-400 text-sm font-bold font-mono">${formatRupiah(s.estimasi_biaya)}</p>
         </td>
-        <td class="px-4 py-3.5">
+        <td class="px-5 py-4">
           <div class="flex items-center justify-center gap-2">
-            <button onclick="openAksi(${s.id_sppd}, 'approve', ${JSON.stringify(s).replace(/"/g,"'")})"
-              title="Approve" ${!isFullAccess ? 'class="disabled-btn"' : `class="btn-approve p-2.5 rounded-xl text-white"`}>
+            <button onclick="openAksi(${s.id_sppd}, 'approve')"
+              title="Setujui SPPD" ${!isFullAccess ? 'class="disabled-btn"' : `class="btn-approve cursor-pointer active:scale-90 p-2.5 rounded-xl text-white shadow-md transition-transform"`}>
               <i class="ph-bold ph-check text-base"></i>
             </button>
-            <button onclick="openAksi(${s.id_sppd}, 'reject', ${JSON.stringify(s).replace(/"/g,"'")})"
-              title="Reject" ${!isFullAccess ? 'class="disabled-btn"' : `class="btn-reject p-2.5 rounded-xl text-white"`}>
+            <button onclick="openAksi(${s.id_sppd}, 'reject')"
+              title="Tolak SPPD" ${!isFullAccess ? 'class="disabled-btn"' : `class="btn-reject cursor-pointer active:scale-90 p-2.5 rounded-xl text-white shadow-md transition-transform"`}>
               <i class="ph-bold ph-x text-base"></i>
             </button>
           </div>
@@ -154,24 +212,126 @@
       </tr>`).join('');
   }
 
-  function openAksi(id, action, data) {
+  async function openAksi(id, action) {
+    const data = sppdMap[id] || {};
     currentID     = id;
     currentAction = action;
     const isApprove = action === 'approve';
     document.getElementById('modalAksiTitle').textContent = isApprove ? '✔ Setujui Pengajuan' : '✖ Tolak Pengajuan';
     document.getElementById('catatanLabel').textContent   = isApprove ? '(opsional)' : '(wajib — alasan penolakan)';
     document.getElementById('catatanInput').value = '';
+    const anggotaNames = (data.anggota || []).map(a => a.user?.nama_lengkap || '').filter(Boolean).join(', ');
+    const anggotaRow = anggotaNames ? `<div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Rombongan</span><span class="text-blue-600 dark:text-indigo-300 font-medium">${anggotaNames}</span></div>` : '';
+    const lampiranRow = data.lampiran_file ? `<div class="flex justify-between items-center"><span class="text-slate-500 dark:text-slate-400">Lampiran</span><a href="${data.lampiran_file}" target="_blank" class="text-blue-600 dark:text-indigo-400 hover:underline text-xs font-semibold flex items-center gap-1"><i class="ph-bold ph-paperclip"></i> Buka Dokumen</a></div>` : '';
+
     document.getElementById('modalAksiInfo').innerHTML = `
-      <div class="flex justify-between"><span class="text-slate-500">Pemohon</span><span class="text-white font-medium">${data.pemohon?.nama_lengkap || '-'}</span></div>
-      <div class="flex justify-between"><span class="text-slate-500">Tujuan</span><span class="text-white">${data.kota_tujuan}, ${data.instansi_tujuan}</span></div>
-      <div class="flex justify-between"><span class="text-slate-500">Tanggal</span><span class="text-white">${formatDateShort(data.tgl_berangkat)} – ${formatDateShort(data.tgl_kembali)}</span></div>
-      <div class="flex justify-between"><span class="text-slate-500">Est. Biaya</span><span class="text-emerald-400 font-semibold">${formatRupiah(data.estimasi_biaya)}</span></div>`;
+      <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Pemohon</span><span class="text-slate-800 dark:text-white font-semibold">${data.pemohon?.nama_lengkap || '-'} (${data.pemohon?.kode_departemen || ''})</span></div>
+      ${anggotaRow}
+      ${lampiranRow}
+      <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Tujuan & Jarak</span><span class="text-slate-800 dark:text-white font-medium">${data.kota_tujuan || '-'} ${data.jarak_km > 0 ? `(${data.jarak_km} KM)` : ''}</span></div>
+      <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Tanggal & Durasi</span><span class="text-slate-800 dark:text-white font-medium">${formatDateShort(data.tgl_berangkat)} – ${formatDateShort(data.tgl_kembali)} (${data.durasi_hari} hari / ${data.durasi_jam || '-'} jam)</span></div>
+      <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Jam Perjalanan</span><span class="text-slate-800 dark:text-white font-mono text-xs">${data.jam_berangkat || '08:00'} - ${data.jam_kembali || '17:00'}</span></div>
+      <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Transport / Akomodasi</span><span class="text-slate-800 dark:text-white font-medium">${data.transportasi || '-'} / ${data.akomodasi || '-'}</span></div>
+      
+      <!-- Container Tabel Rincian Hak Per Orang -->
+      <div id="managerRincianPerKepalaContainer" class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-center py-4 gap-2 text-slate-400 text-xs">
+          <i class="ph-bold ph-spinner-gap text-lg text-blue-600 dark:text-indigo-400 animate-spin"></i>
+          <span>Memuat rincian tarif per kepala...</span>
+        </div>
+      </div>`;
+
     const btn = document.getElementById('btnConfirmAksi');
-    btn.className = `flex-1 py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 transition ${isApprove ? 'btn-approve' : 'btn-reject'}`;
+    btn.className = `flex-1 py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition ${isApprove ? 'btn-approve' : 'btn-reject'}`;
     btn.innerHTML = `<i class="ph-bold ${isApprove ? 'ph-check' : 'ph-x'} text-base"></i>${isApprove ? 'Ya, Setujui' : 'Ya, Tolak'}`;
+    btn.disabled = false;
     btn.onclick = submitAksi;
     document.getElementById('modalAksi').classList.remove('hidden');
     document.getElementById('modalAksi').classList.add('flex');
+
+    // Fetch live breakdown per kepala
+    try {
+      const rekanList = (data.anggota || []).map(a => a.user?.nomor_id || a.user?.nama_lengkap).filter(Boolean);
+      const resCalc = await api.hitungBiaya({
+        nomor_id: data.pemohon?.nomor_id || '',
+        kota_tujuan: data.kota_tujuan,
+        tgl_berangkat: data.tgl_berangkat ? data.tgl_berangkat.substring(0,10) : '',
+        tgl_kembali: data.tgl_kembali ? data.tgl_kembali.substring(0,10) : '',
+        jam_berangkat: data.jam_berangkat || '08:00',
+        jam_kembali: data.jam_kembali || '17:00',
+        jarak_km: data.jarak_km || 0,
+        transportasi: data.transportasi || '',
+        akomodasi: data.akomodasi || '',
+        rekan_kerja: rekanList,
+      });
+
+      const container = document.getElementById('managerRincianPerKepalaContainer');
+      if (resCalc?.success && resCalc.data && container) {
+        const d = resCalc.data;
+        const list = d.rincian_per_kepala || [];
+        const kb = d.komponen_bersama || {};
+        
+        container.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
+                <i class="ph-bold ph-users-three text-blue-600 dark:text-indigo-400"></i> Rincian Hak Biaya Per Orang
+              </span>
+              <span class="text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-transparent px-2 py-0.5 rounded-full">
+                ${list.length} Orang
+              </span>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/60 p-1">
+              <table class="w-full text-xs text-left">
+                <thead class="bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 font-semibold">
+                  <tr>
+                    <th class="py-2 px-2.5">Personil</th>
+                    <th class="py-2 px-2 text-center">Status</th>
+                    <th class="py-2 px-2 text-right">Uang Makan</th>
+                    <th class="py-2 px-2 text-right">Uang Saku</th>
+                    <th class="py-2 px-2 text-right">Hotel</th>
+                    <th class="py-2 px-2.5 text-right text-emerald-700 dark:text-emerald-400">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-white/5">
+                  ${list.map(p => `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-white/5">
+                      <td class="py-2 px-2.5">
+                        <p class="font-semibold text-slate-900 dark:text-white">${p.nama || '-'}</p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">${p.nomor_id || ''} ${p.group_dinas_luar ? `• ${p.group_dinas_luar}` : ''}</p>
+                      </td>
+                      <td class="py-2 px-2 text-center">
+                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${p.role === 'Pemohon' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'}">
+                          ${p.role}
+                        </span>
+                      </td>
+                      <td class="py-2 px-2 text-right text-slate-700 dark:text-slate-200 font-mono">${formatRupiah(p.makan)}</td>
+                      <td class="py-2 px-2 text-right text-slate-700 dark:text-slate-200 font-mono">${formatRupiah(p.saku)}</td>
+                      <td class="py-2 px-2 text-right text-slate-700 dark:text-slate-200 font-mono">${formatRupiah(p.hotel)}</td>
+                      <td class="py-2 px-2.5 text-right font-bold text-emerald-700 dark:text-emerald-400 font-mono">${formatRupiah(p.subtotal)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 space-y-1 text-xs">
+              <div class="flex justify-between text-slate-600 dark:text-slate-400">
+                <span>Transportasi Bersama: <strong class="text-slate-900 dark:text-white font-mono">${formatRupiah(kb.transport || 0)}</strong></span>
+                <span>Tiket: <strong class="text-slate-900 dark:text-white font-mono">${formatRupiah(kb.tiket || 0)}</strong></span>
+              </div>
+              <div class="flex justify-between items-center pt-1 border-t border-slate-200 dark:border-white/10 font-semibold">
+                <span class="text-slate-800 dark:text-white">Total Estimasi Biaya:</span>
+                <span class="text-emerald-700 dark:text-emerald-400 font-mono text-sm font-bold">${formatRupiah(data.estimasi_biaya || d.total_keseluruhan)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    } catch (err) {
+      console.warn('Gagal kalkulasi rincian personil:', err);
+    }
   }
 
   async function submitAksi() {
@@ -181,9 +341,14 @@
     }
     const btn = document.getElementById('btnConfirmAksi');
     btn.disabled = true;
+    btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-base"></i> Memproses...`;
     const res = await api.managerAction(currentID, { action: currentAction, catatan });
     btn.disabled = false;
-    if (!res?.success) { showToast(res?.message || 'Gagal', 'error'); return; }
+    if (!res?.success) {
+      btn.innerHTML = `<i class="ph-bold ${currentAction === 'approve' ? 'ph-check' : 'ph-x'} text-base"></i> Coba Lagi`;
+      showToast(res?.message || 'Gagal', 'error');
+      return;
+    }
     showToast(currentAction === 'approve' ? 'Pengajuan disetujui!' : 'Pengajuan ditolak', currentAction === 'approve' ? 'success' : 'warning');
     closeModal(); loadList();
   }

@@ -6,33 +6,64 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+  <script>
+    // Anti-FOUC theme initialization
+    (function() {
+      const saved = localStorage.getItem('sipadin_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+  </script>
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
   <style>
     * { font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background: #0a0f1e; }
-    .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
-    .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
-    .gradient-text { background: linear-gradient(135deg,#818cf8,#38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-    .btn-primary { background: linear-gradient(135deg,#6366f1,#4f46e5); transition: all .3s; }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,.4); }
+    body { background: #f8fafc; color: #1e293b; }
+    html.dark body { background: #1a2235; color: #ffffff; }
+    .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(226,232,240,0.8); }
+    html.dark .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+    .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+    html.dark .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+    .gradient-text { background: linear-gradient(135deg,#0284c7,#10b981); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    html.dark .gradient-text { background: linear-gradient(135deg,#818cf8,#38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .btn-primary { background: linear-gradient(135deg,#059669,#0d9488); transition: all .3s; }
+    html.dark .btn-primary { background: linear-gradient(135deg,#6366f1,#4f46e5); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,.3); }
+    html.dark .btn-primary:hover { box-shadow: 0 6px 20px rgba(99,102,241,.4); }
     .btn-danger { background: linear-gradient(135deg,#ef4444,#dc2626); transition: all .3s; }
     .btn-danger:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(239,68,68,.3); }
-    .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; transition: .2s; }
-    .input-field:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.2); }
-    .input-field::placeholder { color: rgba(255,255,255,0.3); }
-    select.input-field option { background: #1e293b; }
-    .table-row { border-bottom: 1px solid rgba(255,255,255,0.05); transition: background .2s; }
-    .table-row:hover { background: rgba(255,255,255,0.03); }
-    .modal-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
-    .stepper-line { height: 2px; background: linear-gradient(90deg, #6366f1, rgba(99,102,241,0.2)); }
-    .stepper-active { background: #6366f1; box-shadow: 0 0 12px rgba(99,102,241,0.6); }
+    .input-field { background: #ffffff; border: 1px solid #cbd5e1; color: #1e293b; transition: .2s; }
+    html.dark .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; }
+    .input-field:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.2); }
+    html.dark .input-field:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.2); }
+    .input-field::placeholder { color: #94a3b8; }
+    html.dark .input-field::placeholder { color: rgba(255,255,255,0.3); }
+    select.input-field option { background: #ffffff; color: #1e293b; }
+    html.dark select.input-field option { background: #1e293b; color: white; }
+    .table-row { border-bottom: 1px solid #e2e8f0; transition: background .2s; }
+    html.dark .table-row { border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .table-row:hover { background: #f1f5f9; }
+    html.dark .table-row:hover { background: rgba(255,255,255,0.03); }
+    .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
+    .stepper-line { height: 2px; background: linear-gradient(90deg, #10b981, rgba(16,185,129,0.2)); }
+    html.dark .stepper-line { background: linear-gradient(90deg, #6366f1, rgba(99,102,241,0.2)); }
+    .stepper-active { background: #10b981; box-shadow: 0 0 12px rgba(16,185,129,0.6); }
+    html.dark .stepper-active { background: #6366f1; box-shadow: 0 0 12px rgba(99,102,241,0.6); }
     .stepper-done { background: #10b981; box-shadow: 0 0 12px rgba(16,185,129,0.4); }
     .stepper-rejected { background: #ef4444; box-shadow: 0 0 12px rgba(239,68,68,0.4); }
     #toast { transition: all .4s cubic-bezier(0.175,0.885,0.32,1.275); transform: translateY(80px); opacity: 0; }
     #toast.show { transform: translateY(0); opacity: 1; }
   </style>
 </head>
-<body class="text-white min-h-screen">
+<body class="min-h-screen transition-colors duration-300">
 <div id="sidebarContainer"></div>
 
 <main class="lg:ml-64 min-h-screen">
@@ -41,25 +72,37 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
       <div>
-        <h1 class="text-2xl font-bold text-white">Dashboard <span class="gradient-text">Pengajuan Saya</span></h1>
-        <p id="greetingText" class="text-slate-400 text-sm mt-1"></p>
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Dashboard <span class="gradient-text">Pengajuan Saya</span></h1>
+        <p id="greetingText" class="text-slate-500 dark:text-slate-400 text-sm mt-1"></p>
       </div>
-      <button onclick="openCreateModal()" id="btnCreate"
-        class="btn-primary px-5 py-2.5 rounded-xl text-white text-sm font-semibold flex items-center gap-2 self-start sm:self-auto">
-        <i class="ph-bold ph-plus"></i> Buat Pengajuan
-      </button>
+      <div class="flex items-center gap-3">
+        <!-- Theme Toggle Button -->
+        <button id="themeToggleBtn" type="button" class="p-2.5 rounded-xl border transition-all duration-300 bg-white hover:bg-slate-100 border-slate-200 text-amber-500 shadow-sm dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10 dark:text-sky-400" title="Ganti Mode Tema">
+          <svg class="theme-icon-sun w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z" />
+          </svg>
+          <svg class="theme-icon-moon w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+
+        <button onclick="openCreateModal()" id="btnCreate"
+          class="btn-primary px-5 py-2.5 rounded-xl text-white text-sm font-semibold flex items-center gap-2 self-start sm:self-auto shadow-lg shadow-emerald-600/20 dark:shadow-indigo-600/20">
+          <i class="ph-bold ph-plus"></i> Buat Pengajuan
+        </button>
+      </div>
     </div>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" id="statsGrid">
-      <div class="glass-card rounded-2xl p-4 col-span-2 lg:col-span-1 animate-pulse">
-        <div class="h-4 bg-white/5 rounded w-3/4 mb-3"></div>
-        <div class="h-8 bg-white/5 rounded w-1/2"></div>
+      <div class="bg-white border border-slate-200 shadow-md rounded-xl p-5 col-span-2 lg:col-span-1 animate-pulse dark:bg-slate-800/90 dark:border-slate-700/80 dark:shadow-none">
+        <div class="h-4 bg-slate-200 dark:bg-white/5 rounded w-3/4 mb-3"></div>
+        <div class="h-8 bg-slate-200 dark:bg-white/5 rounded w-1/2"></div>
       </div>
     </div>
 
     <!-- Filter Bar -->
-    <div class="glass-card rounded-2xl p-4 mb-5 flex flex-wrap gap-3 items-center">
+    <div class="bg-white border border-slate-200 shadow-md rounded-xl p-4 mb-5 flex flex-wrap gap-3 items-center dark:bg-slate-800/90 dark:border-slate-700/80 dark:shadow-none transition-all duration-300">
       <select id="filterStatus" onchange="loadList()"
         class="input-field rounded-xl px-3 py-2 text-sm flex-1 min-w-40">
         <option value="">Semua Status</option>
@@ -71,34 +114,34 @@
         <option value="approved">Disetujui</option>
         <option value="rejected">Ditolak</option>
       </select>
-      <button onclick="loadList()" class="px-4 py-2 rounded-xl border border-white/10 text-slate-300 text-sm hover:bg-white/5 transition flex items-center gap-2">
-        <i class="ph-bold ph-arrows-clockwise"></i> Refresh
+      <button onclick="handleRefresh(this)" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 text-sm dark:hover:bg-white/5 transition flex items-center gap-2 active:scale-95 cursor-pointer">
+        <i class="ph-bold ph-arrows-clockwise"></i> <span>Refresh</span>
       </button>
     </div>
 
     <!-- Table -->
-    <div class="glass-card rounded-2xl overflow-hidden">
+    <div class="bg-white border border-slate-200 shadow-md rounded-xl overflow-hidden dark:bg-slate-800/90 dark:border-slate-700/80 dark:shadow-none transition-all duration-300">
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-white/10">
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">No. SPPD</th>
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Tujuan</th>
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Tanggal</th>
-              <th class="text-left px-4 py-3.5 text-slate-400 font-medium">Status</th>
-              <th class="text-center px-4 py-3.5 text-slate-400 font-medium">Aksi</th>
+        <table class="w-full text-sm border-collapse text-left">
+          <thead class="bg-blue-50/80 border-b-2 border-blue-500 dark:bg-slate-900/60 dark:border-b-2 dark:border-emerald-500 transition-colors duration-300">
+            <tr>
+              <th class="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-blue-900 dark:text-emerald-300">No. SPPD</th>
+              <th class="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-blue-900 dark:text-emerald-300">Tujuan</th>
+              <th class="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-blue-900 dark:text-emerald-300">Tanggal</th>
+              <th class="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-blue-900 dark:text-emerald-300">Status</th>
+              <th class="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-blue-900 dark:text-emerald-300 text-center">Aksi</th>
             </tr>
           </thead>
-          <tbody id="sppdTableBody">
+          <tbody id="sppdTableBody" class="divide-y divide-slate-100 dark:divide-slate-700/50">
             <tr><td colspan="5" class="text-center py-12 text-slate-500">
-              <i class="ph-bold ph-spinner-gap text-3xl mb-2 block animate-spin"></i>Memuat data...
+              <i class="ph-bold ph-spinner-gap text-3xl mb-2 block animate-spin text-emerald-600 dark:text-indigo-400"></i>Memuat data...
             </td></tr>
           </tbody>
         </table>
       </div>
       <!-- Pagination -->
-      <div class="flex items-center justify-between px-4 py-3 border-t border-white/5">
-        <p id="paginationInfo" class="text-slate-500 text-xs"></p>
+      <div class="flex items-center justify-between px-5 py-3.5 border-t border-slate-200 dark:border-slate-700/60">
+        <p id="paginationInfo" class="text-slate-500 dark:text-slate-400 text-xs font-medium"></p>
         <div class="flex gap-2" id="paginationBtns"></div>
       </div>
     </div>
@@ -119,7 +162,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="text-xs font-medium text-slate-400 mb-1.5 block">Kota Tujuan *</label>
-          <input id="f_kota" type="text" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="Contoh: Surabaya" required />
+          <input id="f_kota" type="text" oninput="triggerAutoCalculation()" onchange="triggerAutoCalculation()" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="Contoh: Surabaya" required />
         </div>
         <div>
           <label class="text-xs font-medium text-slate-400 mb-1.5 block">Instansi / Lokasi *</label>
@@ -127,53 +170,211 @@
         </div>
         <div>
           <label class="text-xs font-medium text-slate-400 mb-1.5 block">Tanggal Berangkat *</label>
-          <input id="f_tgl_berangkat" type="date" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" required />
+          <input id="f_tgl_berangkat" type="date" onchange="triggerAutoCalculation()" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" required />
         </div>
         <div>
           <label class="text-xs font-medium text-slate-400 mb-1.5 block">Tanggal Kembali *</label>
-          <input id="f_tgl_kembali" type="date" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" required />
+          <input id="f_tgl_kembali" type="date" onchange="triggerAutoCalculation()" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" required />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-400 mb-1.5 block flex items-center gap-1">
+            <i class="ph-bold ph-clock text-indigo-400"></i> Jam Berangkat
+          </label>
+          <input id="f_jam_berangkat" type="time" value="08:00" onchange="triggerAutoCalculation()" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-400 mb-1.5 block flex items-center gap-1">
+            <i class="ph-bold ph-clock-afternoon text-indigo-400"></i> Jam Kembali
+          </label>
+          <input id="f_jam_kembali" type="time" value="17:00" onchange="triggerAutoCalculation()" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-400 mb-1.5 block flex items-center gap-1">
+            <i class="ph-bold ph-map-pin-line text-emerald-400"></i> Estimasi Jarak (KM)
+          </label>
+          <div class="relative">
+            <input id="f_jarak" type="number" step="0.1" min="0" placeholder="0" oninput="triggerAutoCalculation()" onchange="triggerAutoCalculation()" class="input-field w-full rounded-xl pl-3 pr-10 py-2.5 text-sm" />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-500">KM</span>
+          </div>
         </div>
         <div>
           <label class="text-xs font-medium text-slate-400 mb-1.5 block">Transportasi</label>
-          <select id="f_transportasi" class="input-field w-full rounded-xl px-3 py-2.5 text-sm">
+          <select id="f_transportasi" onchange="triggerAutoCalculation()" class="input-field w-full rounded-xl px-3 py-2.5 text-sm">
             <option value="">-- Pilih --</option>
             <option>Pesawat</option>
             <option>Kereta</option>
             <option>Mobil Dinas</option>
+            <option>Kendaraan Pribadi</option>
             <option>Travel</option>
             <option>Bus</option>
           </select>
         </div>
-        <div>
+        <div class="sm:col-span-2">
           <label class="text-xs font-medium text-slate-400 mb-1.5 block">Akomodasi</label>
-          <select id="f_akomodasi" class="input-field w-full rounded-xl px-3 py-2.5 text-sm">
+          <select id="f_akomodasi" onchange="triggerAutoCalculation()" class="input-field w-full rounded-xl px-3 py-2.5 text-sm">
             <option value="">-- Pilih --</option>
             <option>Hotel</option>
             <option>Mess</option>
             <option>Tidak perlu</option>
           </select>
         </div>
-        <div class="sm:col-span-2">
-          <label class="text-xs font-medium text-slate-400 mb-1.5 block">Estimasi Biaya (Rp)</label>
-          <input id="f_biaya" type="number" min="0" class="input-field w-full rounded-xl px-3 py-2.5 text-sm" placeholder="0" />
+        <!-- ─── Rekan Kerja / Anggota Dinas (Diposisikan tepat sebelum Rincian Biaya) ─── -->
+        <div class="sm:col-span-2 pt-3 border-t border-white/10">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+            <div>
+              <label class="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                <i class="ph-bold ph-users text-indigo-400 text-sm"></i> Rekan Kerja / Anggota Rombongan <span class="text-slate-500 font-normal">(Opsional)</span>
+              </label>
+              <p class="text-[11px] text-slate-400">Tambahkan rekan kerja satu rombongan dinas untuk menghitung hak biaya bersama</p>
+            </div>
+            <button type="button" onclick="addRekanRow()"
+              class="self-start sm:self-auto px-3.5 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition shadow-sm">
+              <i class="ph-bold ph-user-plus text-sm"></i> + Tambah Rekan Sekantor
+            </button>
+          </div>
+          <div id="rekanContainer" class="space-y-2 mt-2">
+            <!-- Dynamic rows will be inserted here -->
+          </div>
         </div>
-        <div class="sm:col-span-2">
+
+        <!-- ─── Tabel Read-Only Rincian Hak Per Orang (Auto-calculated) ───────────── -->
+        <div class="sm:col-span-2 pt-2 border-t border-white/10 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <label class="text-xs font-bold text-white flex items-center gap-1.5">
+                <i class="ph-bold ph-users-three text-emerald-400 text-sm"></i> Rincian Hak Biaya Per Orang
+              </label>
+              <p class="text-[11px] text-slate-400">Dihitung otomatis oleh sistem berdasarkan Plafon Jabatan & Master Tarif MySQL.</p>
+            </div>
+            <span id="badgeJumlahOrang" class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold border border-emerald-500/30">
+              1 Orang
+            </span>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-white/10 bg-slate-900/60 p-1">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-800/80 text-slate-300 border-b border-white/10 font-semibold">
+                <tr>
+                  <th class="py-2.5 px-3">Personil</th>
+                  <th class="py-2.5 px-3 text-center">Status</th>
+                  <th class="py-2.5 px-3 text-right">Uang Makan</th>
+                  <th class="py-2.5 px-3 text-right">Uang Saku</th>
+                  <th class="py-2.5 px-3 text-right">Hotel</th>
+                  <th class="py-2.5 px-3 text-right text-emerald-300">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody id="tabelRincianPerKepalaBody" class="divide-y divide-white/5">
+                <tr>
+                  <td colspan="6" class="text-center py-6 text-slate-400">
+                    <i class="ph-bold ph-calculator text-2xl mb-1 block text-slate-500"></i>
+                    Pilih kota tujuan dan tanggal untuk melihat estimasi rincian per kepala
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Komponen Bersama & Total Keseluruhan -->
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-white/10 space-y-2.5 shadow-inner">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-300">
+              <div class="bg-white/5 p-2 rounded-lg border border-white/5 flex items-center justify-between">
+                <span class="text-slate-400 flex items-center gap-1"><i class="ph-bold ph-car text-blue-400"></i> Transportasi:</span>
+                <strong id="dispTransBersama" class="text-white font-mono">Rp 0</strong>
+              </div>
+              <div class="bg-white/5 p-2 rounded-lg border border-white/5 flex items-center justify-between">
+                <span class="text-slate-400 flex items-center gap-1"><i class="ph-bold ph-ticket text-cyan-400"></i> Tiket:</span>
+                <strong id="dispTiketBersama" class="text-white font-mono">Rp 0</strong>
+              </div>
+              <div class="bg-white/5 p-2 rounded-lg border border-white/5 flex items-center justify-between">
+                <span class="text-slate-400 flex items-center gap-1"><i class="ph-bold ph-clock text-indigo-400"></i> Durasi:</span>
+                <strong id="dispDurasiInfo" class="text-white font-mono">1 Hari</strong>
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-white/10">
+              <div>
+                <span class="text-xs font-bold text-white">Total Estimasi Keseluruhan (Terkunci)</span>
+                <p class="text-[10px] text-slate-400">Termasuk hak makan, saku, hotel seluruh rombongan + transport bersama</p>
+              </div>
+              <div class="text-right">
+                <span id="totalBiayaDisplay" class="text-xl font-bold text-emerald-400 font-mono">Rp 0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sm:col-span-2 pt-2 border-t border-white/10">
           <label class="text-xs font-medium text-slate-400 mb-1.5 block">Maksud & Tujuan Dinas *</label>
           <textarea id="f_maksud" rows="3" class="input-field w-full rounded-xl px-3 py-2.5 text-sm resize-none"
             placeholder="Jelaskan keperluan perjalanan dinas..." required></textarea>
         </div>
+
+        <!-- Lampiran Dokumen / Surat Undangan (Opsional) -->
+        <div class="sm:col-span-2">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+              <i class="ph-bold ph-paperclip text-indigo-400 text-sm"></i>
+              Lampiran Dokumen / Surat Undangan
+              <span class="text-slate-500 font-normal text-[11px]">(Opsional)</span>
+            </label>
+            <span class="text-[11px] text-slate-500">PDF, JPG, PNG, DOC (Maks. 5MB)</span>
+          </div>
+
+          <div id="dropzoneArea"
+            onclick="document.getElementById('f_lampiran').click()"
+            class="relative group border border-dashed border-white/15 hover:border-indigo-500/50 rounded-xl p-3.5 transition-all duration-200 bg-white/2 hover:bg-indigo-500/5 cursor-pointer flex flex-col items-center justify-center text-center">
+            
+            <input type="file" id="f_lampiran" name="lampiran" class="hidden" 
+              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="handleFileSelected(this)" />
+            <input type="hidden" id="f_lampiran_url" value="" />
+
+            <!-- Placeholder saat belum ada file -->
+            <div id="uploadPlaceholder" class="flex flex-col items-center gap-1.5 py-1">
+              <div class="w-9 h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-105 transition-transform">
+                <i class="ph-bold ph-cloud-arrow-up text-lg"></i>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-200">
+                  Klik untuk unggah <span class="text-slate-400 font-normal">atau tarik file ke sini</span>
+                </p>
+                <p class="text-[11px] text-slate-500 mt-0.5">Surat tugas, undangan dinas, rundown acara, dsb.</p>
+              </div>
+            </div>
+
+            <!-- Preview saat file sudah dipilih -->
+            <div id="filePreview" class="hidden w-full items-center justify-between gap-3 bg-slate-900/80 border border-white/10 rounded-xl p-2.5">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                  <i class="ph-bold ph-file-text text-emerald-400 text-base" id="previewIcon"></i>
+                </div>
+                <div class="text-left min-w-0">
+                  <p id="fileName" class="text-xs font-semibold text-white truncate">dokumen.pdf</p>
+                  <p id="fileSize" class="text-[11px] text-slate-400">0 KB</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <a id="btnPreviewExisting" href="#" target="_blank" onclick="event.stopPropagation()" class="hidden p-1.5 rounded-lg hover:bg-indigo-500/20 text-slate-400 hover:text-indigo-300 transition" title="Buka File">
+                  <i class="ph-bold ph-arrow-square-out text-base"></i>
+                </a>
+                <button type="button" onclick="removeSelectedFile(event)"
+                  class="p-1.5 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition" title="Hapus File">
+                  <i class="ph-bold ph-trash text-base"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="flex gap-3 pt-2">
         <button type="button" onclick="closeModal()"
-          class="flex-1 py-2.5 rounded-xl border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/5 transition">
+          class="flex-1 py-2.5 rounded-xl border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/5 cursor-pointer active:scale-95 transition">
           Batal
         </button>
-        <button type="button" onclick="saveDraft()"
-          class="flex-1 py-2.5 rounded-xl border border-indigo-500/40 text-indigo-300 text-sm font-medium hover:bg-indigo-500/10 transition flex items-center justify-center gap-2">
+        <button type="button" onclick="saveDraft()" id="btnSaveDraft"
+          class="flex-1 py-2.5 rounded-xl border border-indigo-500/40 text-indigo-300 text-sm font-medium hover:bg-indigo-500/10 cursor-pointer active:scale-95 transition flex items-center justify-center gap-2">
           <i class="ph-bold ph-floppy-disk"></i> Simpan Draft
         </button>
-        <button type="submit"
-          class="flex-1 btn-primary py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2">
+        <button type="submit" id="btnSubmitSPPD"
+          class="flex-1 btn-primary py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer active:scale-95 shadow-lg transition">
           <i class="ph-bold ph-paper-plane-right"></i> Ajukan
         </button>
       </div>
@@ -194,12 +395,12 @@
   </div>
 </div>
 
-<div id="toast" class="fixed bottom-6 right-6 z-[9999] px-5 py-3 rounded-xl glass border text-sm font-medium flex items-center gap-2.5 min-w-64">
+<div id="toast" class="fixed bottom-6 right-6 z-[9999] px-5 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white shadow-xl text-sm font-medium flex items-center gap-2.5 min-w-64 hidden">
   <i id="toastIcon" class="ph-bold text-lg"></i><span id="toastMsg"></span>
 </div>
 
-<script src="/js/api.js"></script>
-<script src="/js/sidebar.js"></script>
+<script src="/js/api.js?v=3"></script>
+<script src="/js/sidebar.js?v=3"></script>
 <script>
   requireAuth();
   const user = getCurrentUser();
@@ -232,21 +433,30 @@
       else if (s.status_dokumen === 'rejected') counts.rejected++;
     });
     const statCards = [
-      { label: 'Total Pengajuan', val: counts.all,      icon: 'ph-files',         color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
-      { label: 'Draft',           val: counts.draft,     icon: 'ph-file-dashed',   color: 'text-slate-400',  bg: 'bg-slate-500/10' },
-      { label: 'Dalam Proses',    val: counts.pending,   icon: 'ph-clock',         color: 'text-amber-400',  bg: 'bg-amber-500/10' },
-      { label: 'Disetujui',       val: counts.approved,  icon: 'ph-check-circle',  color: 'text-emerald-400',bg: 'bg-emerald-500/10' },
+      { label: 'Total Pengajuan', val: counts.all,      icon: 'ph-files',         color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-500/20' },
+      { label: 'Draft',           val: counts.draft,     icon: 'ph-file-dashed',   color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-700/40' },
+      { label: 'Dalam Proses',    val: counts.pending,   icon: 'ph-clock',         color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-500/20' },
+      { label: 'Disetujui',       val: counts.approved,  icon: 'ph-check-circle',  color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-500/20' },
     ];
     document.getElementById('statsGrid').innerHTML = statCards.map(s => `
-      <div class="glass-card rounded-2xl p-4">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="${s.bg} w-9 h-9 rounded-xl flex items-center justify-center">
-            <i class="ph-bold ${s.icon} ${s.color} text-base"></i>
+      <div class="bg-white border border-slate-200 shadow-md rounded-xl p-5 dark:bg-slate-800/90 dark:border-slate-700/80 dark:shadow-none transition-all duration-300">
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-slate-500 dark:text-slate-400 text-xs font-medium">${s.label}</p>
+          <div class="${s.bg} w-10 h-10 rounded-xl flex items-center justify-center">
+            <i class="ph-bold ${s.icon} ${s.color} text-xl"></i>
           </div>
-          <p class="text-slate-400 text-xs font-medium">${s.label}</p>
         </div>
-        <p class="text-3xl font-bold text-white">${s.val}</p>
+        <p class="text-3xl font-bold text-slate-900 dark:text-white">${s.val}</p>
       </div>`).join('');
+  }
+
+  // ── Refresh Handler ────────────────────────────────────────────────────────
+  async function handleRefresh(btn) {
+    const icon = btn?.querySelector('i');
+    if (icon) icon.classList.add('animate-spin');
+    await Promise.all([loadStats(), loadList()]);
+    if (icon) setTimeout(() => icon.classList.remove('animate-spin'), 400);
+    showToast('Data dashboard berhasil diperbarui', 'info');
   }
 
   // ── Load List ───────────────────────────────────────────────────────────────
@@ -255,44 +465,44 @@
     const res = await api.getMyList({ status, page: currentPage, limit: LIMIT });
     const tbody = document.getElementById('sppdTableBody');
     if (!res?.success) {
-      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-red-400">Gagal memuat data</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-rose-500">Gagal memuat data</td></tr>';
       return;
     }
     const items = res.data || [];
     totalData = res.total || 0;
     if (!items.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-12 text-slate-500"><i class="ph-bold ph-inbox text-4xl mb-2 block"></i>Belum ada pengajuan</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-12 text-slate-500"><i class="ph-bold ph-inbox text-4xl mb-2 block text-slate-400"></i>Belum ada pengajuan</td></tr>';
       renderPagination();
       return;
     }
     tbody.innerHTML = items.map(s => `
-      <tr class="table-row">
-        <td class="px-4 py-3.5">
-          <p class="text-white text-xs font-mono font-medium">${s.no_sppd || '<span class="text-slate-600 italic">Belum diajukan</span>'}</p>
-          <p class="text-slate-500 text-xs">${formatDate(s.created_at)}</p>
+      <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors border-b border-slate-100 dark:border-slate-700/50">
+        <td class="px-5 py-4">
+          <p class="text-slate-900 dark:text-white text-xs font-mono font-semibold">${s.no_sppd || '<span class="text-slate-400 italic font-sans font-normal">Draft (Belum diajukan)</span>'}</p>
+          <p class="text-slate-500 dark:text-slate-400 text-xs mt-0.5">${formatDate(s.created_at)}</p>
         </td>
-        <td class="px-4 py-3.5">
-          <p class="text-white text-sm font-medium">${s.kota_tujuan}</p>
-          <p class="text-slate-500 text-xs truncate max-w-xs">${s.instansi_tujuan}</p>
+        <td class="px-5 py-4">
+          <p class="text-slate-800 dark:text-slate-100 text-sm font-semibold">${s.kota_tujuan}</p>
+          <p class="text-slate-500 dark:text-slate-400 text-xs truncate max-w-xs mt-0.5">${s.instansi_tujuan}</p>
         </td>
-        <td class="px-4 py-3.5">
-          <p class="text-slate-300 text-xs">${formatDateShort(s.tgl_berangkat)}</p>
-          <p class="text-slate-500 text-xs">s/d ${formatDateShort(s.tgl_kembali)} (${s.durasi_hari}h)</p>
+        <td class="px-5 py-4">
+          <p class="text-slate-700 dark:text-slate-300 text-xs font-medium">${formatDateShort(s.tgl_berangkat)}</p>
+          <p class="text-slate-500 dark:text-slate-400 text-xs mt-0.5">s/d ${formatDateShort(s.tgl_kembali)} (${s.durasi_hari}h)</p>
         </td>
-        <td class="px-4 py-3.5">${statusBadge(s.status_dokumen)}</td>
-        <td class="px-4 py-3.5">
-          <div class="flex items-center justify-center gap-2">
+        <td class="px-5 py-4">${statusBadge(s.status_dokumen)}</td>
+        <td class="px-5 py-4 text-center">
+          <div class="flex items-center justify-center gap-1.5">
             <button onclick="openDetail(${s.id_sppd})" title="Lihat Detail"
-              class="p-2 rounded-lg hover:bg-indigo-500/20 text-slate-400 hover:text-indigo-300 transition">
+              class="p-2 rounded-lg text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-sky-300 dark:hover:bg-sky-500/20 transition">
               <i class="ph-bold ph-eye text-base"></i>
             </button>
             ${s.status_dokumen === 'draft' ? `
             <button onclick="openEdit(${s.id_sppd})" title="Edit"
-              class="p-2 rounded-lg hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 transition">
+              class="p-2 rounded-lg text-amber-600 hover:bg-amber-50 dark:text-slate-400 dark:hover:text-amber-300 dark:hover:bg-amber-500/20 transition">
               <i class="ph-bold ph-pencil text-base"></i>
             </button>
             <button onclick="deleteSppd(${s.id_sppd})" title="Hapus"
-              class="p-2 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-300 transition">
+              class="p-2 rounded-lg text-rose-600 hover:bg-rose-50 dark:text-slate-400 dark:hover:text-rose-400 dark:hover:bg-rose-500/20 transition">
               <i class="ph-bold ph-trash text-base"></i>
             </button>` : ''}
           </div>
@@ -317,13 +527,382 @@
 
   function goPage(p) { if(p>=1) { currentPage=p; loadList(); } }
 
-  // ── Modal Handlers ───────────────────────────────────────────────────────────
+  // ── Modal Handlers & Rekan Kerja ───────────────────────────────────────────
+  let employeeList = [];
+
+  async function loadEmployees() {
+    await setupPencarianRekan();
+  }
+
+  async function setupPencarianRekan() {
+    try {
+      const res = await api.getKaryawan({ limit: 1000 });
+      if (res?.success && res.data?.data) {
+        employeeList = res.data.data;
+      } else {
+        const usersRes = await api.getAllUsers();
+        if (usersRes?.success && usersRes.data) {
+          employeeList = usersRes.data.map(u => ({
+            nomor_id: u.nomor_id,
+            nama: u.nama_lengkap,
+            kode_departemen: u.kode_departemen,
+          }));
+        }
+      }
+
+      // Buat atau perbarui elemen datalist dinamis
+      const datalistId = "dynamic-karyawan-list";
+      let datalist = document.getElementById(datalistId);
+      if (!datalist) {
+        datalist = document.createElement("datalist");
+        datalist.id = datalistId;
+        document.body.appendChild(datalist);
+      }
+
+      datalist.innerHTML = employeeList.map(k => 
+        `<option value="${k.nama} (${k.nomor_id}) - Dept: ${k.kode_departemen || '-'}">`
+      ).join('');
+    } catch (e) {
+      console.warn('Gagal memuat list rekan kerja', e);
+    }
+  }
+
+  let calcTimeout = null;
+  let currentHakFasilitas = {
+    transport: 1,
+    makan: 1,
+    uang_saku: 1,
+    tiket: 1,
+    hotel: 1
+  };
+
+  let currentPlafon = {
+    makan: 0,
+    transport: 0,
+    uang_saku: 0,
+    tiket: 0,
+    hotel: 0,
+    total: 0,
+    area: '',
+    kategori: '',
+  };
+
+  function hitungKriteriaFasilitas() {
+    const tglBerangkat = document.getElementById('f_tgl_berangkat')?.value || '';
+    const tglKembali   = document.getElementById('f_tgl_kembali')?.value || '';
+    const jamBerangkat = document.getElementById('f_jam_berangkat')?.value || '08:00';
+    const jamKembali   = document.getElementById('f_jam_kembali')?.value || '17:00';
+    const jarakKM      = parseFloat(document.getElementById('f_jarak')?.value) || 0;
+
+    if (!tglBerangkat || !tglKembali) {
+      updateFasilitasUI(1);
+      return;
+    }
+
+    const startDateTime = new Date(`${tglBerangkat}T${jamBerangkat}:00`);
+    const endDateTime   = new Date(`${tglKembali}T${jamKembali}:00`);
+    const selisihMs     = endDateTime - startDateTime;
+    const durasiJam     = selisihMs > 0 ? selisihMs / (1000 * 60 * 60) : 0;
+    const isMenginap    = tglKembali > tglBerangkat;
+
+    let kriteria = 1;
+    if (isMenginap) {
+      kriteria = 4;
+      currentHakFasilitas = { transport: 1, makan: 1, uang_saku: 1, tiket: 1, hotel: 1 };
+    } else if (jarakKM > 200 || durasiJam > 12) {
+      kriteria = 3;
+      currentHakFasilitas = { transport: 1, makan: 1, uang_saku: 1, tiket: 0, hotel: 0 };
+    } else if (jarakKM <= 200 && durasiJam >= 8 && durasiJam <= 12) {
+      kriteria = 2;
+      currentHakFasilitas = { transport: 1, makan: 1, uang_saku: 0, tiket: 0, hotel: 0 };
+    } else {
+      kriteria = 1;
+      currentHakFasilitas = { transport: 1, makan: 0, uang_saku: 0, tiket: 0, hotel: 0 };
+    }
+
+    updateFasilitasUI(kriteria);
+  }
+
+  function updateFasilitasUI(kriteria) {
+    // Kriteria fasilitas terkelola secara otomatis oleh tabel per kepala
+  }
+
+  let currentCalculationData = null;
+
+  // ── 1 & 2. Logika Perhitungan Estimasi Biaya & Payload Array ID ────────────
+  async function hitungEstimasiBiaya() {
+    hitungKriteriaFasilitas();
+    clearTimeout(calcTimeout);
+
+    return new Promise((resolve) => {
+      calcTimeout = setTimeout(async () => {
+        const kota = document.getElementById('f_kota')?.value?.trim() || '';
+        const tglBerangkat = document.getElementById('f_tgl_berangkat')?.value || '';
+        const tglKembali = document.getElementById('f_tgl_kembali')?.value || '';
+        const jamBerangkat = document.getElementById('f_jam_berangkat')?.value || '08:00';
+        const jamKembali = document.getElementById('f_jam_kembali')?.value || '17:00';
+        const jarakKM = parseFloat(document.getElementById('f_jarak')?.value) || 0;
+        const transportasi = document.getElementById('f_transportasi')?.value || '';
+        const akomodasi = document.getElementById('f_akomodasi')?.value || '';
+
+        // Tangkap Nomor ID / Identifier pemohon utama yang sedang login
+        const pemohonID = user?.nomor_id || user?.id_user || '';
+
+        // Kumpulkan semua nilai dan ID dari input "Rekan Kerja" yang sedang aktif
+        const rekanList = getRekanKerjaValues();
+        const rekanIDs = rekanList.map(val => {
+          if (val.includes('(') && val.includes(')')) {
+            const m = val.match(/\(([^)]+)\)/);
+            return m ? m[1].trim() : val;
+          }
+          return val;
+        });
+
+        if (!tglBerangkat && !kota && !transportasi && !akomodasi && jarakKM === 0 && rekanList.length === 0) {
+          return resolve(null);
+        }
+
+        try {
+          const res = await api.hitungBiaya({
+            nomor_id: pemohonID,
+            kota_tujuan: kota,
+            tgl_berangkat: tglBerangkat,
+            tgl_kembali: tglKembali,
+            jam_berangkat: jamBerangkat,
+            jam_kembali: jamKembali,
+            jarak_km: jarakKM,
+            transportasi: transportasi,
+            akomodasi: akomodasi,
+            rekan_kerja: rekanList,
+            rekan_ids: rekanIDs,
+            anggota_ids: rekanIDs,
+          });
+
+          if (res?.success && res.data) {
+            const d = res.data;
+            currentCalculationData = d;
+            currentPlafon = {
+              makan: d.plafon_makan || 0,
+              transport: d.plafon_transport || 0,
+              uang_saku: d.plafon_uang_saku || 0,
+              tiket: d.plafon_tiket || 0,
+              hotel: d.plafon_hotel || 0,
+              total: d.total_keseluruhan || d.plafon_total || 0,
+              area: d.area || '',
+              kategori: d.kategori_jabatan || '',
+            };
+
+            // Render ulang tabel dinamis berdasarkan data backend
+            renderTabelRincianPerKepala(d);
+            resolve(d);
+          } else {
+            resolve(null);
+          }
+        } catch (err) {
+          console.warn('Gagal kalkulasi plafon:', err);
+          resolve(null);
+        }
+      }, 150);
+    });
+  }
+
+  // Alias triggerAutoCalculation untuk kompatibilitas
+  const triggerAutoCalculation = hitungEstimasiBiaya;
+
+  // ── 3. Render Ulang Tabel Dinamis (DOM Manipulation) ──────────────────────
+  function renderTabelRincianPerKepala(d) {
+    const tbody = document.getElementById('tabelRincianPerKepalaBody');
+    if (!tbody) return;
+
+    // Kosongkan isi <tbody> terlebih dahulu
+    tbody.innerHTML = '';
+
+    const list = d?.rincian_per_kepala || [];
+    if (list.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-center py-6 text-slate-400">
+            <i class="ph-bold ph-calculator text-2xl mb-1 block text-slate-500"></i>
+            Pilih kota tujuan dan tanggal untuk melihat estimasi rincian
+          </td>
+        </tr>`;
+      return;
+    }
+
+    // Iterasi array rincian_per_kepala dan buat elemen <tr> baru per orang
+    list.forEach((p) => {
+      const isPemohon = p.role === 'Pemohon';
+      const badgeHTML = isPemohon
+        ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">Pemohon</span>'
+        : '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">Rombongan</span>';
+
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-white/5 transition-colors border-b border-white/5';
+      tr.innerHTML = `
+        <td class="py-2.5 px-3">
+          <p class="font-semibold text-white">${p.nama || '-'}</p>
+          <p class="text-[10px] text-slate-400 font-mono">${p.nomor_id || ''} ${p.group_dinas_luar ? `• ${p.group_dinas_luar}` : (p.nama_jabatan ? `• ${p.nama_jabatan}` : '')}</p>
+        </td>
+        <td class="py-2.5 px-3 text-center">${badgeHTML}</td>
+        <td class="py-2.5 px-3 text-right font-medium text-slate-200 font-mono">${formatRupiah(p.makan)}</td>
+        <td class="py-2.5 px-3 text-right font-medium text-slate-200 font-mono">${formatRupiah(p.saku)}</td>
+        <td class="py-2.5 px-3 text-right font-medium text-slate-200 font-mono">${formatRupiah(p.hotel)}</td>
+        <td class="py-2.5 px-3 text-right font-bold text-emerald-400 font-mono">${formatRupiah(p.subtotal)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Update Komponen Bersama & Info Durasi
+    const kb = d?.komponen_bersama || {};
+    const transEl = document.getElementById('dispTransBersama');
+    if (transEl) transEl.textContent = formatRupiah(kb.transport || 0);
+    const tiketEl = document.getElementById('dispTiketBersama');
+    if (tiketEl) tiketEl.textContent = formatRupiah(kb.tiket || 0);
+    const durasiEl = document.getElementById('dispDurasiInfo');
+    if (durasiEl) durasiEl.textContent = `${d.durasi_hari || 1} Hari (${d.durasi_jam || 0} Jam)`;
+
+    // Update Angka pada Badge Hijau Jumlah Orang
+    const badgeOrang = document.getElementById('badgeJumlahOrang');
+    if (badgeOrang) {
+      const totalOrang = d.jumlah_orang || list.length || 1;
+      badgeOrang.textContent = `${totalOrang} Orang`;
+    }
+
+    // Update Teks Total Estimasi Keseluruhan (Terkunci)
+    const grandTotal = d.total_keseluruhan || d.estimasi_biaya_total || 0;
+    const totalEl = document.getElementById('totalBiayaDisplay');
+    if (totalEl) totalEl.textContent = formatRupiah(grandTotal);
+  }
+
+  // ── Event Listener Dinamis Rekan Kerja ──────────────────────────────────────
+  function addRekanRow(selectedValue = '') {
+    const container = document.getElementById('rekanContainer');
+    const row = document.createElement('div');
+    row.className = 'rekan-row flex items-center gap-2';
+
+    let displayVal = selectedValue;
+    if (selectedValue && !selectedValue.includes('(')) {
+      const found = employeeList.find(e => String(e.nomor_id) === String(selectedValue) || String(e.nama) === String(selectedValue));
+      if (found) {
+        displayVal = `${found.nama} (${found.nomor_id}) - Dept: ${found.kode_departemen || '-'}`;
+      }
+    }
+
+    row.innerHTML = `
+      <div class="relative flex-1">
+        <i class="ph-bold ph-user-circle absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 text-base pointer-events-none"></i>
+        <input type="text"
+          list="dynamic-karyawan-list"
+          class="rekan-input input-field w-full rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm placeholder-slate-500"
+          placeholder="Ketik Nama atau Nomor ID rekan kerja..."
+          value="${displayVal}"
+          autocomplete="off" />
+      </div>
+      <button type="button" title="Hapus Rekan"
+        class="btn-hapus-rekan p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition flex-shrink-0 cursor-pointer active:scale-95">
+        <i class="ph-bold ph-trash text-base"></i>
+      </button>
+    `;
+
+    // Pasang Event Listener Input / Perubahan Rekan Kerja
+    const inputEl = row.querySelector('.rekan-input');
+    inputEl.addEventListener('input', () => hitungEstimasiBiaya());
+    inputEl.addEventListener('change', () => hitungEstimasiBiaya());
+    inputEl.addEventListener('blur', () => hitungEstimasiBiaya());
+    inputEl.addEventListener('keyup', () => hitungEstimasiBiaya());
+
+    // Pasang Event Listener Tombol Hapus Rekan
+    const btnHapus = row.querySelector('.btn-hapus-rekan');
+    btnHapus.addEventListener('click', (e) => {
+      e.stopPropagation();
+      row.remove();
+      hitungEstimasiBiaya();
+    });
+
+    container.appendChild(row);
+    hitungEstimasiBiaya();
+  }
+
+  function getRekanKerjaValues() {
+    const inputs = document.querySelectorAll('.rekan-input');
+    const result = [];
+    inputs.forEach(inp => {
+      const val = inp.value.trim();
+      if (val && !result.includes(val)) result.push(val);
+    });
+    return result;
+  }
+
+  // ── Lampiran File Handling ──────────────────────────────────────────────────
+  let selectedLampiranFile = null;
+
+  function handleFileSelected(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Ukuran file maksimal 5 MB', 'warning');
+      input.value = '';
+      return;
+    }
+
+    selectedLampiranFile = file;
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = formatFileSize(file.size);
+
+    const icon = document.getElementById('previewIcon');
+    if (file.type.includes('image')) {
+      icon.className = 'ph-bold ph-image text-emerald-400 text-base';
+    } else if (file.type.includes('pdf')) {
+      icon.className = 'ph-bold ph-file-pdf text-red-400 text-base';
+    } else {
+      icon.className = 'ph-bold ph-file-text text-indigo-400 text-base';
+    }
+
+    document.getElementById('btnPreviewExisting').classList.add('hidden');
+    document.getElementById('uploadPlaceholder').classList.add('hidden');
+    document.getElementById('filePreview').classList.remove('hidden');
+    document.getElementById('filePreview').classList.add('flex');
+  }
+
+  function removeSelectedFile(e) {
+    if (e) e.stopPropagation();
+    selectedLampiranFile = null;
+    document.getElementById('f_lampiran').value = '';
+    document.getElementById('f_lampiran_url').value = '';
+    document.getElementById('btnPreviewExisting').classList.add('hidden');
+    document.getElementById('uploadPlaceholder').classList.remove('hidden');
+    document.getElementById('filePreview').classList.add('hidden');
+    document.getElementById('filePreview').classList.remove('flex');
+  }
+
+  function formatFileSize(bytes) {
+    if (!bytes || bytes === 0) return '0 KB';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
   function openCreateModal() {
     document.getElementById('editId').value = '';
     document.getElementById('modalTitle').textContent = 'Buat Pengajuan SPPD';
     document.getElementById('sppdForm').reset();
+    removeSelectedFile();
+    document.getElementById('f_jam_berangkat').value = '08:00';
+    document.getElementById('f_jam_kembali').value = '17:00';
+    document.getElementById('f_jarak').value = '';
+    document.getElementById('rekanContainer').innerHTML = '';
+    document.getElementById('totalBiayaDisplay').textContent = 'Rp 0';
+    document.getElementById('tabelRincianPerKepalaBody').innerHTML = `
+      <tr>
+        <td colspan="6" class="text-center py-6 text-slate-400">
+          <i class="ph-bold ph-calculator text-2xl mb-1 block text-slate-500"></i>
+          Pilih kota tujuan dan tanggal untuk melihat estimasi rincian per kepala
+        </td>
+      </tr>`;
     document.getElementById('modalSppd').classList.remove('hidden');
     document.getElementById('modalSppd').classList.add('flex');
+    triggerAutoCalculation();
   }
 
   async function openEdit(id) {
@@ -332,16 +911,46 @@
     const s = res.data;
     document.getElementById('editId').value = id;
     document.getElementById('modalTitle').textContent = 'Edit Draft SPPD';
-    document.getElementById('f_kota').value      = s.kota_tujuan;
-    document.getElementById('f_instansi').value  = s.instansi_tujuan;
-    document.getElementById('f_maksud').value    = s.maksud_tujuan;
-    document.getElementById('f_tgl_berangkat').value = s.tgl_berangkat?.split('T')[0];
-    document.getElementById('f_tgl_kembali').value   = s.tgl_kembali?.split('T')[0];
-    document.getElementById('f_transportasi').value  = s.transportasi;
-    document.getElementById('f_akomodasi').value     = s.akomodasi;
-    document.getElementById('f_biaya').value         = s.estimasi_biaya;
+    document.getElementById('f_kota').value          = s.kota_tujuan || '';
+    document.getElementById('f_instansi').value      = s.instansi_tujuan || '';
+    document.getElementById('f_maksud').value        = s.maksud_tujuan || '';
+    document.getElementById('f_tgl_berangkat').value = s.tgl_berangkat ? s.tgl_berangkat.split('T')[0] : '';
+    document.getElementById('f_tgl_kembali').value   = s.tgl_kembali ? s.tgl_kembali.split('T')[0] : '';
+    document.getElementById('f_jam_berangkat').value = s.jam_berangkat || '08:00';
+    document.getElementById('f_jam_kembali').value   = s.jam_kembali || '17:00';
+    document.getElementById('f_jarak').value         = s.jarak_km > 0 ? s.jarak_km : '';
+    document.getElementById('f_transportasi').value  = s.transportasi || '';
+    document.getElementById('f_akomodasi').value     = s.akomodasi || '';
+    document.getElementById('totalBiayaDisplay').textContent = formatRupiah(s.estimasi_biaya || 0);
+
+    // Lampiran file preview if existing
+    removeSelectedFile();
+    if (s.lampiran_file) {
+      document.getElementById('f_lampiran_url').value = s.lampiran_file;
+      const fName = s.lampiran_file.split('/').pop();
+      document.getElementById('fileName').textContent = fName;
+      document.getElementById('fileSize').textContent = 'Tersimpan di server';
+      const btnP = document.getElementById('btnPreviewExisting');
+      btnP.href = s.lampiran_file;
+      btnP.classList.remove('hidden');
+      document.getElementById('uploadPlaceholder').classList.add('hidden');
+      document.getElementById('filePreview').classList.remove('hidden');
+      document.getElementById('filePreview').classList.add('flex');
+    }
+
+    // Muat rekan kerja
+    const container = document.getElementById('rekanContainer');
+    container.innerHTML = '';
+    if (s.anggota && s.anggota.length > 0) {
+      s.anggota.forEach(a => {
+        const idVal = a.user?.nomor_id || a.user?.nama_lengkap || a.id_user;
+        addRekanRow(idVal);
+      });
+    }
+
     document.getElementById('modalSppd').classList.remove('hidden');
     document.getElementById('modalSppd').classList.add('flex');
+    triggerAutoCalculation();
   }
 
   function closeModal() {
@@ -350,50 +959,103 @@
   }
 
   function getFormData() {
+    const total = currentCalculationData?.total_keseluruhan || 0;
+    const kb = currentCalculationData?.komponen_bersama || {};
+
     return {
-      kota_tujuan:     document.getElementById('f_kota').value.trim(),
-      instansi_tujuan: document.getElementById('f_instansi').value.trim(),
-      maksud_tujuan:   document.getElementById('f_maksud').value.trim(),
-      tgl_berangkat:   document.getElementById('f_tgl_berangkat').value,
-      tgl_kembali:     document.getElementById('f_tgl_kembali').value,
-      transportasi:    document.getElementById('f_transportasi').value,
-      akomodasi:       document.getElementById('f_akomodasi').value,
-      estimasi_biaya:  parseFloat(document.getElementById('f_biaya').value) || 0,
+      kota_tujuan:     document.getElementById('f_kota')?.value?.trim() || '',
+      instansi_tujuan: document.getElementById('f_instansi')?.value?.trim() || '',
+      maksud_tujuan:   document.getElementById('f_maksud')?.value?.trim() || '',
+      lampiran_file:   document.getElementById('f_lampiran_url')?.value || '',
+      tgl_berangkat:   document.getElementById('f_tgl_berangkat')?.value || '',
+      tgl_kembali:     document.getElementById('f_tgl_kembali')?.value || '',
+      jam_berangkat:   document.getElementById('f_jam_berangkat')?.value || '08:00',
+      jam_kembali:     document.getElementById('f_jam_kembali')?.value || '17:00',
+      jarak_km:        parseFloat(document.getElementById('f_jarak')?.value) || 0,
+      transportasi:    document.getElementById('f_transportasi')?.value || '',
+      akomodasi:       document.getElementById('f_akomodasi')?.value || '',
+      biaya_transport: kb.transport || 0,
+      biaya_tiket:     kb.tiket || 0,
+      estimasi_biaya:  total,
+      rekan_kerja:     getRekanKerjaValues(),
     };
   }
 
+  async function uploadFileIfNeeded() {
+    if (!selectedLampiranFile) return document.getElementById('f_lampiran_url').value || '';
+    const formData = new FormData();
+    formData.append('lampiran', selectedLampiranFile);
+    const res = await api.uploadLampiran(formData);
+    if (res?.success && res.data?.file_url) {
+      document.getElementById('f_lampiran_url').value = res.data.file_url;
+      return res.data.file_url;
+    }
+    return document.getElementById('f_lampiran_url').value || '';
+  }
+
   async function saveDraft() {
-    const body = getFormData();
-    const editId = document.getElementById('editId').value;
-    const res = editId
-      ? await api.updateSppd(editId, body)
-      : await api.createSppd(body);
-    if (!res?.success) { showToast(res?.message || 'Gagal menyimpan', 'error'); return; }
-    showToast('Draft berhasil disimpan', 'success');
-    closeModal(); loadList(); loadStats();
+    const btn = document.getElementById('btnSaveDraft');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...`;
+
+    try {
+      // Upload lampiran jika ada
+      const lampiranUrl = await uploadFileIfNeeded();
+      const body = getFormData();
+      body.lampiran_file = lampiranUrl;
+
+      const editId = document.getElementById('editId').value;
+      const res = editId
+        ? await api.updateSppd(editId, body)
+        : await api.createSppd(body);
+      if (!res?.success) { showToast(res?.message || 'Gagal menyimpan draft', 'error'); return; }
+      showToast('Draft SPPD berhasil disimpan', 'success');
+      closeModal(); loadList(); loadStats();
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
   }
 
   document.getElementById('sppdForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const body = getFormData();
-    const editId = document.getElementById('editId').value;
-    let res;
-    if (editId) {
-      res = await api.updateSppd(editId, body);
-      if (res?.success) {
-        const submitRes = await api.submitSppd(editId);
-        res = submitRes;
+    const btnSubmit = document.getElementById('btnSubmitSPPD');
+    const originalText = btnSubmit.innerHTML;
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Mengajukan...`;
+
+    try {
+      // Upload lampiran jika ada
+      const lampiranUrl = await uploadFileIfNeeded();
+      const body = getFormData();
+      body.lampiran_file = lampiranUrl;
+
+      const editId = document.getElementById('editId').value;
+      let res;
+      if (editId) {
+        res = await api.updateSppd(editId, body);
+        if (res?.success) {
+          const submitRes = await api.submitSppd(editId);
+          res = submitRes;
+        }
+      } else {
+        res = await api.createSppd(body);
+        if (res?.success && res.data?.id_sppd) {
+          const submitRes = await api.submitSppd(res.data.id_sppd);
+          res = submitRes;
+        }
       }
-    } else {
-      res = await api.createSppd(body);
-      if (res?.success) {
-        const submitRes = await api.submitSppd(res.data.id_sppd);
-        res = submitRes;
+      if (!res?.success) {
+        showToast(res?.message || 'Gagal mengajukan SPPD', 'error');
+        return;
       }
+      showToast('SPPD berhasil diajukan ke Manager!', 'success');
+      closeModal(); loadList(); loadStats();
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = originalText;
     }
-    if (!res?.success) { showToast(res?.message || 'Gagal mengajukan', 'error'); return; }
-    showToast('SPPD berhasil diajukan ke Manager!', 'success');
-    closeModal(); loadList(); loadStats();
   });
 
   async function deleteSppd(id) {
@@ -418,6 +1080,7 @@
     }
     const s = res.data;
     const logs = s.approval_logs || [];
+    const anggota = s.anggota || [];
 
     const steppers = [
       { key: 'Manager',  label: 'Manager',  icon: 'ph-user-check' },
@@ -432,6 +1095,31 @@
       if (log.status_tindakan === 'Rejected') return 'rejected';
       return 'done';
     };
+
+    const anggotaHTML = anggota.length > 0 ? `
+      <div class="glass-card rounded-xl p-3.5 col-span-2">
+        <p class="text-xs text-slate-400 font-semibold mb-2 flex items-center gap-1.5">
+          <i class="ph-bold ph-users text-indigo-400"></i> Rekan Kerja / Anggota Rombongan (${anggota.length})
+        </p>
+        <div class="space-y-1.5">
+          ${anggota.map(a => `
+            <div class="flex items-center justify-between text-xs bg-white/3 px-3 py-2 rounded-lg border border-white/5">
+              <div class="flex items-center gap-2">
+                <i class="ph-bold ph-user-circle text-indigo-400 text-base"></i>
+                <span class="text-white font-medium">${a.user?.nama_lengkap || 'Anggota'}</span>
+                <span class="text-slate-500 font-mono text-[11px]">(${a.user?.nomor_id || '-'})</span>
+              </div>
+              <span class="text-indigo-300 text-[11px]">${a.user?.kode_departemen || ''}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    const isExceeded = s.status_plafon === 'MELEBIHI_PLAFON';
+    const statusPlafonBadge = isExceeded
+      ? `<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-full"><i class="ph-bold ph-warning"></i> Melebihi Plafon</span>`
+      : `<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full"><i class="ph-bold ph-check-circle"></i> Sesuai Plafon</span>`;
 
     document.getElementById('detailContent').innerHTML = `
       <div class="space-y-5">
@@ -451,20 +1139,84 @@
           </div>
           <div class="glass-card rounded-xl p-3">
             <p class="text-xs text-slate-500 mb-1">Berangkat</p>
-            <p class="text-white text-sm">${formatDate(s.tgl_berangkat)}</p>
+            <p class="text-white text-sm font-medium">${formatDate(s.tgl_berangkat)}</p>
+            <p class="text-indigo-300 text-xs mt-0.5"><i class="ph-bold ph-clock"></i> ${s.jam_berangkat || '08:00'}</p>
           </div>
           <div class="glass-card rounded-xl p-3">
-            <p class="text-xs text-slate-500 mb-1">Kembali (${s.durasi_hari} hari)</p>
-            <p class="text-white text-sm">${formatDate(s.tgl_kembali)}</p>
+            <p class="text-xs text-slate-500 mb-1">Kembali (${s.durasi_hari} hari / ${s.durasi_jam || '-'} jam)</p>
+            <p class="text-white text-sm font-medium">${formatDate(s.tgl_kembali)}</p>
+            <p class="text-indigo-300 text-xs mt-0.5"><i class="ph-bold ph-clock"></i> ${s.jam_kembali || '17:00'}</p>
           </div>
           <div class="glass-card rounded-xl p-3">
-            <p class="text-xs text-slate-500 mb-1">Transportasi</p>
+            <p class="text-xs text-slate-500 mb-1">Transportasi & Jarak</p>
             <p class="text-white text-sm">${s.transportasi || '-'}</p>
+            ${s.jarak_km > 0 ? `<p class="text-emerald-400 text-xs mt-0.5 font-medium"><i class="ph-bold ph-map-pin-line"></i> ${s.jarak_km} KM</p>` : ''}
           </div>
           <div class="glass-card rounded-xl p-3">
-            <p class="text-xs text-slate-500 mb-1">Estimasi Biaya</p>
+            <p class="text-xs text-slate-500 mb-1">Total Estimasi Biaya</p>
             <p class="text-emerald-400 text-sm font-semibold">${formatRupiah(s.estimasi_biaya)}</p>
+            <div class="mt-1">${statusPlafonBadge}</div>
           </div>
+
+          <!-- Rincian 5 Komponen Biaya -->
+          <div class="bg-white border border-slate-200 dark:bg-slate-800/90 dark:border-slate-700/80 rounded-xl p-3 col-span-2 space-y-2">
+            <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold mb-2 flex items-center justify-between">
+              <span class="flex items-center gap-1.5"><i class="ph-bold ph-wallet text-blue-600 dark:text-indigo-400"></i> Rincian 5 Hak Komponen Biaya</span>
+              ${statusPlafonBadge}
+            </p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+              <div class="bg-slate-100 dark:bg-slate-900/60 p-2 rounded-lg border border-slate-200 dark:border-slate-700/80">
+                <span class="text-slate-500 dark:text-slate-400 text-[10px] block font-semibold uppercase">Hak Makan</span>
+                <p class="text-slate-800 dark:text-white font-semibold">${formatRupiah(s.biaya_makan || 0)}</p>
+                <span class="text-slate-500 dark:text-slate-400 text-[10px]">Plafon: ${formatRupiah(s.plafon_makan || 0)}</span>
+              </div>
+              <div class="bg-slate-100 dark:bg-slate-900/60 p-2 rounded-lg border border-slate-200 dark:border-slate-700/80">
+                <span class="text-slate-500 dark:text-slate-400 text-[10px] block font-semibold uppercase">Hak Transport</span>
+                <p class="text-slate-800 dark:text-white font-semibold">${formatRupiah(s.biaya_transport || 0)}</p>
+                <span class="text-slate-500 dark:text-slate-400 text-[10px]">Plafon: ${formatRupiah(s.plafon_transport || 0)}</span>
+              </div>
+              <div class="bg-slate-100 dark:bg-slate-900/60 p-2 rounded-lg border border-slate-200 dark:border-slate-700/80">
+                <span class="text-slate-500 dark:text-slate-400 text-[10px] block font-semibold uppercase">Hak Uang Saku</span>
+                <p class="text-slate-800 dark:text-white font-semibold">${formatRupiah(s.biaya_uang_saku || 0)}</p>
+                <span class="text-slate-500 dark:text-slate-400 text-[10px]">Plafon: ${formatRupiah(s.plafon_uang_saku || 0)}</span>
+              </div>
+              <div class="bg-slate-100 dark:bg-slate-900/60 p-2 rounded-lg border border-slate-200 dark:border-slate-700/80">
+                <span class="text-slate-500 dark:text-slate-400 text-[10px] block font-semibold uppercase">Hak Tiket</span>
+                <p class="text-slate-800 dark:text-white font-semibold">${formatRupiah(s.biaya_tiket || 0)}</p>
+                <span class="text-slate-500 dark:text-slate-400 text-[10px]">Plafon: ${formatRupiah(s.plafon_tiket || 0)}</span>
+              </div>
+              <div class="bg-slate-100 dark:bg-slate-900/60 p-2 rounded-lg border border-slate-200 dark:border-slate-700/80">
+                <span class="text-slate-500 dark:text-slate-400 text-[10px] block font-semibold uppercase">Hak Hotel</span>
+                <p class="text-slate-800 dark:text-white font-semibold">${formatRupiah(s.biaya_hotel || 0)}</p>
+                <span class="text-slate-500 dark:text-slate-400 text-[10px]">Plafon: ${formatRupiah(s.plafon_hotel || 0)}</span>
+              </div>
+            </div>
+          </div>
+          ${s.rincian_biaya ? `
+          <div class="bg-white border border-slate-200 dark:bg-slate-800/90 dark:border-slate-700/80 rounded-xl p-3 col-span-2">
+            <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold mb-1.5 flex items-center gap-1.5">
+              <i class="ph-bold ph-calculator text-blue-600 dark:text-indigo-400"></i> Rincian & Plafon Biaya SPPD
+            </p>
+            <p class="text-slate-800 dark:text-slate-200 text-xs leading-relaxed bg-slate-100 dark:bg-slate-900/60 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700/80">
+              ${s.rincian_biaya}
+            </p>
+          </div>` : ''}
+          ${s.lampiran_file ? `
+          <div class="glass-card rounded-xl p-3 col-span-2 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                <i class="ph-bold ph-paperclip text-base"></i>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Lampiran Dokumen</p>
+                <p class="text-white text-xs font-mono font-medium truncate max-w-xs">${s.lampiran_file.split('/').pop()}</p>
+              </div>
+            </div>
+            <a href="${s.lampiran_file}" target="_blank" class="px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/30 text-indigo-300 text-xs font-semibold flex items-center gap-1.5 transition">
+              <i class="ph-bold ph-arrow-square-out text-sm"></i> Buka Lampiran
+            </a>
+          </div>` : ''}
+          ${anggotaHTML}
           <div class="glass-card rounded-xl p-3 col-span-2">
             <p class="text-xs text-slate-500 mb-1">Status</p>
             ${statusBadge(s.status_dokumen)}
@@ -495,6 +1247,76 @@
             }).join('')}
           </div>
         </div>
+
+        <!-- Timeline Riwayat Aktivitas & Audit Trail -->
+        <div class="pt-4 border-t border-slate-200 dark:border-white/10">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 dark:bg-indigo-600/20 dark:text-indigo-400 flex items-center justify-center">
+              <i class="ph-bold ph-clock-counter-clockwise text-base"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 dark:text-white text-xs sm:text-sm">Riwayat Aktivitas & Audit Trail</h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Transparansi persetujuan dan riwayat penyesuaian nominal biaya SPPD</p>
+            </div>
+          </div>
+
+          <div class="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-700">
+            ${logs && logs.length > 0 ? logs.map(log => {
+              const isCostChange = log.status_tindakan === 'Biaya Diubah' || (log.catatan && log.catatan.includes('diubah'));
+              const isApproved = log.status_tindakan === 'Approved' || log.status_tindakan === 'Verified' || log.status_tindakan === 'Sent';
+              const isRejected = log.status_tindakan === 'Rejected';
+
+              let dotColor = 'bg-blue-500 ring-blue-100 dark:ring-blue-900';
+              let badgeStyle = 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
+              let icon = 'ph-check-circle';
+
+              if (isCostChange) {
+                dotColor = 'bg-amber-500 ring-amber-100 dark:ring-amber-900';
+                badgeStyle = 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-700';
+                icon = 'ph-currency-circle-dollar';
+              } else if (isApproved) {
+                dotColor = 'bg-emerald-500 ring-emerald-100 dark:ring-emerald-900';
+                badgeStyle = 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300';
+                icon = 'ph-seal-check';
+              } else if (isRejected) {
+                dotColor = 'bg-rose-500 ring-rose-100 dark:ring-rose-900';
+                badgeStyle = 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300';
+                icon = 'ph-x-circle';
+              }
+
+              const tglStr = log.tgl_tindakan ? new Date(log.tgl_tindakan).toLocaleString('id-ID', {
+                day: '2-digit', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+              }) : '-';
+
+              const approverName = log.approver?.nama_lengkap || '';
+
+              return `
+                <div class="relative group">
+                  <div class="absolute -left-[27px] top-1 w-3.5 h-3.5 rounded-full ${dotColor} ring-4 transition-transform group-hover:scale-125"></div>
+                  <div class="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 rounded-xl p-3.5 text-xs transition-all hover:shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="px-2 py-0.5 rounded text-[11px] font-bold ${badgeStyle} flex items-center gap-1">
+                          <i class="ph-bold ${icon}"></i> ${log.tahap_approval} - ${log.status_tindakan}
+                        </span>
+                        ${approverName ? `<span class="font-medium text-slate-700 dark:text-slate-300">oleh <strong class="text-slate-900 dark:text-white">${approverName}</strong></span>` : ''}
+                      </div>
+                      <span class="text-[10px] font-mono text-slate-400 dark:text-slate-500">${tglStr}</span>
+                    </div>
+                    <p class="${isCostChange ? 'text-amber-800 dark:text-amber-300 font-semibold bg-amber-50/80 dark:bg-amber-950/40 p-2 rounded-lg border border-amber-200/60 dark:border-amber-800/40' : 'text-slate-600 dark:text-slate-300'} leading-relaxed">
+                      ${log.catatan || 'Tidak ada catatan tambahan.'}
+                    </p>
+                  </div>
+                </div>
+              `;
+            }).join('') : `
+              <div class="p-3 rounded-xl bg-slate-50 dark:bg-white/3 border border-slate-200 dark:border-white/5 text-center text-slate-400 text-xs">
+                Belum ada catatan aktivitas persetujuan.
+              </div>
+            `}
+          </div>
+        </div>
       </div>`;
   }
 
@@ -518,8 +1340,19 @@
     setTimeout(()=>t.classList.remove('show'), 3500);
   }
 
+  // Load awal
   loadStats();
   loadList();
+  loadEmployees();
+
+  // Pasang listener kalkulasi otomatis real-time pada semua field pemicu
+  ['f_kota', 'f_tgl_berangkat', 'f_tgl_kembali', 'f_jam_berangkat', 'f_jam_kembali', 'f_jarak', 'f_transportasi', 'f_akomodasi'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', triggerAutoCalculation);
+      el.addEventListener('change', triggerAutoCalculation);
+    }
+  });
 </script>
 </body>
 </html>

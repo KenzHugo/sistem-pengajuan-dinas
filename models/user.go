@@ -1,7 +1,8 @@
 package models
 
-// User merepresentasikan tabel `users` — master data karyawan dan akun login.
+// User merepresentasikan tabel `users` — master data karyawan dan akun login (SQL Server).
 // Kolom persis sesuai PRD v2.0. TIDAK ada kolom tambahan.
+// SQL Server: tinyint (0-255) kompatibel dengan int8 Go via go-mssqldb driver.
 type User struct {
 	IDUser         int    `gorm:"column:id_user;primaryKey;autoIncrement"       json:"id_user"`
 	NomorID        string `gorm:"column:nomor_id;type:varchar(50);not null"     json:"nomor_id"`
@@ -12,7 +13,7 @@ type User struct {
 	RoleSistem     string `gorm:"column:role_sistem;type:varchar(20);not null"  json:"role_sistem"`
 	NoWhatsapp     string `gorm:"column:no_whatsapp;type:varchar(20)"           json:"no_whatsapp"`
 	PasswordHash   string `gorm:"column:password_hash;type:varchar(255);not null" json:"-"`
-	StatusAktif    int8   `gorm:"column:status_aktif;type:tinyint(1);default:1" json:"status_aktif"`
+	StatusAktif    int8   `gorm:"column:status_aktif;type:tinyint;default:1" json:"status_aktif"`
 }
 
 // TableName mendefinisikan nama tabel secara eksplisit agar GORM tidak pluralize

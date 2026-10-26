@@ -41,11 +41,14 @@ func LoadConfig() {
 	}
 
 	AppConfig = &Config{
-		DBHost:         getEnv("DB_HOST", "localhost"),
-		DBPort:         getEnv("DB_PORT", "3306"),
-		DBUser:         getEnv("DB_USER", "root"),
-		DBPassword:     getEnv("DB_PASSWORD", ""),
-		DBName:         getEnv("DB_NAME", "sipadin"),
+		// DBHost:         getEnv("DB_HOST", "localhost"),
+		DBHost: getEnv("DB_HOST", "172.16.1.248"),
+		DBPort: getEnv("DB_PORT", "1433"),
+		DBUser: getEnv("DB_USER", "sa"),
+		// DBPassword:     getEnv("DB_PASSWORD", "zeeins2022"),
+		DBPassword: getEnv("DB_PASSWORD", "Sura24Printa"),
+		// DBName:         getEnv("DB_NAME", "sipadin"),
+		DBName:         getEnv("DB_NAME", "adi_perdin"),
 		JWTSecret:      getEnv("JWT_SECRET", "secret-fallback"),
 		JWTExpireHours: expireHours,
 		AppPort:        getEnv("APP_PORT", "3000"),

@@ -10,7 +10,7 @@ type SppdApprovalLog struct {
 	TahapApproval  string    `gorm:"column:tahap_approval;type:varchar(50);not null"   json:"tahap_approval"`
 	IDApprover     int       `gorm:"column:id_approver;type:int;not null"                       json:"id_approver"`
 	StatusTindakan string    `gorm:"column:status_tindakan;type:varchar(20);not null"  json:"status_tindakan"`
-	Catatan        string    `gorm:"column:catatan;type:text"                          json:"catatan"`
+	Catatan        string    `gorm:"column:catatan;type:varchar(max)"                  json:"catatan"`
 	TglTindakan    time.Time `gorm:"column:tgl_tindakan;autoCreateTime"                json:"tgl_tindakan"`
 
 	// Relasi

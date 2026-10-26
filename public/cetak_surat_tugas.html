@@ -7,17 +7,23 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @page {
-      size: A4;
-      margin: 1cm;
+    body, .page-container, #documentContainer {
+      font-family: 'Times New Roman', Times, serif;
     }
     @media print {
+      @page {
+        size: 8.5in 12.99in; /* Ukuran presisi Foolscap */
+        margin-top: 40mm; /* Beri jarak atas ekstra agar teks tidak menabrak kop surat di kertas fisik */
+        margin-bottom: 20mm;
+        margin-left: 20mm;
+        margin-right: 20mm;
+      }
       body {
+        font-family: 'Times New Roman', Times, serif;
+        -webkit-print-color-adjust: exact;
         background-color: #ffffff !important;
         margin: 0 !important;
         padding: 0 !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
       }
       .no-print {
         display: none !important;
@@ -31,7 +37,7 @@
     }
   </style>
 </head>
-<body class="bg-gray-100 flex flex-col items-center py-6 print:py-0 print:bg-white text-gray-900 font-serif min-h-screen">
+<body class="bg-gray-100 flex flex-col items-center py-6 print:py-0 print:bg-white text-gray-900" style="font-family: 'Times New Roman', Times, serif;">
 
   <!-- Loading State Banner -->
   <div id="loadingBanner" class="no-print fixed top-6 bg-white border border-slate-300 px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 z-50 text-sm font-sans font-medium text-slate-700">
@@ -45,7 +51,7 @@
   <!-- Error Alert Banner -->
   <div id="errorBanner" class="no-print fixed top-6 bg-rose-50 border border-rose-200 px-6 py-4 rounded-xl shadow-lg hidden flex-col items-center gap-2 z-50 text-sm font-sans text-rose-800 max-w-md text-center">
     <p class="font-bold" id="errorMessage">Gagal memuat data Surat Tugas</p>
-    <a href="/hrga.html" class="mt-1 text-xs text-blue-700 underline font-semibold">Kembali ke Menu HRGA</a>
+    <a href="hrga.html" class="mt-1 text-xs text-blue-700 underline font-semibold">Kembali ke Menu HRGA</a>
   </div>
 
   <!-- Action Bar (Hidden during printing) -->
@@ -59,101 +65,80 @@
   </div>
 
   <!-- Main Document Container -->
-  <div id="documentContainer" class="page-container w-full max-w-[21cm] min-h-[29.7cm] p-10 bg-white text-black text-sm font-serif shadow-lg print:shadow-none mx-auto flex flex-col justify-between">
-    <div>
-      <!-- 1. KOP & JUDUL SURAT -->
-      <div class="flex items-center justify-between border-b-2 border-black pb-3 mb-4">
-        <!-- Logo Perusahaan -->
-        <div class="flex items-center gap-3">
-          <img 
-            src="/logo-light.png" 
-            alt="Logo PT Adiprima Suraprinta" 
-            class="h-12 w-auto object-contain"
-            onerror="this.src='https://via.placeholder.com/150x50?text=ADIPRIMA+SURAPRINTA'"
-          />
-        </div>
-        <!-- Info Perusahaan / Website -->
-        <div class="text-right text-xs leading-tight font-sans text-gray-700">
-          <p class="font-bold text-black font-serif text-sm">PT ADIPRIMA SURAPRINTA</p>
-          <p>Jl. Raya Wringinanom KM. 31.8, Gresik - Jawa Timur</p>
-          <p>Website: www.adiprima.com | Telp: (031) 8982345</p>
-        </div>
-      </div>
-
-      <!-- Judul Surat -->
-      <div class="text-center my-4">
-        <h1 class="text-base font-bold tracking-wider underline uppercase">SURAT TUGAS</h1>
-        <p class="text-xs font-bold uppercase tracking-wide mt-0.5">PT ADIPRIMA SURAPRINTA</p>
-        <p class="text-xs mt-0.5 font-sans">No. <span id="no_sppd">SPPD/ST/-</span></p>
-      </div>
-
-      <!-- 2. PEMBERI TUGAS & TABEL PESERTA -->
-      <div class="mt-4 leading-relaxed">
-        <p class="mb-2">Yang bertanda tangan di bawah ini:</p>
-        <table class="ml-4 mb-3 text-sm">
-          <tbody>
-            <tr>
-              <td class="w-24 py-0.5 font-medium">Nama</td>
-              <td class="w-4 py-0.5 text-center">:</td>
-              <td class="py-0.5 font-semibold"><span id="nama_pemberi_tugas">-</span></td>
-            </tr>
-            <tr>
-              <td class="w-24 py-0.5 font-medium">Jabatan</td>
-              <td class="w-4 py-0.5 text-center">:</td>
-              <td class="py-0.5"><span id="jabatan_pemberi_tugas">HR & GA Department Head</span></td>
-            </tr>
-          </tbody>
-        </table>
-
-        <p class="mb-3 text-justify">
-          Dengan ini memberikan tugas kepada nama-nama tersebut dibawah ini untuk melakukan kegiatan : 
-          <span class="font-semibold underline">"<span id="nama_kegiatan">-</span>"</span> dengan detail sbb :
-        </p>
-
-        <!-- Tabel Peserta (5 Kolom Dinamis) -->
-        <table class="w-full border-collapse border border-black text-xs my-2 text-left">
-          <thead>
-            <tr class="bg-gray-100 font-bold text-center border-b border-black">
-              <th class="border border-black px-2 py-1.5 w-10">No</th>
-              <th class="border border-black px-2 py-1.5">Nama</th>
-              <th class="border border-black px-2 py-1.5 w-28">Dep</th>
-              <th class="border border-black px-2 py-1.5 w-32">Tanggal</th>
-              <th class="border border-black px-2 py-1.5 w-36">Tempat</th>
-            </tr>
-          </thead>
-          <tbody id="tabel_peserta_body">
-            <tr>
-              <td colspan="5" class="border border-black px-2 py-4 text-center text-gray-500 font-sans">
-                Memuat data peserta dinas...
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- 3. DAFTAR KEWAJIBAN -->
-      <div class="mt-4 leading-relaxed text-justify">
-        <p class="font-semibold mb-1.5">Saudara yang diberikan tugas ini, BERKEWAJIBAN untuk:</p>
-        <ol class="list-decimal ml-6 space-y-1 text-xs sm:text-sm">
-          <li>Mengikuti seluruh rangkaian kegiatan sesuai dengan jadwal yang telah ditetapkan dengan penuh tanggung jawab dan kedisiplinan.</li>
-          <li>Mematuhi seluruh ketentuan, tata tertib, serta protokol yang berlaku selama kegiatan berlangsung.</li>
-          <li>Menjaga nama baik perusahaan/instansi dengan berperilaku sopan, profesional, dan menghormati seluruh peserta kegiatan.</li>
-          <li>Berpartisipasi aktif dalam setiap sesi atau agenda yang menjadi bagian dari kegiatan.</li>
-          <li>Melaporkan hasil pelaksanaan kegiatan, pengalaman, atau hal-hal penting lainnya kepada atasan atau pihak yang menugaskan setelah kegiatan berakhir.</li>
-          <li>Tidak melakukan tindakan yang dapat merugikan diri sendiri, peserta lain, maupun nama baik perusahaan.</li>
-        </ol>
-      </div>
-
-      <!-- 4. PENUTUP -->
-      <p class="mt-4 leading-relaxed text-justify text-xs sm:text-sm">
-        Dengan melaksanakan tugas dan kewajiban tersebut, karyawan diharapkan dapat berkontribusi secara optimal di perusahaan. Demikian surat tugas ini dibuat agar dipergunakan sebagaimana mestinya.
-      </p>
+  <div id="documentContainer" class="page-container w-full max-w-[21.5cm] p-10 bg-white text-black text-sm shadow-lg print:shadow-none mx-auto" style="font-family: 'Times New Roman', Times, serif;">
+    <!-- 1. JUDUL SURAT -->
+    <div class="text-center mb-6">
+      <h1 class="text-base font-bold tracking-wider underline uppercase">SURAT TUGAS</h1>
+      <p class="text-xs font-bold uppercase tracking-wide mt-0.5">PT ADIPRIMA SURAPRINTA</p>
+      <p class="text-xs mt-0.5">No. <span id="no_sppd">SPPD/ST/-</span></p>
     </div>
 
-    <!-- 5. BLOK TANDA TANGAN (ANTI-PAGE BREAK) -->
-    <div class="break-inside-avoid mt-8 pt-2">
+    <!-- 2. PEMBERI TUGAS & TABEL PESERTA -->
+    <div class="mt-4 leading-relaxed">
+      <p class="mb-2">Yang bertanda tangan di bawah ini:</p>
+      <table class="ml-4 mb-3 text-sm">
+        <tbody>
+          <tr>
+            <td class="w-24 py-0.5 font-medium">Nama</td>
+            <td class="w-4 py-0.5 text-center">:</td>
+            <td class="py-0.5 font-semibold"><span id="nama_pemberi_tugas">-</span></td>
+          </tr>
+          <tr>
+            <td class="w-24 py-0.5 font-medium">Jabatan</td>
+            <td class="w-4 py-0.5 text-center">:</td>
+            <td class="py-0.5"><span id="jabatan_pemberi_tugas">Manager HRGA</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="mb-3 text-justify">
+        Dengan ini memberikan tugas kepada nama-nama tersebut dibawah ini untuk melakukan kegiatan : 
+        <span class="font-semibold underline">"<span id="nama_kegiatan">-</span>"</span> dengan detail sbb :
+      </p>
+
+      <!-- Tabel Peserta (5 Kolom Dinamis) -->
+      <table class="w-full border-collapse border border-black text-xs my-2 text-left">
+        <thead>
+          <tr class="bg-gray-100 font-bold text-center border-b border-black">
+            <th class="border border-black px-2 py-1.5 w-10">No</th>
+            <th class="border border-black px-2 py-1.5">Nama</th>
+            <th class="border border-black px-2 py-1.5 w-28">Dep</th>
+            <th class="border border-black px-2 py-1.5 w-32">Tanggal</th>
+            <th class="border border-black px-2 py-1.5 w-36">Tempat</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_peserta_body">
+          <tr>
+            <td colspan="5" class="border border-black px-2 py-4 text-center text-gray-500">
+              Memuat data peserta dinas...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 3. DAFTAR KEWAJIBAN -->
+    <div class="mt-4 leading-relaxed text-justify">
+      <p class="font-semibold mb-1.5">Saudara yang diberikan tugas ini, BERKEWAJIBAN untuk:</p>
+      <ol class="list-decimal ml-6 space-y-1 text-xs sm:text-sm">
+        <li>Mengikuti seluruh rangkaian kegiatan sesuai dengan jadwal yang telah ditetapkan dengan penuh tanggung jawab dan kedisiplinan.</li>
+        <li>Mematuhi seluruh ketentuan, tata tertib, serta protokol yang berlaku selama kegiatan berlangsung.</li>
+        <li>Menjaga nama baik perusahaan/instansi dengan berperilaku sopan, profesional, dan menghormati seluruh peserta kegiatan.</li>
+        <li>Berpartisipasi aktif dalam setiap sesi atau agenda yang menjadi bagian dari kegiatan.</li>
+        <li>Melaporkan hasil pelaksanaan kegiatan, pengalaman, atau hal-hal penting lainnya kepada atasan atau pihak yang menugaskan setelah kegiatan berakhir.</li>
+        <li>Tidak melakukan tindakan yang dapat merugikan diri sendiri, peserta lain, maupun nama baik perusahaan.</li>
+      </ol>
+    </div>
+
+    <!-- 4. PENUTUP -->
+    <p class="mt-4 leading-relaxed text-justify text-xs sm:text-sm">
+      Dengan melaksanakan tugas dan kewajiban tersebut, karyawan diharapkan dapat berkontribusi secara optimal di perusahaan. Demikian surat tugas ini dibuat agar dipergunakan sebagaimana mestinya.
+    </p>
+
+    <!-- 5. BLOK TANDA TANGAN (ANTI-PAGE BREAK & MARGIN DINAMIS) -->
+    <div class="break-inside-avoid mt-10" style="page-break-inside: avoid;">
       <div class="grid grid-cols-2 gap-8 text-center text-xs sm:text-sm">
-        <!-- Kolom Kiri: HRGA Penyetuju -->
+        <!-- Kolom Kiri: Manager HRGA -->
         <div class="flex flex-col items-start text-left">
           <p>Ditetapkan di : Gresik</p>
           <p>Pada tanggal : <span id="tgl_ditetapkan">-</span></p>
@@ -163,10 +148,10 @@
           <div class="h-20 flex items-center justify-center"></div>
           
           <p class="font-bold underline uppercase"><span id="nama_hrga">-</span></p>
-          <p class="text-xs text-gray-700"><span id="jabatan_hrga">HR & GA Department Head</span></p>
+          <p class="text-xs text-gray-700"><span id="jabatan_hrga">Manager HRGA</span></p>
         </div>
 
-        <!-- Kolom Kanan: Kepala Divisi / Manager -->
+        <!-- Kolom Kanan: Direksi -->
         <div class="flex flex-col items-center">
           <p class="invisible">Spacer Baris 1</p>
           <p class="invisible">Spacer Baris 2</p>
@@ -175,15 +160,15 @@
           <!-- Area Tanda Tangan Atasan -->
           <div class="h-20 flex items-center justify-center"></div>
           
-          <p class="font-bold underline uppercase"><span id="nama_kepala_divisi">-</span></p>
-          <p class="text-xs text-gray-700"><span id="jabatan_kepala_divisi">Kepala Divisi</span></p>
+          <p class="font-bold underline uppercase"><span id="nama_direksi">-</span></p>
+          <p class="text-xs text-gray-700"><span id="jabatan_direksi">Direksi</span></p>
         </div>
       </div>
     </div>
   </div>
 
   <!-- API Scripts -->
-  <script src="/js/api.js"></script>
+  <script src="js/api.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       // 1. TANGKAP PARAMETER URL
@@ -203,7 +188,13 @@
 
       try {
         // 2. FETCH API (BACKEND CALL)
-        const res = await api.getSppdByID(idSppd);
+        const [res, userRes] = await Promise.all([
+          api.getSppdByID(idSppd),
+          api.getAllUsers().catch(e => {
+            console.warn('[Cetak ST] Gagal memuat daftar master user:', e);
+            return { success: false, data: [] };
+          })
+        ]);
 
         loadingBanner.classList.add('hidden');
 
@@ -214,6 +205,7 @@
         }
 
         const data = res.data;
+        const allUsers = (userRes && userRes.success && Array.isArray(userRes.data)) ? userRes.data : [];
 
         // 3. DOM MANIPULATION (REPLACE PLACEHOLDER SPAN)
         // No SPPD
@@ -226,26 +218,65 @@
         const tglDitetapkan = data.created_at ? formatDate(data.created_at) : formatDate(data.tgl_berangkat);
         document.getElementById('tgl_ditetapkan').textContent = tglDitetapkan;
 
-        // Ekstraksi Approver HRGA dari Approval Logs
-        const logs = data.approval_logs || [];
-        const hrgaLog = logs.find(l => l.tahap_approval === 'HRGA') || logs.find(l => l.tahap_approval === 'Finance');
-        const hrgaName = hrgaLog?.approver?.nama_lengkap || 'HR & GA Department Head';
-        const hrgaJabatan = hrgaLog?.approver?.kode_jabatan ? `HR & GA (${hrgaLog.approver.kode_jabatan})` : 'HR & GA Department Head';
+        // ── RESOLVE MANAGER HRGA (Pihak Pemberi Tugas & Tanda Tangan Kiri) ─────────────
+        let hrgaManagerName = data.nama_manager_hrga || '';
+        
+        // Jika backend belum menyertakan, cari dari list master user
+        if (!hrgaManagerName) {
+          const mgrHRGAUser = allUsers.find(u => {
+            const dept = (u.kode_departemen || '').toUpperCase();
+            const role = (u.role_sistem || '').toUpperCase();
+            const jab = (u.kode_jabatan || '').toUpperCase();
+            const isHR = dept === 'HRGA' || dept === 'HRD' || dept === 'GA';
+            const isMgr = role === 'MANAGER' || jab === '28' || jab === '29' || jab.includes('MGR') || jab.includes('HEAD');
+            return isHR && isMgr;
+          }) || allUsers.find(u => {
+            const dept = (u.kode_departemen || '').toUpperCase();
+            const role = (u.role_sistem || '').toUpperCase();
+            return (dept === 'HRGA' || dept === 'HRD' || dept === 'GA') && role === 'MANAGER';
+          });
 
-        document.getElementById('nama_pemberi_tugas').textContent = hrgaName;
-        document.getElementById('jabatan_pemberi_tugas').textContent = hrgaJabatan;
-        document.getElementById('nama_hrga').textContent = hrgaName;
-        document.getElementById('jabatan_hrga').textContent = hrgaJabatan;
+          if (mgrHRGAUser && mgrHRGAUser.nama_lengkap) {
+            hrgaManagerName = mgrHRGAUser.nama_lengkap;
+          }
+        }
 
-        // Ekstraksi Approver Manager / Atasan dari Approval Logs
-        const mgrLog = logs.find(l => l.tahap_approval === 'Manager');
-        const mgrName = mgrLog?.approver?.nama_lengkap || 'Kepala Divisi / Manager';
-        const mgrJabatan = mgrLog?.approver?.kode_jabatan 
-          ? `Kepala Divisi (${mgrLog.approver.kode_jabatan})` 
-          : `Kepala Divisi ${data.pemohon?.kode_departemen || ''}`;
+        // Setel Pihak Pemberi Tugas (Bagian Atas)
+        document.getElementById('nama_pemberi_tugas').textContent = hrgaManagerName || 'Manager HRGA';
+        document.getElementById('jabatan_pemberi_tugas').textContent = 'Manager HRGA';
 
-        document.getElementById('nama_kepala_divisi').textContent = mgrName;
-        document.getElementById('jabatan_kepala_divisi').textContent = mgrJabatan;
+        // Setel Tanda Tangan Kiri (Bagian Bawah)
+        document.getElementById('nama_hrga').textContent = hrgaManagerName || 'Manager HRGA';
+        document.getElementById('jabatan_hrga').textContent = 'Manager HRGA';
+
+        // ── RESOLVE DIREKSI (Tanda Tangan Kanan - Mengetahui) ──────────────────────────
+        let direksiName = data.nama_direksi || '';
+        
+        // Jika backend belum menyertakan, cari dari list master user
+        if (!direksiName) {
+          const dirUser = allUsers.find(u => {
+            const role = (u.role_sistem || '').toUpperCase();
+            const jab = (u.kode_jabatan || '').toUpperCase();
+            return role === 'DIREKSI' || jab === '31' || jab === '30' || jab.includes('DIR');
+          });
+
+          if (dirUser && dirUser.nama_lengkap) {
+            direksiName = dirUser.nama_lengkap;
+          } else {
+            const logs = data.approval_logs || [];
+            const direksiLog = logs.find(l => (l.tahap_approval || '').toUpperCase() === 'DIREKSI');
+            if (direksiLog && direksiLog.catatan && direksiLog.catatan.includes(':')) {
+              const parts = direksiLog.catatan.split(':');
+              if (parts.length > 1 && parts[1].trim()) {
+                direksiName = parts[1].trim();
+              }
+            }
+          }
+        }
+
+        // Setel Tanda Tangan Kanan (Direksi)
+        document.getElementById('nama_direksi').textContent = direksiName || 'Direksi';
+        document.getElementById('jabatan_direksi').textContent = 'Direksi';
 
         // 4. RENDER TABEL PESERTA DINAMIS
         const tbody = document.getElementById('tabel_peserta_body');

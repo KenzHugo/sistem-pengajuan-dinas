@@ -69,8 +69,8 @@ func (s *sppdService) resolveUserID(identifier string) int {
 		}
 	}
 
-	cleanExpr := "TRIM(REPLACE(REPLACE(nomor_id, '\r', ''), '\n', ''))"
-	cleanNama := "TRIM(REPLACE(REPLACE(nama_lengkap, '\r', ''), '\n', ''))"
+	cleanExpr := "LTRIM(RTRIM(REPLACE(REPLACE(nomor_id, CHAR(13), ''), CHAR(10), '')))"
+	cleanNama := "LTRIM(RTRIM(REPLACE(REPLACE(nama_lengkap, CHAR(13), ''), CHAR(10), '')))"
 
 	// 1. Coba cari langsung di tabel users
 	var user models.User
@@ -82,11 +82,11 @@ func (s *sppdService) resolveUserID(identifier string) int {
 		return user.IDUser
 	}
 
-	// 2. Coba cari di tabel karyawan_copy1 dan sinkronkan ke users jika belum ada
+	// 2. Coba cari di tabel adi_persons.dbo.karyawan dan sinkronkan ke users jika belum ada
 	var karyawan models.Karyawan
-	kCleanID := "TRIM(REPLACE(REPLACE(NomorID, '\r', ''), '\n', ''))"
-	kCleanNama := "TRIM(REPLACE(REPLACE(Nama, '\r', ''), '\n', ''))"
-	errK := config.DB.Table("karyawan_copy1").Where(
+	kCleanID := "LTRIM(RTRIM(REPLACE(REPLACE(NomorID, CHAR(13), ''), CHAR(10), '')))"
+	kCleanNama := "LTRIM(RTRIM(REPLACE(REPLACE(Nama, CHAR(13), ''), CHAR(10), '')))"
+	errK := config.DB.Table("adi_persons.dbo.karyawan").Where(
 		kCleanID+" = ? OR "+kCleanID+" = ? OR LOWER("+kCleanNama+") = LOWER(?) OR LOWER("+kCleanNama+") = LOWER(?) OR "+kCleanNama+" LIKE ?",
 		extractedID, clean, extractedNama, clean, "%"+extractedNama+"%",
 	).First(&karyawan).Error
@@ -309,12 +309,57 @@ func (s *sppdService) Submit(idSppd, idPemohon int) (*models.SppdPengajuan, erro
 	return s.sppdRepo.FindByID(idSppd)
 }
 
-// GetByID mengambil detail SPPD beserta relasi
+// GetByID mengambil detail SPPD beserta relasi dan pejabat penandatangan resmi dari database
 func (s *sppdService) GetByID(id int) (*models.SppdPengajuan, error) {
 	sppd, err := s.sppdRepo.FindByID(id)
 	if err != nil {
 		return nil, errors.New("pengajuan tidak ditemukan")
 	}
+
+	// 1. Query Manager HRGA dari database (adi_persons.dbo.karyawan / users)
+	var managerHRGAName string
+	// _ = config.DB.Raw(`
+	// 	SELECT TOP 1 Nama FROM karyawan_copy1
+	// 	WHERE (KodeDepartemen IN ('HRGA', 'HRD', 'GA') AND (KodeJabatan IN ('29', '28') OR KodeJabatan LIKE '%MGR%'))
+	// 	ORDER BY TRY_CAST(KodeJabatan AS INT) DESC, Nama ASC
+	// `).Scan(&managerHRGAName).Error
+
+	_ = config.DB.Raw(`
+		SELECT TOP 1 Nama FROM adi_persons.dbo.karyawan 
+		WHERE (KodeDepartemen IN ('HRGA', 'HRD', 'GA') AND (KodeJabatan IN ('29', '28') OR KodeJabatan LIKE '%MGR%'))
+		ORDER BY TRY_CAST(KodeJabatan AS INT) DESC, Nama ASC
+	`).Scan(&managerHRGAName).Error
+
+	if managerHRGAName == "" {
+		_ = config.DB.Raw(`
+			SELECT TOP 1 nama_lengkap FROM users 
+			WHERE (role_sistem = 'Manager' AND (kode_departemen IN ('HRGA', 'HRD', 'GA', 'MGT')))
+		`).Scan(&managerHRGAName).Error
+	}
+	sppd.NamaManagerHRGA = strings.TrimSpace(managerHRGAName)
+
+	// 2. Query Direksi dari database (adi_persons.dbo.karyawan / users)
+	var direksiName string
+	// _ = config.DB.Raw(`
+	// 	SELECT TOP 1 Nama FROM karyawan_copy1
+	// 	WHERE KodeJabatan IN ('31', '30') OR KodeJabatan LIKE '%DIR%' OR KodeDepartemen = 'DIR'
+	// 	ORDER BY TRY_CAST(KodeJabatan AS INT) DESC, Nama ASC
+	// `).Scan(&direksiName).Error
+
+	_ = config.DB.Raw(`
+		SELECT TOP 1 Nama FROM adi_persons.dbo.karyawan
+		WHERE KodeJabatan IN ('31', '30') OR KodeJabatan LIKE '%DIR%' OR KodeDepartemen = 'DIR'
+		ORDER BY TRY_CAST(KodeJabatan AS INT) DESC, Nama ASC
+	`).Scan(&direksiName).Error
+
+	if direksiName == "" {
+		_ = config.DB.Raw(`
+			SELECT TOP 1 nama_lengkap FROM users 
+			WHERE role_sistem = 'Direksi' OR kode_jabatan IN ('31', '30')
+		`).Scan(&direksiName).Error
+	}
+	sppd.NamaDireksi = strings.TrimSpace(direksiName)
+
 	return sppd, nil
 }
 
@@ -663,7 +708,7 @@ type PersonilDinasTarif struct {
 }
 
 // HitungEstimasiBiaya menghitung estimasi biaya SPPD secara dinamis per kepala (Pemohon + Seluruh Partner)
-// Menggunakan relasi tabel: karyawan_copy1 -> jabatan (KodeJabatan) -> perjalanandinas_tarif (GroupDinasLuar)
+// Menggunakan relasi tabel: adi_persons.dbo.karyawan -> jabatan (KodeJabatan) -> perjalanandinas_tarif (GroupDinasLuar)
 func (s *sppdService) HitungEstimasiBiaya(idPemohon int, req dto.KalkulasiBiayaRequest) (*dto.KalkulasiBiayaResponse, error) {
 	// 1. Normalisasi jam & tanggal perjalanan
 	jamB := strings.TrimSpace(req.JamBerangkat)
@@ -826,14 +871,14 @@ func (s *sppdService) HitungEstimasiBiaya(idPemohon int, req dto.KalkulasiBiayaR
 		// 1. Cari berdasarkan TargetID / NomorID terlebih dahulu (Prioritas Utama)
 		if cleanTargetID != "" && !strings.EqualFold(cleanTargetID, "PEMOHON") {
 			var k models.Karyawan
-			if err := config.DB.Table("karyawan_copy1").Where("TRIM(REPLACE(REPLACE(NomorID, '\r', ''), '\n', '')) = ?", cleanTargetID).First(&k).Error; err == nil {
+			if err := config.DB.Table("adi_persons.dbo.karyawan").Where("LTRIM(RTRIM(REPLACE(REPLACE(NomorID, CHAR(13), ''), CHAR(10), ''))) = ?", cleanTargetID).First(&k).Error; err == nil {
 				nama = strings.TrimSpace(k.Nama)
 				kodeJabatan = strings.TrimSpace(k.KodeJabatan)
 				nomorID = strings.TrimSpace(k.NomorID)
 				found = true
 			} else {
 				var u models.User
-				if err := config.DB.Where("TRIM(REPLACE(REPLACE(nomor_id, '\r', ''), '\n', '')) = ?", cleanTargetID).First(&u).Error; err == nil {
+				if err := config.DB.Where("LTRIM(RTRIM(REPLACE(REPLACE(nomor_id, CHAR(13), ''), CHAR(10), ''))) = ?", cleanTargetID).First(&u).Error; err == nil {
 					nama = strings.TrimSpace(u.NamaLengkap)
 					kodeJabatan = strings.TrimSpace(u.KodeJabatan)
 					nomorID = strings.TrimSpace(u.NomorID)
@@ -845,14 +890,14 @@ func (s *sppdService) HitungEstimasiBiaya(idPemohon int, req dto.KalkulasiBiayaR
 		// 2. Jika tidak ditemukan via ID, cari berdasarkan Nama (HANYA jika nama tidak kosong)
 		if !found && cleanNama != "" && !strings.EqualFold(cleanNama, "PEMOHON") {
 			var k models.Karyawan
-			if err := config.DB.Table("karyawan_copy1").Where("TRIM(REPLACE(REPLACE(Nama, '\r', ''), '\n', '')) = ? OR TRIM(REPLACE(REPLACE(Nama, '\r', ''), '\n', '')) LIKE ?", cleanNama, "%"+cleanNama+"%").First(&k).Error; err == nil {
+			if err := config.DB.Table("adi_persons.dbo.karyawan").Where("LTRIM(RTRIM(REPLACE(REPLACE(Nama, CHAR(13), ''), CHAR(10), ''))) = ? OR LTRIM(RTRIM(REPLACE(REPLACE(Nama, CHAR(13), ''), CHAR(10), ''))) LIKE ?", cleanNama, "%"+cleanNama+"%").First(&k).Error; err == nil {
 				nama = strings.TrimSpace(k.Nama)
 				kodeJabatan = strings.TrimSpace(k.KodeJabatan)
 				nomorID = strings.TrimSpace(k.NomorID)
 				found = true
 			} else {
 				var u models.User
-				if err := config.DB.Where("TRIM(REPLACE(REPLACE(nama_lengkap, '\r', ''), '\n', '')) = ? OR TRIM(REPLACE(REPLACE(nama_lengkap, '\r', ''), '\n', '')) LIKE ?", cleanNama, "%"+cleanNama+"%").First(&u).Error; err == nil {
+				if err := config.DB.Where("LTRIM(RTRIM(REPLACE(REPLACE(nama_lengkap, CHAR(13), ''), CHAR(10), ''))) = ? OR LTRIM(RTRIM(REPLACE(REPLACE(nama_lengkap, CHAR(13), ''), CHAR(10), ''))) LIKE ?", cleanNama, "%"+cleanNama+"%").First(&u).Error; err == nil {
 					nama = strings.TrimSpace(u.NamaLengkap)
 					kodeJabatan = strings.TrimSpace(u.KodeJabatan)
 					nomorID = strings.TrimSpace(u.NomorID)
@@ -885,7 +930,7 @@ func (s *sppdService) HitungEstimasiBiaya(idPemohon int, req dto.KalkulasiBiayaR
 		// C. Cari GroupDinasLuar di tabel master jabatan
 		if kodeJabatan != "" {
 			var j models.Jabatan
-			if err := config.DB.Where("TRIM(REPLACE(REPLACE(Kode, '\r', ''), '\n', '')) = ?", kodeJabatan).First(&j).Error; err == nil {
+			if err := config.DB.Where("LTRIM(RTRIM(REPLACE(REPLACE(Kode, CHAR(13), ''), CHAR(10), ''))) = ?", kodeJabatan).First(&j).Error; err == nil {
 				groupDinasLuar = strings.TrimSpace(j.GroupDinasLuar)
 			}
 		}
@@ -899,7 +944,7 @@ func (s *sppdService) HitungEstimasiBiaya(idPemohon int, req dto.KalkulasiBiayaR
 		var tarif models.PerjalananDinasTarif
 		tarifFound := false
 		if groupDinasLuar != "" {
-			if err := config.DB.Where("TRIM(Jabatan) = ? AND Area = ?", groupDinasLuar, area).First(&tarif).Error; err == nil {
+			if err := config.DB.Where("LTRIM(RTRIM(Jabatan)) = ? AND Area = ?", groupDinasLuar, area).First(&tarif).Error; err == nil {
 				tarifFound = true
 			}
 		}

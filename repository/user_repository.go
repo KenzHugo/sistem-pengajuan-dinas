@@ -29,16 +29,19 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{db: db}
 }
 
-const cleanKaryawanNamaExpr = "TRIM(REPLACE(REPLACE(Nama, '\r', ''), '\n', ''))"
-const cleanKaryawanNomorIDExpr = "TRIM(REPLACE(REPLACE(NomorID, '\r', ''), '\n', ''))"
+const cleanKaryawanNamaExpr = "LTRIM(RTRIM(REPLACE(REPLACE(Nama, CHAR(13), ''), CHAR(10), '')))"
+const cleanKaryawanNomorIDExpr = "LTRIM(RTRIM(REPLACE(REPLACE(NomorID, CHAR(13), ''), CHAR(10), '')))"
+const cleanKaryawanLast5IDExpr = "RIGHT(" + cleanKaryawanNomorIDExpr + ", 5)"
 
-// FindByUsernameOrName melakukan query langsung ke tabel karyawan_copy1 dengan membersihkan spasi tersembunyi
+// FindByUsernameOrName melakukan query langsung ke tabel adi_persons.dbo.karyawan berdasarkan 5 digit terakhir NomorID, NomorID lengkap, atau Nama
 func (r *userRepository) FindByUsernameOrName(identifier string) (*models.Karyawan, error) {
 	var karyawan models.Karyawan
 	clean := strings.TrimSpace(identifier)
 
-	err := r.db.Table("karyawan_copy1").
-		Where("("+cleanKaryawanNamaExpr+" = ? OR LOWER("+cleanKaryawanNamaExpr+") = LOWER(?) OR "+cleanKaryawanNomorIDExpr+" = ?)", clean, clean, clean).
+	err := r.db.Table("adi_persons.dbo.karyawan").
+		Where("("+cleanKaryawanLast5IDExpr+" = ? OR "+cleanKaryawanNomorIDExpr+" = ? OR "+cleanKaryawanNomorIDExpr+" LIKE ? OR "+cleanKaryawanNamaExpr+" = ? OR LOWER("+cleanKaryawanNamaExpr+") = LOWER(?))",
+			clean, clean, "%"+clean, clean, clean).
+		Order("CASE WHEN Aktif = 1 THEN 0 ELSE 1 END, Nama ASC").
 		First(&karyawan).Error
 
 	if err != nil {
@@ -51,7 +54,7 @@ func (r *userRepository) FindByUsernameOrName(identifier string) (*models.Karyaw
 	return &karyawan, nil
 }
 
-// FindByIdentifier mencocokkan kredensial langsung ke tabel karyawan_copy1 dan memetakan ke struct User sistem
+// FindByIdentifier mencocokkan kredensial langsung ke tabel adi_persons.dbo.karyawan dan memetakan ke struct User sistem
 func (r *userRepository) FindByIdentifier(identifier string) (*models.User, error) {
 	karyawan, err := r.FindByUsernameOrName(identifier)
 	if err != nil {
@@ -76,12 +79,20 @@ func (r *userRepository) FindByIdentifier(identifier string) (*models.User, erro
 		role = "Finance"
 	}
 
+	// Hitung nik_pendek (5 digit terakhir NomorID)
+	cleanNomorID := cleanString(karyawan.NomorID)
+	nikPendek := cleanNomorID
+	if len(cleanNomorID) >= 5 {
+		nikPendek = cleanNomorID[len(cleanNomorID)-5:]
+	}
+
 	// Sinkronisasi/Cek record di tabel users untuk integritas relasi ID SPPD
 	var existingUser models.User
-	errUser := r.db.Where("TRIM(REPLACE(REPLACE(nomor_id, '\r', ''), '\n', '')) = ?", karyawan.NomorID).First(&existingUser).Error
+	errUser := r.db.Where("LTRIM(RTRIM(REPLACE(REPLACE(nomor_id, CHAR(13), ''), CHAR(10), ''))) = ?", karyawan.NomorID).First(&existingUser).Error
 
 	if errUser == nil {
 		existingUser.NamaLengkap = karyawan.Nama
+		existingUser.NikPendek = nikPendek
 		existingUser.KodeDepartemen = karyawan.KodeDepartemen
 		existingUser.KodeJabatan = karyawan.KodeJabatan
 		existingUser.RoleSistem = role
@@ -96,7 +107,7 @@ func (r *userRepository) FindByIdentifier(identifier string) (*models.User, erro
 	// Buat record User baru jika belum ada di tabel users
 	newUser := models.User{
 		NomorID:        karyawan.NomorID,
-		NikPendek:      "",
+		NikPendek:      nikPendek,
 		NamaLengkap:    karyawan.Nama,
 		KodeDepartemen: karyawan.KodeDepartemen,
 		KodeJabatan:    karyawan.KodeJabatan,
@@ -123,7 +134,8 @@ func (r *userRepository) FindByID(id int) (*models.User, error) {
 
 func (r *userRepository) FindAll() ([]models.User, error) {
 	var listKaryawan []models.Karyawan
-	err := r.db.Table("karyawan_copy1").Order("Nama ASC").Find(&listKaryawan).Error
+	// err := r.db.Table("karyawan_copy1").Order("Nama ASC").Find(&listKaryawan).Error
+	err := r.db.Table("adi_persons.dbo.karyawan").Order("Nama ASC").Find(&listKaryawan).Error
 	if err != nil {
 		var users []models.User
 		errUsers := r.db.Order("nama_lengkap ASC").Find(&users).Error
@@ -145,9 +157,16 @@ func (r *userRepository) FindAll() ([]models.User, error) {
 			role = "Finance"
 		}
 
+		cID := cleanString(k.NomorID)
+		nikPendek := cID
+		if len(cID) >= 5 {
+			nikPendek = cID[len(cID)-5:]
+		}
+
 		users = append(users, models.User{
 			IDUser:         i + 1,
-			NomorID:        cleanString(k.NomorID),
+			NomorID:        cID,
+			NikPendek:      nikPendek,
 			NamaLengkap:    cleanString(k.Nama),
 			KodeDepartemen: k.KodeDepartemen,
 			KodeJabatan:    k.KodeJabatan,

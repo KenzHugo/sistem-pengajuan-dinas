@@ -102,7 +102,7 @@ func RegisterRoutes(
 	users.Put("/:id", middleware.RequireRole(middleware.RoleHRGA), userCtrl.Update)
 	users.Delete("/:id", middleware.RequireRole(middleware.RoleHRGA), userCtrl.Delete)
 
-	// ─── Karyawan Routes (karyawan_copy1) ─────────────────────────────────────
+	// ─── Karyawan Routes (SQL Server adi_persons.dbo.karyawan) ─────────────────
 	karyawan := protected.Group("/karyawan", middleware.RequireRole(
 		middleware.RoleManager,
 		middleware.RoleHRGA,

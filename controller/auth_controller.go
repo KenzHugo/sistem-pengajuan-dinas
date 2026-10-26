@@ -30,7 +30,7 @@ func (c *AuthController) Login(ctx *fiber.Ctx) error {
 	req.Password = strings.TrimSpace(req.Password)
 
 	if req.Identifier == "" || req.Password == "" {
-		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("Nama lengkap dan password wajib diisi"))
+		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("Nomor ID dan password wajib diisi"))
 	}
 
 	result, err := c.authSvc.Login(req)

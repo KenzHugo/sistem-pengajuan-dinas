@@ -124,8 +124,8 @@
   </div>
 </main>
 
-<script src="/js/api.js?v=3"></script>
-<script src="/js/sidebar.js?v=3"></script>
+<script src="js/api.js?v=3"></script>
+<script src="js/sidebar.js?v=3"></script>
 <script>
   requireAuth();
   const user = getCurrentUser();
@@ -193,7 +193,7 @@
       const rombonganBadge = anggotaNames ? `<div class="mt-1 text-blue-600 dark:text-indigo-400 text-xs flex items-center gap-1 font-medium"><i class="ph-bold ph-users"></i> +${s.anggota.length} Rekan (${anggotaNames})</div>` : '';
       
       const stBtn = s.status_dokumen === 'approved'
-        ? `<a href="/cetak_surat_tugas.html?id=${s.id_sppd}" target="_blank" onclick="event.stopPropagation()"
+        ? `<a href="cetak_surat_tugas.html?id=${s.id_sppd}" target="_blank" onclick="event.stopPropagation()"
              class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold shadow-sm transition" title="Lihat Surat Tugas">
              <i class="ph-bold ph-file-text"></i>
              <span>Lihat ST</span>
@@ -305,7 +305,7 @@
         res = await apiFetch(`/finance/sppd-ledger/${id}`);
       } else {
         const token = localStorage.getItem('sppd_token');
-        const fRes = await fetch(`/api/finance/sppd-ledger/${id}`, {
+        const fRes = await fetch(`${API_BASE}/finance/sppd-ledger/${id}`, {
           headers: {
             'Content-Type': 'application/json',
             ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -429,7 +429,7 @@
       btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Mengekspor CSV...`;
 
       const q = status ? `?status=${encodeURIComponent(status)}` : '';
-      const response = await fetch(`/api/finance/export-csv${q}`, {
+      const response = await fetch(`${API_BASE}/finance/export-csv${q}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

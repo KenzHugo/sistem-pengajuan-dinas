@@ -4,8 +4,8 @@ import (
 	"time"
 )
 
-// Karyawan merepresentasikan tabel `karyawan_copy1`
-// Menggunakan pointer *time.Time untuk TanggalLahir agar null-safe saat berhadapan dengan nilai NULL di database MySQL
+// Karyawan merepresentasikan tabel `karyawan` di database adi_persons SQL Server
+// Menggunakan pointer *time.Time untuk TanggalLahir agar null-safe saat berhadapan dengan nilai NULL di SQL Server
 type Karyawan struct {
 	NomorID        string     `gorm:"column:NomorID;primaryKey;type:varchar(50)" json:"nomor_id"`
 	Nama           string     `gorm:"column:Nama;type:varchar(50)" json:"nama"`
@@ -20,5 +20,6 @@ type Karyawan struct {
 
 // TableName menentukan nama tabel database secara eksplisit
 func (Karyawan) TableName() string {
-	return "karyawan_copy1"
+	// return "karyawan_copy1"
+	return "adi_persons.dbo.karyawan"
 }

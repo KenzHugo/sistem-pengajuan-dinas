@@ -133,8 +133,8 @@
     <div class="text-center mb-8">
       <!-- Logo Container -->
       <div class="inline-flex items-center justify-center p-3.5 rounded-2xl bg-white/90 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 shadow-md mb-4 float-anim transition-all duration-300">
-        <img src="/logo-light.png" alt="Logo PT Adiprima Suraprinta" class="max-w-[200px] h-auto max-h-12 object-contain block dark:hidden" />
-        <img src="/logo-dark.png" alt="Logo PT Adiprima Suraprinta" class="max-w-[200px] h-auto max-h-12 object-contain hidden dark:block" />
+        <img src="logo-light.png" alt="Logo PT Adiprima Suraprinta" class="max-w-[200px] h-auto max-h-12 object-contain block dark:hidden" />
+        <img src="logo-dark.png" alt="Logo PT Adiprima Suraprinta" class="max-w-[200px] h-auto max-h-12 object-contain hidden dark:block" />
       </div>
       <h1 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">
         <span class="gradient-text">SIPADIN</span>
@@ -148,22 +148,26 @@
 
     <!-- Form -->
     <form id="loginForm" class="space-y-5">
-      <!-- Identifier (Nama Lengkap) -->
+      <!-- Identifier (Nomor ID Karyawan) -->
       <div>
-        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-          Nama Lengkap
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 flex items-center justify-between">
+          <span>Nomor ID Karyawan</span>
+          <span class="text-[11px] font-normal text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">5 Digit Terakhir</span>
         </label>
         <div class="relative">
-          <i class="ph-bold ph-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+          <i class="ph-bold ph-identification-card absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
           <input
             id="identifier"
             type="text"
-            placeholder="Masukkan Nama Lengkap Anda"
+            placeholder="Contoh: 14016 atau 29642"
             class="input-field w-full rounded-xl pl-10 pr-4 py-3 text-sm"
-            autocomplete="name"
+            autocomplete="username"
             required
           />
         </div>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1">
+          <i class="ph-bold ph-info text-emerald-500"></i> Masukkan 5 digit terakhir Nomor ID dari data karyawan
+        </p>
       </div>
 
       <!-- Password -->
@@ -210,7 +214,8 @@
   </div>
 
   <script>
-    const API = '/api';
+    const BASE_PATH = window.location.pathname.startsWith('/perdin') ? '/perdin' : '';
+    const API = `${BASE_PATH}/api`;
 
     // Toggle password visibility
     document.getElementById('togglePassword').addEventListener('click', () => {
@@ -275,14 +280,14 @@
         // Redirect sesuai role
         const role = data.data.user.role_sistem;
         const redirectMap = {
-          'Karyawan' : '/dashboard.html',
-          'Manager'  : '/manager.html',
-          'HRGA'     : '/hrga.html',
-          'Finance'  : '/finance.html',
-          'Direksi'  : '/laporan.html',
+          'Karyawan' : `${BASE_PATH}/dashboard.html`,
+          'Manager'  : `${BASE_PATH}/manager.html`,
+          'HRGA'     : `${BASE_PATH}/hrga.html`,
+          'Finance'  : `${BASE_PATH}/finance.html`,
+          'Direksi'  : `${BASE_PATH}/laporan.html`,
         };
         setTimeout(() => {
-          window.location.href = redirectMap[role] || '/dashboard.html';
+          window.location.href = redirectMap[role] || `${BASE_PATH}/dashboard.html`;
         }, 1200);
 
       } catch (err) {
@@ -297,15 +302,15 @@
     if (localStorage.getItem('sppd_token')) {
       const user = JSON.parse(localStorage.getItem('sppd_user') || '{}');
       const redirectMap = {
-        'Karyawan' : '/dashboard.html',
-        'Manager'  : '/manager.html',
-        'HRGA'     : '/hrga.html',
-        'Finance'  : '/finance.html',
-        'Direksi'  : '/laporan.html',
+        'Karyawan' : `${BASE_PATH}/dashboard.html`,
+        'Manager'  : `${BASE_PATH}/manager.html`,
+        'HRGA'     : `${BASE_PATH}/hrga.html`,
+        'Finance'  : `${BASE_PATH}/finance.html`,
+        'Direksi'  : `${BASE_PATH}/laporan.html`,
       };
-      window.location.href = redirectMap[user.role_sistem] || '/dashboard.html';
+      window.location.href = redirectMap[user.role_sistem] || `${BASE_PATH}/dashboard.html`;
     }
   </script>
-  <script src="/js/theme.js"></script>
+  <script src="js/theme.js"></script>
 </body>
 </html>

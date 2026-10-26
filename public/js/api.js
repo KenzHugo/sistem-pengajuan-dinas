@@ -1,6 +1,7 @@
 /* public/js/api.js — Utility API client terpusat */
 
-const API_BASE = '/api';
+const BASE_PATH = window.location.pathname.startsWith('/perdin') ? '/perdin' : '';
+const API_BASE = `${BASE_PATH}/api`;
 
 // Ambil token dari localStorage
 function getToken() {
@@ -16,13 +17,13 @@ function getCurrentUser() {
 function logout() {
   localStorage.removeItem('sppd_token');
   localStorage.removeItem('sppd_user');
-  window.location.href = '/index.html';
+  window.location.href = `${BASE_PATH}/index.html`;
 }
 
 // Guard: redirect ke login jika belum login
 function requireAuth() {
   if (!getToken()) {
-    window.location.href = '/index.html';
+    window.location.href = `${BASE_PATH}/index.html`;
     return false;
   }
   return true;
@@ -104,29 +105,29 @@ const api = {
   },
 
   // Approval
-  managerAction:  (id, body) => apiFetch(`/approval/${id}/manager`, { method: 'POST', body: JSON.stringify(body) }),
-  hrgaAction:     (id, body) => apiFetch(`/approval/${id}/hrga`, { method: 'POST', body: JSON.stringify(body) }),
-  financeAction:  (id, body) => apiFetch(`/approval/${id}/finance`, { method: 'POST', body: JSON.stringify(body) }),
-  sendToDirector: (id) =>       apiFetch(`/approval/${id}/send`, { method: 'POST' }),
-  getFinanceLedger: (id) =>     apiFetch(`/finance/sppd-ledger/${id}`),
+  managerAction: (id, body) => apiFetch(`/approval/${id}/manager`, { method: 'POST', body: JSON.stringify(body) }),
+  hrgaAction: (id, body) => apiFetch(`/approval/${id}/hrga`, { method: 'POST', body: JSON.stringify(body) }),
+  financeAction: (id, body) => apiFetch(`/approval/${id}/finance`, { method: 'POST', body: JSON.stringify(body) }),
+  sendToDirector: (id) => apiFetch(`/approval/${id}/send`, { method: 'POST' }),
+  getFinanceLedger: (id) => apiFetch(`/finance/sppd-ledger/${id}`),
 
   // Tarif (perjalanandinas_tarif & perjalanandinas_fasilitas)
-  getAllTarif:  (params = {}) => {
+  getAllTarif: (params = {}) => {
     const q = new URLSearchParams(params).toString();
     return apiFetch(`/tarif${q ? '?' + q : ''}`);
   },
   getFasilitas: () => apiFetch('/tarif/fasilitas'),
-  createTarif:  (body) => apiFetch('/tarif', { method: 'POST', body: JSON.stringify(body) }),
-  updateTarif:  (body) => apiFetch('/tarif', { method: 'PUT', body: JSON.stringify(body) }),
-  deleteTarif:  (area, jabatan) => apiFetch(`/tarif?area=${encodeURIComponent(area)}&jabatan=${encodeURIComponent(jabatan)}`, { method: 'DELETE' }),
+  createTarif: (body) => apiFetch('/tarif', { method: 'POST', body: JSON.stringify(body) }),
+  updateTarif: (body) => apiFetch('/tarif', { method: 'PUT', body: JSON.stringify(body) }),
+  deleteTarif: (area, jabatan) => apiFetch(`/tarif?area=${encodeURIComponent(area)}&jabatan=${encodeURIComponent(jabatan)}`, { method: 'DELETE' }),
 
   // Users
-  getAllUsers:  ()         => apiFetch('/users'),
-  createUser:  (body)     => apiFetch('/users', { method: 'POST', body: JSON.stringify(body) }),
-  updateUser:  (id, body) => apiFetch(`/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
-  deleteUser:  (id)       => apiFetch(`/users/${id}`, { method: 'DELETE' }),
+  getAllUsers: () => apiFetch('/users'),
+  createUser: (body) => apiFetch('/users', { method: 'POST', body: JSON.stringify(body) }),
+  updateUser: (id, body) => apiFetch(`/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  deleteUser: (id) => apiFetch(`/users/${id}`, { method: 'DELETE' }),
 
-  // Karyawan (karyawan_copy1)
+  // Karyawan (SQL Server)
   getKaryawan: (params = {}) => {
     const q = new URLSearchParams(params).toString();
     return apiFetch(`/karyawan${q ? '?' + q : ''}`);
@@ -156,13 +157,13 @@ function formatDateShort(dateStr) {
 }
 
 const STATUS_CONFIG = {
-  'draft':           { label: 'Draft',           color: 'bg-slate-500/20 text-slate-300  border-slate-500/30',  icon: 'ph-file-dashed' },
-  'pending_manager': { label: 'Menunggu Manager', color: 'bg-amber-500/20  text-amber-300  border-amber-500/30',  icon: 'ph-clock' },
-  'pending_hrga':    { label: 'Menunggu HRGA',    color: 'bg-blue-500/20   text-blue-300   border-blue-500/30',   icon: 'ph-clock' },
+  'draft': { label: 'Draft', color: 'bg-slate-500/20 text-slate-300  border-slate-500/30', icon: 'ph-file-dashed' },
+  'pending_manager': { label: 'Menunggu Manager', color: 'bg-amber-500/20  text-amber-300  border-amber-500/30', icon: 'ph-clock' },
+  'pending_hrga': { label: 'Menunggu HRGA', color: 'bg-blue-500/20   text-blue-300   border-blue-500/30', icon: 'ph-clock' },
   'pending_finance': { label: 'Menunggu Finance', color: 'bg-violet-500/20 text-violet-300 border-violet-500/30', icon: 'ph-clock' },
-  'ready_to_send':   { label: 'Siap Dikirim',     color: 'bg-cyan-500/20   text-cyan-300   border-cyan-500/30',   icon: 'ph-paper-plane-right' },
-  'approved':        { label: 'Disetujui',         color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', icon: 'ph-check-circle' },
-  'rejected':        { label: 'Ditolak',           color: 'bg-red-500/20    text-red-300    border-red-500/30',    icon: 'ph-x-circle' },
+  'ready_to_send': { label: 'Siap Dikirim', color: 'bg-cyan-500/20   text-cyan-300   border-cyan-500/30', icon: 'ph-paper-plane-right' },
+  'approved': { label: 'Disetujui', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', icon: 'ph-check-circle' },
+  'rejected': { label: 'Ditolak', color: 'bg-red-500/20    text-red-300    border-red-500/30', icon: 'ph-x-circle' },
 };
 
 function statusBadge(status) {

@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dokumentasi Teknis — SIPADIN v2.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0f766e;
+      --primary-light: #14b8a6;
+      --primary-dark: #0d5c56;
+      --accent: #6366f1;
+      --accent-light: #818cf8;
+      --bg-page: #ffffff;
+      --bg-section: #f0fdfa;
+      --bg-card: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --border-accent: #99f6e4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #3b82f6;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-primary);
+      background: var(--bg-page);
+      line-height: 1.7;
+      font-size: 11pt;
+    }
+
+    /* ── Print Optimization ────────────────────────────────────── */
+    @media print {
+      body { font-size: 10pt; line-height: 1.6; }
+      .page-break { page-break-before: always; }
+      .no-break { page-break-inside: avoid; }
+      .cover-page { page-break-after: always; }
+      @page { margin: 1.5cm 2cm; size: A4; }
+      .nav-print { display: flex !important; }
+      .print-btn { display: none !important; }
+      .flow-container { page-break-inside: avoid; }
+    }
+
+    /* ── Cover Page ────────────────────────────────────────────── */
+    .cover-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0f766e 0%, #0d9488 30%, #14b8a6 50%, #6366f1 100%);
+      color: white;
+      text-align: center;
+      padding: 60px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover-page::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.08) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 80%, rgba(99,102,241,0.15) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .cover-logo {
+      width: 120px;
+      height: 120px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 56px;
+      margin-bottom: 40px;
+      border: 2px solid rgba(255,255,255,0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-title {
+      font-size: 42pt;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-subtitle {
+      font-size: 16pt;
+      font-weight: 400;
+      opacity: 0.9;
+      margin-bottom: 50px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-meta {
+      position: relative;
+      z-index: 1;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 30px 50px;
+      border: 1px solid rgba(255,255,255,0.15);
+      text-align: left;
+      min-width: 400px;
+    }
+
+    .cover-meta-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .cover-meta-row:last-child { border-bottom: none; }
+
+    .cover-meta-label {
+      font-weight: 600;
+      font-size: 10pt;
+      opacity: 0.8;
+    }
+
+    .cover-meta-value {
+      font-weight: 700;
+      font-size: 10pt;
+    }
+
+    /* ── Content Wrapper ──────────────────────────────────────── */
+    .content-wrapper {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 30px;
+    }
+
+    /* ── Section Headers ─────────────────────────────────────── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 3px solid var(--primary);
+    }
+
+    .section-number {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18pt;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 20pt;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+    }
+
+    /* ── Subsection ──────────────────────────────────────────── */
+    h3 {
+      font-size: 13pt;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin: 28px 0 12px;
+      padding-left: 12px;
+      border-left: 4px solid var(--primary-light);
+    }
+
+    h4 {
+      font-size: 11pt;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 20px 0 8px;
+    }
+
+    p {
+      margin-bottom: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* ── Cards ───────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 5px solid var(--primary);
+    }
+
+    .card-warning {
+      border-left: 5px solid var(--warning);
+      background: #fffbeb;
+    }
+
+    .card-info {
+      border-left: 5px solid var(--info);
+      background: #eff6ff;
+    }
+
+    .card-danger {
+      border-left: 5px solid var(--danger);
+      background: #fef2f2;
+    }
+
+    .card-success {
+      border-left: 5px solid var(--success);
+      background: #ecfdf5;
+    }
+
+    .card-title {
+      font-size: 12pt;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Table ───────────────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 24px;
+      font-size: 10pt;
+    }
+
+    thead th {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 9pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    thead th:first-child { border-radius: 10px 0 0 0; }
+    thead th:last-child { border-radius: 0 10px 0 0; }
+
+    tbody td {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tbody tr:nth-child(even) { background: #f8fafc; }
+    tbody tr:hover { background: #f0fdfa; }
+
+    /* ── Flow Diagram ────────────────────────────────────────── */
+    .flow-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      margin: 30px 0;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 650px;
+    }
+
+    .flow-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+      color: white;
+      font-weight: 700;
+    }
+
+    .flow-content {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+
+    .flow-role {
+      font-size: 9pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 2px;
+    }
+
+    .flow-desc {
+      font-size: 10pt;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .flow-status {
+      display: inline-block;
+      font-size: 8pt;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 20px;
+      margin-top: 6px;
+    }
+
+    .flow-arrow {
+      display: flex;
+      justify-content: center;
+      padding: 4px 0;
+      margin-left: 28px;
+    }
+
+    .flow-arrow svg {
+      width: 20px;
+      height: 30px;
+    }
+
+    /* ── Badge / Chip ─────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 9pt;
+      font-weight: 700;
+    }
+
+    .badge-teal { background: #ccfbf1; color: #0f766e; }
+    .badge-blue { background: #dbeafe; color: #1d4ed8; }
+    .badge-purple { background: #ede9fe; color: #6d28d9; }
+    .badge-amber { background: #fef3c7; color: #b45309; }
+    .badge-red { background: #fee2e2; color: #dc2626; }
+    .badge-green { background: #dcfce7; color: #15803d; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+
+    /* ── List ─────────────────────────────────────────────────── */
+    ul, ol {
+      margin: 8px 0 16px 24px;
+      color: var(--text-secondary);
+    }
+
+    li { margin-bottom: 6px; }
+
+    li strong { color: var(--text-primary); }
+
+    /* ── Code ─────────────────────────────────────────────────── */
+    code {
+      background: #f1f5f9;
+      color: var(--primary-dark);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 9.5pt;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+    }
+
+    .code-block {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 20px 24px;
+      border-radius: 12px;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 9pt;
+      overflow-x: auto;
+      margin: 12px 0 20px;
+      line-height: 1.8;
+    }
+
+    /* ── TOC ──────────────────────────────────────────────────── */
+    .toc {
+      background: var(--bg-section);
+      border: 1px solid var(--border-accent);
+      border-radius: 16px;
+      padding: 30px 36px;
+      margin: 30px 0;
+    }
+
+    .toc-title {
+      font-size: 16pt;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toc ol {
+      list-style: none;
+      counter-reset: toc-counter;
+      margin: 0;
+      padding: 0;
+    }
+
+    .toc li {
+      counter-increment: toc-counter;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .toc li:last-child { border-bottom: none; }
+
+    .toc li::before {
+      content: counter(toc-counter, decimal-leading-zero);
+      display: inline-flex;
+      width: 32px;
+      height: 32px;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      color: white;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 10pt;
+      flex-shrink: 0;
+    }
+
+    .toc a {
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 11pt;
+    }
+
+    .toc .toc-page {
+      margin-left: auto;
+      color: var(--text-muted);
+      font-size: 9pt;
+    }
+
+    /* ── ER Diagram ──────────────────────────────────────────── */
+    .er-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .er-table {
+      border: 2px solid var(--primary);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .er-table-header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 10px 16px;
+      font-weight: 700;
+      font-size: 10pt;
+      text-align: center;
+    }
+
+    .er-table-body {
+      padding: 12px 16px;
+      font-size: 9pt;
+      background: white;
+    }
+
+    .er-field {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+      border-bottom: 1px dotted #e2e8f0;
+    }
+
+    .er-field:last-child { border-bottom: none; }
+
+    .er-field-name { font-weight: 600; color: var(--text-primary); }
+    .er-field-type { color: var(--accent); font-family: monospace; font-size: 8.5pt; }
+    .er-pk { color: var(--warning); font-weight: 700; }
+
+    /* ── Status Flow Diagram ─────────────────────────────────── */
+    .status-flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 20px 0;
+      padding: 20px;
+      background: #f8fafc;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .status-node {
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 8.5pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .status-arrow {
+      font-size: 16pt;
+      color: var(--text-muted);
+    }
+
+    /* ── Print Button ────────────────────────────────────────── */
+    .print-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-size: 11pt;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(15,118,110,0.3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 999;
+    }
+
+    .print-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(15,118,110,0.4);
+    }
+
+    /* ── Spacing ──────────────────────────────────────────────── */
+    .mt-0 { margin-top: 0; }
+    .mt-1 { margin-top: 8px; }
+    .mt-2 { margin-top: 16px; }
+    .mt-3 { margin-top: 24px; }
+    .mb-0 { margin-bottom: 0; }
+    .mb-1 { margin-bottom: 8px; }
+    .mb-2 { margin-bottom: 16px; }
+
+    .text-center { text-align: center; }
+
+    /* ── Highlight Box ───────────────────────────────────────── */
+    .highlight-box {
+      background: linear-gradient(135deg, #f0fdfa, #eff6ff);
+      border: 1px solid var(--border-accent);
+      border-radius: 14px;
+      padding: 24px;
+      margin: 20px 0;
+    }
+
+    .role-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    @media print {
+      .role-grid { grid-template-columns: 1fr 1fr; }
+      .er-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .api-method {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 8pt;
+      font-family: monospace;
+      color: white;
+      min-width: 48px;
+      text-align: center;
+    }
+    .method-get { background: #22c55e; }
+    .method-post { background: #3b82f6; }
+    .method-put { background: #f59e0b; }
+    .method-delete { background: #ef4444; }
+
+    .divider {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .footer-doc {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+      font-size: 9pt;
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║                     COVER PAGE                              ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="cover-page">
+  <div class="cover-logo">✈️</div>
+  <div class="cover-title">SIPADIN</div>
+  <div class="cover-subtitle">Sistem Informasi Pengajuan Perjalanan Dinas<br>PT Adiprima Suraprinta</div>
+  <div class="cover-meta">
+    <div class="cover-meta-row">
+      <span class="cover-meta-label">Versi Sistem</span>
+      <span class="cover-meta-value">v2.0 (Final PKL)</span>
+    </div>
+    <div class="cover-meta-row">
+      <span class="cover-meta-label">Dokumen</span>
+      <span class="cover-meta-value">Dokumentasi Teknis & Panduan Alur</span>
+    </div>
+    <div class="cover-meta-row">
+      <span class="cover-meta-label">Tanggal</span>
+      <span class="cover-meta-value">September 2026</span>
+    </div>
+    <div class="cover-meta-row">
+      <span class="cover-meta-label">Status</span>
+      <span class="cover-meta-value">✅ Final — Siap Serah Terima</span>
+    </div>
+    <div class="cover-meta-row">
+      <span class="cover-meta-label">Penulis</span>
+      <span class="cover-meta-value">Tim PKL — Divisi IT</span>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║                  TABLE OF CONTENTS                          ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="content-wrapper page-break">
+  <div class="toc">
+    <div class="toc-title">📋 Daftar Isi</div>
+    <ol>
+      <li><a href="#s1">Ringkasan Proyek (Executive Summary)</a></li>
+      <li><a href="#s2">Deskripsi Sistem & Tujuan</a></li>
+      <li><a href="#s3">Peran Pengguna (5 Role)</a></li>
+      <li><a href="#s4">Alur Proses — Dari Mulai Hingga Selesai</a></li>
+      <li><a href="#s5">Spesifikasi Teknis & Arsitektur</a></li>
+      <li><a href="#s6">Struktur Database (Entity Relationship)</a></li>
+      <li><a href="#s7">Daftar API Endpoint</a></li>
+      <li><a href="#s8">Fitur Unggulan Sistem</a></li>
+      <li><a href="#s9">Batasan Proyek & Catatan Penting</a></li>
+      <li><a href="#s10">Panduan Pengembangan Lanjutan (Untuk Staf IT)</a></li>
+    </ol>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║               SECTION 1: EXECUTIVE SUMMARY                  ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="content-wrapper page-break" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Ringkasan Proyek</div>
+  </div>
+
+  <div class="highlight-box">
+    <p style="font-size: 12pt; font-weight: 600; color: var(--primary-dark); margin-bottom: 12px;">
+      Apa itu SIPADIN?
+    </p>
+    <p>
+      <strong>SIPADIN (Sistem Informasi Pengajuan Dinas)</strong> adalah aplikasi web internal yang dirancang khusus untuk 
+      <strong>PT Adiprima Suraprinta</strong> guna mendigitalisasi seluruh proses pengajuan perjalanan dinas karyawan — 
+      mulai dari pembuatan surat tugas, perhitungan biaya otomatis, hingga persetujuan berjenjang oleh 5 level jabatan.
+    </p>
+    <p>
+      Sistem ini menggantikan proses manual berbasis kertas/email menjadi platform terpusat yang terintegrasi 
+      dengan <strong>notifikasi WhatsApp real-time</strong>, <strong>kalkulasi biaya otomatis berdasarkan master tarif perusahaan</strong>, 
+      serta <strong>audit trail keuangan (ledger)</strong> yang transparan dan tidak dapat dimanipulasi.
+    </p>
+  </div>
+
+  <div class="card card-accent no-break">
+    <div class="card-title">🎯 Masalah yang Diselesaikan</div>
+    <ul>
+      <li><strong>Proses manual lambat:</strong> Pengajuan dinas sebelumnya menggunakan form kertas yang harus ditandatangani satu per satu secara fisik.</li>
+      <li><strong>Tidak ada transparansi:</strong> Karyawan tidak tahu status pengajuannya sedang di tahap apa.</li>
+      <li><strong>Kesalahan perhitungan biaya:</strong> Perhitungan uang makan, uang saku, hotel, transportasi dilakukan manual sehingga rawan salah.</li>
+      <li><strong>Tidak ada audit trail:</strong> Riwayat perubahan biaya dan keputusan approval tidak tercatat.</li>
+      <li><strong>Koordinasi sulit:</strong> Rombongan perjalanan dinas sulit dikoordinasikan antardepartemen.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║               SECTION 2: DESKRIPSI & TUJUAN                 ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="content-wrapper page-break" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Deskripsi Sistem & Tujuan</div>
+  </div>
+
+  <h3>2.1 Deskripsi Umum</h3>
+  <p>
+    SIPADIN adalah aplikasi <strong>Single Page Application (SPA)</strong> berbasis web yang dibangun menggunakan 
+    bahasa pemrograman <strong>Go (Golang)</strong> sebagai backend dengan framework <strong>Fiber</strong>, 
+    dan frontend berbasis <strong>HTML + Tailwind CSS + JavaScript</strong>. 
+    Database yang digunakan adalah <strong>MySQL</strong> dengan ORM <strong>GORM</strong>.
+  </p>
+
+  <h3>2.2 Tujuan Proyek</h3>
+  <div class="role-grid">
+    <div class="card card-success no-break">
+      <div class="card-title">✅ Untuk Karyawan</div>
+      <p class="mb-0">Mempermudah pengajuan dinas, melihat status real-time, dan mendapatkan notifikasi otomatis via WhatsApp.</p>
+    </div>
+    <div class="card card-info no-break">
+      <div class="card-title">✅ Untuk Manajemen</div>
+      <p class="mb-0">Mempercepat proses persetujuan berjenjang dan memastikan transparansi serta akuntabilitas anggaran.</p>
+    </div>
+    <div class="card card-accent no-break">
+      <div class="card-title">✅ Untuk Finance</div>
+      <p class="mb-0">Memberikan kalkulasi biaya otomatis sesuai master tarif, audit ledger keuangan, dan ekspor data CSV.</p>
+    </div>
+    <div class="card no-break" style="border-left: 5px solid var(--accent);">
+      <div class="card-title">✅ Untuk IT</div>
+      <p class="mb-0">Arsitektur clean & modular siap diintegrasikan ke sistem ERP/HRIS perusahaan yang sudah berjalan.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║               SECTION 3: PERAN PENGGUNA                     ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="content-wrapper page-break" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Peran Pengguna (5 Role)</div>
+  </div>
+
+  <p>Sistem SIPADIN memiliki <strong>5 peran (role)</strong> dengan hak akses dan tanggung jawab yang berbeda. Setiap pengguna hanya bisa mengakses fitur sesuai rolenya.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 5%;">No</th>
+        <th style="width: 15%;">Role</th>
+        <th style="width: 25%;">Halaman</th>
+        <th style="width: 55%;">Tanggung Jawab & Hak Akses</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1</strong></td>
+        <td><span class="badge badge-teal">Karyawan</span></td>
+        <td><code>dashboard.html</code></td>
+        <td>
+          <strong>Pembuat pengajuan dinas.</strong> Membuat draft SPPD, mengisi data perjalanan (tujuan, tanggal, transportasi, akomodasi), menambah rekan kerja/rombongan, mengunggah lampiran, lalu mengajukan ke Manager. Bisa melihat status pengajuan dan mencetak Surat Tugas.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>2</strong></td>
+        <td><span class="badge badge-blue">Manager</span></td>
+        <td><code>manager.html</code></td>
+        <td>
+          <strong>Verifikasi tahap pertama.</strong> Menerima notifikasi WA saat ada pengajuan baru, memeriksa kelayakan perjalanan dinas, lalu menyetujui (<em>approve</em>) atau menolak (<em>reject</em>) dengan catatan.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>3</strong></td>
+        <td><span class="badge badge-purple">HRGA</span></td>
+        <td><code>hrga.html</code></td>
+        <td>
+          <strong>Verifikasi fasilitas & pengelolaan tarif.</strong> Mengecek ketersediaan transportasi & akomodasi, bisa merevisi komponen biaya. Juga bertugas mengelola data master tarif dinas, data user, dan mengirim dokumen final ke WhatsApp Direksi.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>4</strong></td>
+        <td><span class="badge badge-amber">Finance</span></td>
+        <td><code>finance.html</code></td>
+        <td>
+          <strong>Persetujuan anggaran & audit keuangan.</strong> Memeriksa rincian biaya per personil (Audit Ledger), bisa merevisi komponen biaya, lalu menyetujui atau menolak anggaran. Dapat mengekspor data keuangan ke CSV.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>5</strong></td>
+        <td><span class="badge badge-red">Direksi</span></td>
+        <td>WhatsApp</td>
+        <td>
+          <strong>Pengesahan akhir.</strong> Menerima dokumen final SPPD melalui WhatsApp yang dikirim oleh HRGA. Direksi memberikan konfirmasi penerimaan sebagai persetujuan terakhir.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card card-warning no-break">
+    <div class="card-title">⚠️ Catatan Penting Tentang Role</div>
+    <ul>
+      <li>Setiap user <strong>hanya memiliki 1 role</strong> — tidak bisa multi-role.</li>
+      <li>Role ditentukan oleh kolom <code>role_sistem</code> di tabel <code>users</code>.</li>
+      <li>Hanya <strong>HRGA</strong> yang dapat mengelola data master (tarif, user, karyawan).</li>
+      <li><strong>Direksi</strong> tidak memiliki halaman khusus di sistem — mereka hanya menerima dokumen via WhatsApp.</li>
+      <li><strong>Manager, HRGA, dan Finance</strong> juga bisa membuat pengajuan SPPD (meskipun umumnya hanya Karyawan yang mengajukan).</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║               SECTION 4: ALUR PROSES                        ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="content-wrapper page-break" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Alur Proses — Dari Mulai Hingga Selesai</div>
+  </div>
+
+  <p>Berikut adalah alur lengkap pengajuan perjalanan dinas di SIPADIN, disajikan agar dapat dipahami oleh semua pihak, baik karyawan biasa maupun tim IT.</p>
+
+  <div class="flow-container">
+    <!-- STEP 1 -->
+    <div class="flow-step no-break">
+      <div class="flow-icon" style="background: linear-gradient(135deg, #14b8a6, #0f766e);">1</div>
+      <div class="flow-content">
+        <div class="flow-role" style="color: #0f766e;">👤 Karyawan — Membuat Draft</div>
+        <p class="flow-desc">
+          Karyawan login ke sistem, lalu membuat <strong>Draft Pengajuan SPPD</strong> baru. 
+          Karyawan mengisi: kota tujuan, instansi tujuan, maksud/tujuan perjalanan, tanggal berangkat & kembali, 
+          jam berangkat & kembali, jarak (KM), jenis transportasi, jenis akomodasi, dan bisa menambahkan rekan kerja/rombongan.
+        </p>
+        <span class="flow-status" style="background: #f1f5f9; color: #64748b;">Status: <strong>DRAFT</strong></span>
+        <p class="flow-desc mt-1" style="font-size: 9pt; color: #0f766e;">
+          💡 Sistem otomatis menghitung estimasi biaya (uang makan, uang saku, hotel, transport, tiket) berdasarkan master tarif perusahaan, jabatan karyawan, dan area tujuan.
+        </p>
+      </div>
+    </div>
+
+    <div class="flow-arrow">
+      <svg viewBox="0 0 20 30"><path d="M10 0 L10 22 M4 16 L10 24 L16 16" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="flow-step no-break">
+      <div class="flow-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">2</div>
+      <div class="flow-content">
+        <div class="flow-role" style="color: #1d4ed8;">👤 Karyawan — Mengajukan ke Manager</div>
+        <p class="flow-desc">
+          Setelah draft dirasa lengkap, karyawan menekan tombol <strong>"Ajukan"</strong>. 
+          Sistem secara otomatis menggenerate <strong>Nomor SPPD</strong> dan mengubah status menjadi <em>pending_manager</em>.
+        </p>
+        <span class="flow-status" style="background: #dbeafe; color: #1d4ed8;">Status: <strong>PENDING MANAGER</strong></span>
+        <p class="flow-desc mt-1" style="font-size: 9pt; color: #1d4ed8;">
+          📱 Notifikasi WhatsApp otomatis dikirim ke seluruh Manager dan anggota rombongan (jika ada).
+        </p>
+      </div>
+    </div>
+
+    <div class="flow-arrow">
+      <svg viewBox="0 0 20 30"><path d="M10 0 L10 22 M4 16 L10 24 L16 16" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="flow-step no-break">
+      <div class="flow-icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">3</div>
+      <div class="flow-content">
+        <div class="flow-role" style="color: #4f46e5;">🔍 Manager — Verifikasi Tahap 1</div>
+        <p class="flow-desc">
+          Manager menerima notifikasi dan login ke halaman <code>manager.html</code>. 
+          Manager memeriksa kelayakan pengajuan (apakah perjalanan dinas memang diperlukan), 
+          lalu memilih <strong>Approve</strong> (setuju) atau <strong>Reject</strong> (tolak) disertai catatan.
+        </p>
+        <span class="flow-status" style="background: #ede9fe; color: #6d28d9;">Approve → Status: <strong>PENDING HRGA</strong></span><br>
+        <span class="flow-status" style="background: #fee2e2; color: #dc2626;">Reject → Status: <strong>REJECTED</strong></span>
+        <p class="flow-desc mt-1" style="font-size: 9pt; color: #6366f1;">
+          📱 Notifikasi WA dikirim ke HRGA (jika disetujui) atau kembali ke Pemohon (jika ditolak).
+        </p>
+      </div>
+    </div>
+
+    <div class="flow-arrow">
+      <svg viewBox="0 0 20 30"><path d="M10 0 L10 22 M4 16 L10 24 L16 16" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="flow-step no-break">
+      <div class="flow-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">4</div>
+      <div class="flow-content">
+        <div class="flow-role" style="color: #7c3aed;">🏢 HRGA — Verifikasi Fasilitas (Tahap 2)</div>
+        <p class="flow-desc">
+          Tim HRGA memeriksa ketersediaan fasilitas (armada transportasi, akomodasi) dan bisa 
+          <strong>merevisi komponen biaya</strong> jika diperlukan (misal: mengurangi uang makan, mengganti hotel). 
+          Setelah itu menyetujui atau menolak.
+        </p>
+        <span class="flow-status" style="background: #ede9fe; color: #6d28d9;">Approve → Status: <strong>PENDING FINANCE</strong></span>
+        <p class="flow-desc mt-1" style="font-size: 9pt; color: #8b5cf6;">
+          💰 Sistem merekam <em>Immutable Financial Snapshot</em> — data biaya per personil tercatat secara permanen di database untuk keperluan audit.
+        </p>
+      </div>
+    </div>
+
+    <div class="flow-arrow">
+      <svg viewBox="0 0 20 30"><path d="M10 0 L10 22 M4 16 L10 24 L16 16" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="flow-step no-break">
+      <div class="flow-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">5</div>
+      <div class="flow-content">
+        <div class="flow-role" style="color: #d97706;">💰 Finance — Persetujuan Anggaran (Tahap 3)</div>
+        <p class="flow-desc">
+          Finance memeriksa rincian biaya melalui <strong>Audit Ledger</strong> (breakdown biaya per kepala), 
+          bisa merevisi komponen biaya, lalu menyetujui alokasi anggaran. 
+          Finance juga bisa mengekspor data ke <strong>CSV</strong>.
+        </p>
+        <span class="flow-status" style="background: #dcfce7; color: #15803d;">Approve → Status: <strong>READY TO SEND</strong></span>
+        <p class="flow-desc mt-1" style="font-size: 9pt; color: #d97706;">
+          📱 Notifikasi WA dikirim ke HRGA bahwa dokumen siap diteruskan ke Direksi.
+        </p>
+      </div>
+    </div>
+
+    <div class="flow-arrow">
+      <svg viewBox="0 0 20 30"><path d="M10 0 L10 22 M4 16 L10 24 L16 16" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <!-- STEP 6 -->
+    <div class="flow-step no-break">
+      <div class="flow-icon" style="background: linear-gradient(135deg, #0f766e, #059669);">6</div>
+      <div class="flow-content">
+        <div class="flow-role" style="color: #059669;">🏢 HRGA — Kirim ke WhatsApp Direksi</div>
+        <p class="flow-desc">
+          HRGA menekan tombol <strong>"Kirim ke Direksi"</strong>. Sistem membuat tautan 
+          <code>wa.me</code> berisi ringkasan lengkap SPPD (No. SPPD, pemohon, rombongan, tujuan, tanggal, biaya) 
+          dan membuka WhatsApp untuk dikirim ke nomor Direksi.
+        </p>
+        <span class="flow-status" style="background: #dcfce7; color: #15803d;">Status: <strong>APPROVED ✅</strong></span>
+        <p class="flow-desc mt-1" style="font-size: 9pt; color: #059669;">
+          🎉 Notifikasi WA dikirim ke Pemohon dan seluruh rombongan bahwa SPPD telah resmi disetujui.
+        </p>
+      </div>
+    </div>
+
+    <div class="flow-arrow">
+      <svg viewBox="0 0 20 30"><path d="M10 0 L10 22 M4 16 L10 24 L16 16" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <!-- STEP 7 -->
+    <div class="flow-step no-break">
+      <div class="flow-icon" style="background: linear-gradient(135deg, #10b981, #059669);">✓</div>
+      <div class="flow-content">
+        <div class="flow-role" style="color: #059669;">🎉 SELESAI — Cetak Surat Tugas</div>
+        <p class="flow-desc">
+          Karyawan dan pihak terkait kini bisa <strong>mencetak Surat Tugas resmi</strong> melalui halaman cetak 
+          (<code>cetak_surat_tugas.html</code>). Surat tugas mencantumkan: No. SPPD, data pemohon & rombongan, 
+          tujuan, tanggal, nama Manager HRGA & Direksi sebagai penandatangan.
+        </p>
+        <span class="flow-status" style="background: #dcfce7; color: #15803d;">📄 Surat Tugas Siap Cetak</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>4.1 Diagram Status Dokumen</h3>
+  <p>Berikut alur perubahan status dokumen SPPD dari awal hingga akhir:</p>
+  <div class="status-flow no-break">
+    <div class="status-node" style="background: #f1f5f9; color: #64748b;">Draft</div>
+    <span class="status-arrow">→</span>
+    <div class="status-node" style="background: #dbeafe; color: #1d4ed8;">Pending Manager</div>
+    <span class="status-arrow">→</span>
+    <div class="status-node" style="background: #ede9fe; color: #6d28d9;">Pending HRGA</div>
+    <span class="status-arrow">→</span>
+    <div class="status-node" style="background: #fef3c7; color: #b45309;">Pending Finance</div>
+    <span class="status-arrow">→</span>
+    <div class="status-node" style="background: #ccfbf1; color: #0f766e;">Ready to Send</div>
+    <span class="status-arrow">→</span>
+    <div class="status-node" style="background: #dcfce7; color: #15803d;">✅ Approved</div>
+  </div>
+  <p class="text-center" style="font-size: 9pt; color: var(--text-muted);">
+    ⛔ Di setiap tahap approval (Manager, HRGA, Finance), pengajuan bisa berubah menjadi <span class="badge badge-red">Rejected</span>
+  </p>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║               SECTION 5: SPESIFIKASI TEKNIS                 ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="content-wrapper page-break" id="s5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Spesifikasi Teknis & Arsitektur</div>
+  </div>
+
+  <h3>5.1 Technology Stack</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Komponen</th>
+        <th>Teknologi</th>
+        <th>Versi / Keterangan</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Bahasa Backend</strong></td>
+        <td>Go (Golang)</td>
+        <td>v1.26.2</td>
+      </tr>
+      <tr>
+        <td><strong>Web Framework</strong></td>
+        <td>GoFiber</td>
+        <td>v2.52.15 — framework HTTP berkinerja tinggi</td>
+      </tr>
+      <tr>
+        <td><strong>ORM Database</strong></td>
+        <td>GORM</td>
+        <td>v1.31.2 — dengan auto-migration</td>
+      </tr>
+      <tr>
+        <td><strong>Database</strong></td>
+        <td>MySQL</td>
+        <td>Menggunakan driver <code>go-sql-driver/mysql</code></td>
+      </tr>
+      <tr>
+        <td><strong>Autentikasi</strong></td>
+        <td>JWT (JSON Web Token)</td>
+        <td>golang-jwt/v5 + gofiber/contrib/jwt</td>
+      </tr>
+      <tr>
+        <td><strong>Frontend</strong></td>
+        <td>HTML + Tailwind CSS + JavaScript</td>
+        <td>Single Page Application tanpa framework JS</td>
+      </tr>
+      <tr>
+        <td><strong>UI Framework</strong></td>
+        <td>Tailwind CSS (CDN)</td>
+        <td>Dengan dark mode support</td>
+      </tr>
+      <tr>
+        <td><strong>Icon Library</strong></td>
+        <td>Phosphor Icons</td>
+        <td>v2.1.1</td>
+      </tr>
+      <tr>
+        <td><strong>Font</strong></td>
+        <td>Plus Jakarta Sans</td>
+        <td>Google Fonts</td>
+      </tr>
+      <tr>
+        <td><strong>Notifikasi</strong></td>
+        <td>WhatsApp (Fonnte API / Click-to-Chat)</td>
+        <td>Mendukung Fonnte + Generic Webhook</td>
+      </tr>
+      <tr>
+        <td><strong>Environment</strong></td>
+        <td>dotenv</td>
+        <td>godotenv v1.5.1 — konfigurasi via <code>.env</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 Arsitektur Aplikasi</h3>
+  <p>SIPADIN menggunakan arsitektur <strong>Layered Architecture</strong> yang bersih dan modular:</p>
+
+  <div class="code-block">
+┌────────────────────────────────────────────────────────────────┐
+│                    🌐 BROWSER (Frontend)                       │
+│        index.html │ dashboard.html │ manager.html │ ...        │
+│              js/api.js │ js/sidebar.js │ js/theme.js           │
+└────────────────────────────┬───────────────────────────────────┘
+                             │  HTTP REST API (JSON)
+                             ▼
+┌────────────────────────────────────────────────────────────────┐
+│              🔐 MIDDLEWARE LAYER                                │
+│         jwt_middleware.go  │  rbac_middleware.go                │
+│    (Validasi Token JWT)     (Kontrol Akses Role-Based)         │
+└────────────────────────────┬───────────────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────────────┐
+│              🎮 CONTROLLER LAYER (6 Controller)                │
+│  auth │ sppd │ approval │ tarif │ user │ karyawan              │
+│         (Parsing Request ↔ Response HTTP)                      │
+└────────────────────────────┬───────────────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────────────┐
+│              ⚙️ SERVICE LAYER (7 Service)                      │
+│  auth │ sppd │ approval │ tarif │ user │ karyawan │ notif      │
+│       (Business Logic, Kalkulasi Biaya, Workflow)              │
+└────────────────────────────┬───────────────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────────────┐
+│              💾 REPOSITORY LAYER (6 Repository)                │
+│  user │ sppd │ approval │ anggota │ tarif │ karyawan           │
+│          (Query Database via GORM)                             │
+└────────────────────────────┬───────────────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────────────┐
+│              🗄️ DATABASE (SQL Server)                          │
+│  users │ sppd_pengajuan │ sppd_approval_log │ sppd_anggota     │
+│  sppd_detail_biaya │ jabatan │ adi_persons.dbo.karyawan       │
+│  perjalanandinas_tarif │ perjalanandinas_fasilitas              │
+└────────────────────────────────────────────────────────────────┘
+  </div>
+
+  <h3>5.3 Struktur Folder Proyek</h3>
+  <div class="code-block">
+sipadin/
+├── main.go                    # Entry point aplikasi
+├── go.mod / go.sum            # Dependency management
+├── .env                       # Konfigurasi environment
+│
+├── config/                    # Konfigurasi aplikasi
+│   ├── database.go            #   Koneksi SQL Server + GORM
+│   └── env.go                 #   Loader environment variables
+│
+├── database/
+│   └── migrate.go             # Auto-migration skema DB
+│
+├── models/                    # Definisi struct / tabel database
+│   ├── user.go                #   Tabel users
+│   ├── karyawan.go            #   Tabel karyawan (adi_persons)
+│   ├── jabatan.go             #   Tabel jabatan (master)
+│   ├── master_tarif_fasilitas.go #   Tabel tarif & fasilitas
+│   ├── sppd_pengajuan.go      #   Tabel sppd_pengajuan
+│   ├── sppd_approval_log.go   #   Tabel log approval
+│   ├── sppd_anggota.go        #   Tabel anggota rombongan
+│   └── sppd_detail_biaya.go   #   Tabel audit ledger keuangan
+│
+├── dto/                       # Data Transfer Objects
+│   ├── sppd_dto.go            #   DTO pengajuan & kalkulasi
+│   ├── approval_dto.go        #   DTO approval & WA response
+│   ├── auth_dto.go            #   DTO login
+│   ├── karyawan_dto.go        #   DTO karyawan
+│   ├── tarif_dto.go           #   DTO tarif
+│   ├── user_dto.go            #   DTO user management
+│   └── response.go            #   Wrapper response standar
+│
+├── repository/                # Layer akses database
+├── service/                   # Business logic
+├── controller/                # HTTP handler
+├── middleware/                # JWT & RBAC middleware
+├── routes/                    # Routing API
+│
+└── public/                    # Frontend (Static Files)
+    ├── index.html             #   Halaman login
+    ├── dashboard.html         #   Dashboard Karyawan
+    ├── manager.html           #   Dashboard Manager
+    ├── hrga.html              #   Dashboard HRGA
+    ├── finance.html           #   Dashboard Finance
+    ├── tarif.html             #   Kelola Master Tarif
+    ├── users.html             #   Kelola User
+    ├── karyawan.html          #   Kelola Karyawan
+    ├── laporan.html           #   Halaman Laporan
+    ├── cetak_surat_tugas.html #   Halaman Cetak Surat Tugas
+    └── js/                    #   JavaScript modules
+        ├── api.js             #   HTTP client + auth helper
+        ├── sidebar.js         #   Sidebar navigation
+        └── theme.js           #   Dark/Light theme toggle
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║               SECTION 6: DATABASE                           ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="content-wrapper page-break" id="s6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">Struktur Database</div>
+  </div>
+
+  <p>Sistem menggunakan <strong>8 tabel database</strong>. 5 tabel dikelola oleh sistem (auto-migrate) dan 3 tabel master sudah ada sebelumnya (milik perusahaan).</p>
+
+  <h3>6.1 Tabel Transaksi (Auto-Migrate oleh Sistem)</h3>
+
+  <h4>📄 <code>users</code> — Data Akun & Profil Karyawan</h4>
+  <table>
+    <thead><tr><th>Kolom</th><th>Tipe</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td><strong>id_user</strong> 🔑</td><td>INT (PK, AI)</td><td>Primary key</td></tr>
+      <tr><td>nomor_id</td><td>VARCHAR(50)</td><td>Nomor Induk Karyawan</td></tr>
+      <tr><td>nik_pendek</td><td>VARCHAR(50)</td><td>NIK pendek</td></tr>
+      <tr><td>nama_lengkap</td><td>VARCHAR(128)</td><td>Nama lengkap karyawan</td></tr>
+      <tr><td>kode_departemen</td><td>VARCHAR(16)</td><td>Kode departemen (HRGA, PROD, dsb.)</td></tr>
+      <tr><td>kode_jabatan</td><td>VARCHAR(16)</td><td>Kode jabatan → relasi ke tabel <code>jabatan</code></td></tr>
+      <tr><td>role_sistem</td><td>VARCHAR(20)</td><td>Karyawan | Manager | HRGA | Finance | Direksi</td></tr>
+      <tr><td>no_whatsapp</td><td>VARCHAR(20)</td><td>Nomor WA untuk notifikasi</td></tr>
+      <tr><td>password_hash</td><td>VARCHAR(255)</td><td>Hash password (bcrypt)</td></tr>
+      <tr><td>status_aktif</td><td>TINYINT(1)</td><td>1 = Aktif, 0 = Nonaktif</td></tr>
+    </tbody>
+  </table>
+
+  <h4>📄 <code>sppd_pengajuan</code> — Dokumen SPPD Utama</h4>
+  <table>
+    <thead><tr><th>Kolom</th><th>Tipe</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td><strong>id_sppd</strong> 🔑</td><td>INT (PK, AI)</td><td>Primary key</td></tr>
+      <tr><td>no_sppd</td><td>VARCHAR(50)</td><td>Nomor SPPD (auto-generate)</td></tr>
+      <tr><td>id_pemohon</td><td>INT (FK)</td><td>Relasi ke <code>users.id_user</code></td></tr>
+      <tr><td>kota_tujuan</td><td>VARCHAR(100)</td><td>Kota tujuan perjalanan</td></tr>
+      <tr><td>instansi_tujuan</td><td>VARCHAR(150)</td><td>Instansi/perusahaan yang dituju</td></tr>
+      <tr><td>maksud_tujuan</td><td>TEXT</td><td>Tujuan/maksud perjalanan dinas</td></tr>
+      <tr><td>tgl_berangkat / tgl_kembali</td><td>DATE</td><td>Tanggal berangkat & kembali</td></tr>
+      <tr><td>jam_berangkat / jam_kembali</td><td>VARCHAR(10)</td><td>Jam berangkat & kembali</td></tr>
+      <tr><td>durasi_hari / durasi_jam</td><td>INT / DECIMAL</td><td>Durasi perjalanan</td></tr>
+      <tr><td>jarak_km</td><td>DECIMAL(10,2)</td><td>Estimasi jarak (KM)</td></tr>
+      <tr><td>transportasi / akomodasi</td><td>VARCHAR(50)</td><td>Jenis transportasi & akomodasi</td></tr>
+      <tr><td>biaya_*</td><td>DECIMAL(20,4)</td><td>5 komponen: makan, transport, uang_saku, tiket, hotel</td></tr>
+      <tr><td>plafon_*</td><td>DECIMAL(20,4)</td><td>5 plafon: batas maks per komponen</td></tr>
+      <tr><td>status_plafon</td><td>VARCHAR(50)</td><td>SESUAI | MELEBIHI_PLAFON</td></tr>
+      <tr><td>estimasi_biaya</td><td>DECIMAL(20,4)</td><td>Total estimasi biaya</td></tr>
+      <tr><td>rincian_biaya</td><td>TEXT</td><td>Catatan rincian biaya (teks)</td></tr>
+      <tr><td>lampiran_file</td><td>VARCHAR(255)</td><td>Path file lampiran (opsional)</td></tr>
+      <tr><td>status_dokumen</td><td>VARCHAR(50)</td><td>draft → pending_manager → pending_hrga → pending_finance → ready_to_send → approved / rejected</td></tr>
+      <tr><td>created_at</td><td>TIMESTAMP</td><td>Waktu dibuat</td></tr>
+    </tbody>
+  </table>
+
+  <h4>📄 <code>sppd_approval_log</code> — Riwayat Persetujuan</h4>
+  <table>
+    <thead><tr><th>Kolom</th><th>Tipe</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td><strong>id_log</strong> 🔑</td><td>INT (PK, AI)</td><td>Primary key</td></tr>
+      <tr><td>id_sppd</td><td>INT (FK)</td><td>Relasi ke <code>sppd_pengajuan</code></td></tr>
+      <tr><td>tahap_approval</td><td>VARCHAR(50)</td><td>Manager | HRGA | Finance | Direksi</td></tr>
+      <tr><td>id_approver</td><td>INT (FK)</td><td>Relasi ke <code>users.id_user</code></td></tr>
+      <tr><td>status_tindakan</td><td>VARCHAR(20)</td><td>Approved | Verified | Rejected | Sent | Biaya Diubah</td></tr>
+      <tr><td>catatan</td><td>TEXT</td><td>Catatan dari approver</td></tr>
+      <tr><td>tgl_tindakan</td><td>TIMESTAMP</td><td>Waktu tindakan</td></tr>
+    </tbody>
+  </table>
+
+  <h4>📄 <code>sppd_anggota</code> — Anggota Rombongan</h4>
+  <table>
+    <thead><tr><th>Kolom</th><th>Tipe</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td><strong>id_anggota</strong> 🔑</td><td>INT (PK, AI)</td><td>Primary key</td></tr>
+      <tr><td>id_sppd</td><td>INT (FK)</td><td>Relasi ke <code>sppd_pengajuan</code></td></tr>
+      <tr><td>id_user</td><td>INT (FK)</td><td>Relasi ke <code>users.id_user</code></td></tr>
+      <tr><td>kriteria_fasilitas</td><td>VARCHAR(50)</td><td>Kategori fasilitas anggota</td></tr>
+      <tr><td>uang_makan / uang_saku</td><td>DECIMAL(20,4)</td><td>Alokasi biaya per anggota</td></tr>
+    </tbody>
+  </table>
+
+  <h4>📄 <code>sppd_detail_biaya</code> — Audit Financial Ledger (Immutable Snapshot)</h4>
+  <table>
+    <thead><tr><th>Kolom</th><th>Tipe</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td><strong>id_detail</strong> 🔑</td><td>BIGINT (PK, AI)</td><td>Primary key</td></tr>
+      <tr><td>id_pengajuan</td><td>INT (FK)</td><td>Relasi ke <code>sppd_pengajuan</code></td></tr>
+      <tr><td>id_karyawan</td><td>VARCHAR(50)</td><td>Nomor ID karyawan</td></tr>
+      <tr><td>role_personil</td><td>VARCHAR(20)</td><td>Pemohon | Rekan Kerja</td></tr>
+      <tr><td>snapshot_nama</td><td>VARCHAR(128)</td><td>Nama pada saat snapshot</td></tr>
+      <tr><td>snapshot_jabatan</td><td>VARCHAR(100)</td><td>Jabatan pada saat snapshot</td></tr>
+      <tr><td>snapshot_grup_dinas</td><td>VARCHAR(50)</td><td>Grup dinas luar pada saat snapshot</td></tr>
+      <tr><td>snapshot_tujuan / snapshot_deskripsi</td><td>VARCHAR / TEXT</td><td>Data tujuan & deskripsi pada saat snapshot</td></tr>
+      <tr><td>uang_makan / uang_saku / uang_hotel</td><td>DECIMAL(15,2)</td><td>Nominal per komponen</td></tr>
+      <tr><td>subtotal_hak_individu</td><td>DECIMAL(15,2)</td><td>Total hak per orang</td></tr>
+      <tr><td>catatan_koreksi</td><td>TEXT</td><td>Catatan koreksi dari HRGA/Finance</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.2 Tabel Master (Sudah Ada — Milik Perusahaan)</h3>
+  <div class="card card-info no-break">
+    <div class="card-title">ℹ️ Tabel Master yang Direferensikan</div>
+    <ul>
+      <li><code><strong>adi_persons.dbo.karyawan</strong></code> — Data karyawan dari SQL Server (NomorID, Nama, KodeDepartemen, KodeJabatan, dll.)</li>
+      <li><code><strong>jabatan</strong></code> — Master jabatan (Kode, Nama, GroupDinasLuar) → menentukan kategori tarif dinas</li>
+      <li><code><strong>perjalanandinas_tarif</strong></code> — Master tarif dinas per Area × Jabatan (UangMakan, UangSaku, Hotel, Transport, Tiket)</li>
+      <li><code><strong>perjalanandinas_fasilitas</strong></code> — Ketentuan hak fasilitas (HakTransport, HakUangMakan, HakUangSaku, HakTiket, HakHotel)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║               SECTION 7: API ENDPOINTS                      ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="content-wrapper page-break" id="s7">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <div class="section-title">Daftar API Endpoint</div>
+  </div>
+
+  <p>Semua endpoint API berada di prefix <code>/api</code>. Route yang memerlukan autentikasi dilindungi oleh <strong>JWT Middleware</strong> dan <strong>RBAC Middleware</strong>.</p>
+
+  <h3>7.1 Autentikasi (Publik)</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td><span class="api-method method-post">POST</span></td><td><code>/api/auth/login</code></td><td>Login → mendapatkan JWT token</td></tr>
+      <tr><td><span class="api-method method-get">GET</span></td><td><code>/api/auth/users</code></td><td>Daftar user untuk form login</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.2 SPPD (JWT Required)</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Role</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td><span class="api-method method-get">GET</span></td><td><code>/api/sppd/mine</code></td><td>Semua</td><td>Daftar SPPD milik user login</td></tr>
+      <tr><td><span class="api-method method-get">GET</span></td><td><code>/api/sppd/queue</code></td><td>Semua</td><td>Antrian approval sesuai role</td></tr>
+      <tr><td><span class="api-method method-get">GET</span></td><td><code>/api/sppd/:id</code></td><td>Semua</td><td>Detail SPPD lengkap</td></tr>
+      <tr><td><span class="api-method method-get">GET</span></td><td><code>/api/sppd/</code></td><td>Semua</td><td>Seluruh SPPD (dengan filter)</td></tr>
+      <tr><td><span class="api-method method-post">POST</span></td><td><code>/api/sppd/</code></td><td>K, M, H, F</td><td>Buat SPPD baru (draft)</td></tr>
+      <tr><td><span class="api-method method-post">POST</span></td><td><code>/api/sppd/:id/submit</code></td><td>K, M, H, F</td><td>Ajukan draft → pending_manager</td></tr>
+      <tr><td><span class="api-method method-put">PUT</span></td><td><code>/api/sppd/:id</code></td><td>K, M, H, F</td><td>Edit draft SPPD</td></tr>
+      <tr><td><span class="api-method method-delete">DEL</span></td><td><code>/api/sppd/:id</code></td><td>K, M, H, F</td><td>Hapus draft SPPD</td></tr>
+      <tr><td><span class="api-method method-post">POST</span></td><td><code>/api/sppd/hitung-biaya</code></td><td>Semua</td><td>Kalkulasi estimasi biaya</td></tr>
+      <tr><td><span class="api-method method-post">POST</span></td><td><code>/api/sppd/upload-lampiran</code></td><td>Semua</td><td>Upload file lampiran</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.3 Approval (JWT + Role Required)</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Role</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td><span class="api-method method-post">POST</span></td><td><code>/api/approval/:id/manager</code></td><td>Manager</td><td>Approve/Reject oleh Manager</td></tr>
+      <tr><td><span class="api-method method-post">POST</span></td><td><code>/api/approval/:id/hrga</code></td><td>HRGA</td><td>Approve/Reject oleh HRGA (+revisi biaya)</td></tr>
+      <tr><td><span class="api-method method-post">POST</span></td><td><code>/api/approval/:id/finance</code></td><td>Finance</td><td>Approve/Reject oleh Finance (+revisi biaya)</td></tr>
+      <tr><td><span class="api-method method-post">POST</span></td><td><code>/api/approval/:id/send</code></td><td>HRGA</td><td>Kirim dokumen ke WhatsApp Direksi</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.4 Finance & Audit Ledger</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td><span class="api-method method-get">GET</span></td><td><code>/api/finance/sppd-ledger/:id</code></td><td>Audit ledger biaya per personil</td></tr>
+      <tr><td><span class="api-method method-get">GET</span></td><td><code>/api/finance/export-csv</code></td><td>Ekspor data keuangan ke CSV</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.5 Master Data (Tarif, User, Karyawan)</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Role</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td><span class="api-method method-get">GET</span></td><td><code>/api/tarif/</code></td><td>Semua</td><td>Daftar master tarif dinas</td></tr>
+      <tr><td><span class="api-method method-post">POST</span></td><td><code>/api/tarif/</code></td><td>HRGA</td><td>Tambah tarif baru</td></tr>
+      <tr><td><span class="api-method method-put">PUT</span></td><td><code>/api/tarif/:id</code></td><td>HRGA</td><td>Update tarif</td></tr>
+      <tr><td><span class="api-method method-delete">DEL</span></td><td><code>/api/tarif/:id</code></td><td>HRGA</td><td>Hapus tarif</td></tr>
+      <tr><td><span class="api-method method-get">GET</span></td><td><code>/api/users/</code></td><td>Semua</td><td>Daftar semua user</td></tr>
+      <tr><td><span class="api-method method-post">POST</span></td><td><code>/api/users/</code></td><td>HRGA</td><td>Tambah user baru</td></tr>
+      <tr><td><span class="api-method method-get">GET</span></td><td><code>/api/karyawan/</code></td><td>M, H, F, D</td><td>Daftar karyawan (dari HRIS)</td></tr>
+    </tbody>
+  </table>
+
+  <p style="font-size: 9pt; color: var(--text-muted);">
+    <strong>Keterangan Role:</strong> K = Karyawan, M = Manager, H = HRGA, F = Finance, D = Direksi
+  </p>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║               SECTION 8: FITUR UNGGULAN                     ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="content-wrapper page-break" id="s8">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <div class="section-title">Fitur Unggulan Sistem</div>
+  </div>
+
+  <div class="card card-accent no-break">
+    <div class="card-title">🧮 1. Kalkulasi Biaya Otomatis</div>
+    <p>
+      Sistem menghitung biaya perjalanan dinas secara <strong>otomatis dan objektif</strong> berdasarkan:
+    </p>
+    <ul>
+      <li><strong>Area tujuan</strong> — Jawa, Jakarta/Luar Jawa, Asia, Jepang, Amerika/Singapura, Eropa</li>
+      <li><strong>Jabatan karyawan</strong> — Operator-Karu, Assup-Supervisor, Assman-Manager, GM-Wadir, Direktur-Dirut</li>
+      <li><strong>Durasi perjalanan</strong> — Hitungan hari dan jam (mempengaruhi hak uang makan & uang saku)</li>
+      <li><strong>Jumlah personil</strong> — Pemohon + seluruh rekan kerja/rombongan dihitung per kepala</li>
+    </ul>
+    <p>Biaya yang dihitung meliputi: <strong>Uang Makan</strong>, <strong>Uang Saku</strong>, <strong>Hotel</strong>, <strong>Transport</strong>, dan <strong>Tiket</strong> — semua mengacu pada tabel <code>perjalanandinas_tarif</code> milik perusahaan.</p>
+  </div>
+
+  <div class="card card-accent no-break">
+    <div class="card-title">📱 2. Notifikasi WhatsApp Berjenjang</div>
+    <p>
+      Setiap perubahan status SPPD secara otomatis mengirimkan <strong>notifikasi WhatsApp yang terstruktur</strong> ke:
+    </p>
+    <ul>
+      <li><strong>Pemohon</strong> — diberitahu setiap kali ada perubahan status pengajuannya.</li>
+      <li><strong>Approver tahap berikutnya</strong> — Manager, HRGA, atau Finance mendapat notifikasi bahwa ada antrian persetujuan baru.</li>
+      <li><strong>Seluruh anggota rombongan</strong> — rekan kerja yang ikut dinas mendapat tembusan status.</li>
+    </ul>
+    <p>Integrasi mendukung: <strong>Fonnte API</strong> (otomatis) dan <strong>Click-to-Chat wa.me</strong> (manual).</p>
+  </div>
+
+  <div class="card card-accent no-break">
+    <div class="card-title">📊 3. Audit Financial Ledger (Immutable Snapshot)</div>
+    <p>
+      Saat HRGA atau Finance menyetujui SPPD, sistem merekam <strong>snapshot data keuangan per personil</strong> 
+      ke tabel <code>sppd_detail_biaya</code> secara permanen. Snapshot mencakup:
+    </p>
+    <ul>
+      <li>Nama, jabatan, dan grup dinas <strong>pada saat approval</strong> (tidak terpengaruh perubahan master data di masa depan)</li>
+      <li>Nominal uang makan, uang saku, hotel, dan subtotal hak individu</li>
+      <li>Catatan koreksi (jika ada revisi biaya oleh HRGA/Finance)</li>
+    </ul>
+  </div>
+
+  <div class="role-grid">
+    <div class="card card-accent no-break">
+      <div class="card-title">🖨️ 4. Cetak Surat Tugas</div>
+      <p class="mb-0">Surat tugas resmi bisa dicetak dengan format standar perusahaan, lengkap dengan nama penandatangan (Manager HRGA & Direksi) dari database.</p>
+    </div>
+    <div class="card card-accent no-break">
+      <div class="card-title">🌙 5. Dark Mode</div>
+      <p class="mb-0">Seluruh halaman mendukung dark mode dengan deteksi preferensi sistem + toggle manual. Tema disimpan di localStorage.</p>
+    </div>
+    <div class="card card-accent no-break">
+      <div class="card-title">📎 6. Upload Lampiran</div>
+      <p class="mb-0">Karyawan bisa mengunggah dokumen pendukung (undangan, surat, dsb.) sebagai lampiran pengajuan.</p>
+    </div>
+    <div class="card card-accent no-break">
+      <div class="card-title">📥 7. Ekspor CSV</div>
+      <p class="mb-0">Finance dapat mengekspor data keuangan SPPD ke file CSV untuk keperluan pelaporan dan rekonsiliasi.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║               SECTION 9: BATASAN PROYEK                     ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="content-wrapper page-break" id="s9">
+  <div class="section-header">
+    <div class="section-number">9</div>
+    <div class="section-title">Batasan Proyek & Catatan Penting</div>
+  </div>
+
+  <p>Berikut adalah batasan dan ketentuan penting yang harus diperhatikan oleh semua pengguna dan pengembang sistem:</p>
+
+  <div class="card card-danger no-break">
+    <div class="card-title">🚫 Batasan Fungsional</div>
+    <table>
+      <thead><tr><th style="width: 5%;">No</th><th style="width: 30%;">Batasan</th><th>Penjelasan</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>Alur satu arah</strong></td>
+          <td>Pengajuan yang sudah diajukan <strong>tidak bisa ditarik kembali</strong> ke draft. Jika ditolak, karyawan harus membuat pengajuan baru.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>Hanya draft yang bisa diedit/dihapus</strong></td>
+          <td>Setelah status berubah dari <code>draft</code>, karyawan tidak bisa mengubah atau menghapus pengajuan.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>Single role per user</strong></td>
+          <td>Setiap akun hanya memiliki 1 role. Tidak ada mekanisme multi-role atau role switching.</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><strong>Direksi tanpa halaman web</strong></td>
+          <td>Pengesahan akhir oleh Direksi dilakukan melalui WhatsApp, bukan melalui halaman web khusus.</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><strong>Approval berurutan (sequential)</strong></td>
+          <td>Alur approval harus berurutan: Manager → HRGA → Finance → Direksi. Tidak bisa melompati tahap.</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td><strong>Belum ada notifikasi email</strong></td>
+          <td>Notifikasi hanya melalui WhatsApp. Belum ada integrasi email.</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td><strong>Belum ada laporan realisasi biaya</strong></td>
+          <td>Sistem hanya mengelola pengajuan dan estimasi biaya. Belum ada fitur laporan realisasi (actual) pasca-perjalanan.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card card-warning no-break">
+    <div class="card-title">⚠️ Batasan Teknis & Penggunaan</div>
+    <table>
+      <thead><tr><th style="width: 5%;">No</th><th style="width: 30%;">Batasan</th><th>Penjelasan</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>Input kota tujuan harus spesifik</strong></td>
+          <td>Sistem menentukan area tarif (Jawa, Luar Jawa, Asia, dsb.) berdasarkan nama kota. Tulis nama kota yang jelas dan lengkap (contoh: "Surabaya", "Jakarta", "Singapore") — <strong>bukan</strong> singkatan atau kode.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>Format tanggal wajib YYYY-MM-DD</strong></td>
+          <td>Tanggal berangkat dan kembali harus dalam format <code>2026-09-25</code>. Kesalahan format akan ditolak sistem.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>Rekan kerja harus terdaftar</strong></td>
+          <td>Rekan kerja/rombongan yang ditambahkan harus sudah terdaftar di tabel <code>users</code> atau <code>adi_persons.dbo.karyawan</code>. Jika belum ada, sistem akan berusaha menyinkronkan dari tabel karyawan.</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><strong>JWT token kadaluarsa 24 jam</strong></td>
+          <td>Sesi login berlaku 24 jam (default). Setelah itu harus login ulang.</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><strong>Tabel master milik perusahaan</strong></td>
+          <td>Tabel <code>adi_persons.dbo.karyawan</code>, <code>jabatan</code>, dan <code>perjalanandinas_tarif</code> adalah milik sistem perusahaan yang sudah ada di SQL Server. SIPADIN hanya <strong>membaca</strong> data dari tabel-tabel ini (kecuali tarif yang bisa diedit HRGA melalui UI).</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td><strong>CORS terbuka (*)</strong></td>
+          <td>Saat ini CORS diset <code>AllowOrigins: "*"</code> untuk kemudahan development. <strong>Harus dikonfigurasi ulang</strong> di production.</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td><strong>WA Gateway memerlukan konfigurasi</strong></td>
+          <td>Notifikasi WA otomatis memerlukan token Fonnte (<code>WA_TOKEN</code>) di file <code>.env</code>. Tanpa token, notifikasi hanya tercatat di log server.</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td><strong>Belum ada rate limiting</strong></td>
+          <td>Belum ada mekanisme pembatasan jumlah request per menit. Perlu ditambahkan di production.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card card-info no-break">
+    <div class="card-title">💡 Tips Penggunaan untuk Karyawan</div>
+    <ul>
+      <li>Isi <strong>Maksud/Tujuan Perjalanan</strong> dengan detail dan jelas (misal: "Meeting dengan supplier X terkait pengadaan bahan baku Y") — bukan hanya "dinas" atau "meeting".</li>
+      <li>Pastikan <strong>jarak KM</strong> diisi mendekati aktual agar kalkulasi biaya transport akurat.</li>
+      <li>Pilih <strong>jenis transportasi</strong> dan <strong>akomodasi</strong> yang sesuai rencana sebenarnya.</li>
+      <li>Jika perjalanan rombongan, tambahkan semua <strong>rekan kerja</strong> agar mereka juga mendapat notifikasi dan tercatat di surat tugas.</li>
+      <li>Unggah <strong>lampiran</strong> (surat undangan, email, dsb.) sebagai bukti pendukung agar approval lebih cepat.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║          SECTION 10: PANDUAN PENGEMBANGAN LANJUTAN           ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="content-wrapper page-break" id="s10">
+  <div class="section-header">
+    <div class="section-number">10</div>
+    <div class="section-title">Panduan Pengembangan Lanjutan</div>
+  </div>
+
+  <p>Bagian ini ditujukan untuk <strong>Staf IT PT Adiprima Suraprinta</strong> yang akan melanjutkan dan mengintegrasikan SIPADIN ke sistem yang sudah ada.</p>
+
+  <h3>10.1 Cara Menjalankan Sistem</h3>
+  <div class="code-block">
+# 1. Pastikan MySQL berjalan dan database "sipadin" sudah ada
+# 2. Salin dan sesuaikan file .env:
+#    DB_HOST=localhost
+#    DB_PORT=3306
+#    DB_USER=root
+#    DB_PASSWORD=xxx
+#    DB_NAME=sipadin
+#    JWT_SECRET=rahasia-anda
+#    APP_PORT=3000
+#    WA_TOKEN=token-fonnte-anda (opsional)
+
+# 3. Jalankan aplikasi:
+go run main.go
+
+# Atau gunakan binary yang sudah dikompilasi:
+./sipadin.exe
+
+# 4. Akses di browser: http://localhost:3000
+  </div>
+
+  <h3>10.2 Konfigurasi Environment (.env)</h3>
+  <table>
+    <thead><tr><th>Variabel</th><th>Default</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td><code>DB_HOST</code></td><td>localhost</td><td>Host database MySQL</td></tr>
+      <tr><td><code>DB_PORT</code></td><td>3306</td><td>Port MySQL</td></tr>
+      <tr><td><code>DB_USER</code></td><td>root</td><td>Username database</td></tr>
+      <tr><td><code>DB_PASSWORD</code></td><td>(kosong)</td><td>Password database</td></tr>
+      <tr><td><code>DB_NAME</code></td><td>sipadin</td><td>Nama database</td></tr>
+      <tr><td><code>JWT_SECRET</code></td><td>secret-fallback</td><td>Secret key untuk JWT — <strong>wajib diganti</strong></td></tr>
+      <tr><td><code>JWT_EXPIRE_HOURS</code></td><td>24</td><td>Masa berlaku token (jam)</td></tr>
+      <tr><td><code>APP_PORT</code></td><td>3000</td><td>Port server HTTP</td></tr>
+      <tr><td><code>WA_GATEWAY_URL</code></td><td>(kosong)</td><td>URL gateway WA (Fonnte / custom)</td></tr>
+      <tr><td><code>WA_TOKEN</code></td><td>(kosong)</td><td>Token Fonnte API untuk kirim WA otomatis</td></tr>
+      <tr><td><code>WA_API_KEY</code></td><td>(kosong)</td><td>API Key untuk generic webhook</td></tr>
+    </tbody>
+  </table>
+
+  <h3>10.3 Rekomendasi Pengembangan ke Depan</h3>
+  <div class="card card-success no-break">
+    <div class="card-title">🚀 Fitur yang Disarankan untuk Ditambahkan</div>
+    <table>
+      <thead><tr><th>Prioritas</th><th>Fitur</th><th>Keterangan</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge badge-red">Tinggi</span></td><td><strong>Halaman Direksi</strong></td><td>Tambahkan halaman web untuk Direksi agar approval bisa dilakukan langsung di sistem, tidak hanya via WhatsApp.</td></tr>
+        <tr><td><span class="badge badge-red">Tinggi</span></td><td><strong>Laporan Realisasi</strong></td><td>Fitur pelaporan biaya aktual pasca-perjalanan dan perbandingan dengan estimasi.</td></tr>
+        <tr><td><span class="badge badge-red">Tinggi</span></td><td><strong>Konfigurasi CORS Production</strong></td><td>Batasi <code>AllowOrigins</code> hanya ke domain produksi perusahaan.</td></tr>
+        <tr><td><span class="badge badge-amber">Sedang</span></td><td><strong>Rate Limiting</strong></td><td>Tambahkan pembatasan request per IP/user untuk mencegah abuse.</td></tr>
+        <tr><td><span class="badge badge-amber">Sedang</span></td><td><strong>Notifikasi Email</strong></td><td>Kirim email paralel dengan WA sebagai fallback notifikasi.</td></tr>
+        <tr><td><span class="badge badge-amber">Sedang</span></td><td><strong>Mekanisme Revisi</strong></td><td>Izinkan karyawan merevisi pengajuan yang ditolak tanpa membuat ulang dari awal.</td></tr>
+        <tr><td><span class="badge badge-green">Rendah</span></td><td><strong>Dashboard Analitik</strong></td><td>Grafik & statistik: jumlah dinas per departemen, tren biaya, rata-rata waktu approval.</td></tr>
+        <tr><td><span class="badge badge-green">Rendah</span></td><td><strong>Integrasi SSO/LDAP</strong></td><td>Login terintegrasi dengan sistem autentikasi perusahaan yang sudah ada.</td></tr>
+        <tr><td><span class="badge badge-green">Rendah</span></td><td><strong>Multi-Currency</strong></td><td>Penanganan mata uang asing yang lebih komprehensif (kurs real-time).</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>10.4 Catatan Integrasi ke Sistem Existing</h3>
+  <div class="card card-warning no-break">
+    <div class="card-title">⚠️ Hal-hal yang Perlu Diperhatikan</div>
+    <ol>
+      <li><strong>Tabel Karyawan</strong> — SIPADIN terhubung langsung ke SQL Server <code>adi_persons.dbo.karyawan</code> untuk verifikasi login dan personil dinas.</li>
+      <li><strong>Password hash</strong> — SIPADIN menggunakan bcrypt. Pastikan kompatibel dengan mekanisme autentikasi perusahaan.</li>
+      <li><strong>Tabel <code>jabatan</code> dan <code>perjalanandinas_tarif</code></strong> — Ini adalah tabel master perusahaan. Perubahan struktur di tabel ini akan mempengaruhi kalkulasi biaya SIPADIN.</li>
+      <li><strong>Auto-migration</strong> — GORM AutoMigrate hanya menambah kolom baru, <strong>tidak menghapus</strong> kolom lama. Migrasi destruktif harus dilakukan manual.</li>
+      <li><strong>Connection pool</strong> — Default: max idle = 10, max open = 100. Sesuaikan berdasarkan beban produksi.</li>
+      <li><strong>Deployment</strong> — Binary <code>sipadin.exe</code> sudah tersedia. Untuk deployment di Linux, compile ulang dengan <code>GOOS=linux go build -o sipadin</code>.</li>
+    </ol>
+  </div>
+
+  <h3>10.5 Dependency Graph</h3>
+  <div class="code-block">
+main.go
+  ├── config.LoadConfig()        → Baca .env
+  ├── config.InitDatabase()      → Koneksi MySQL
+  ├── database.Migrate()         → Auto-create tabel
+  │
+  ├── Repository Layer           → Akses DB langsung
+  │   ├── UserRepository
+  │   ├── SppdRepository
+  │   ├── ApprovalRepository
+  │   ├── AnggotaRepository
+  │   ├── TarifRepository
+  │   └── KaryawanRepository
+  │
+  ├── Service Layer              → Business Logic
+  │   ├── NotificationService    → Kirim WA
+  │   ├── AuthService            → Login + JWT
+  │   ├── SppdService            → CRUD + Kalkulasi Biaya
+  │   ├── ApprovalService        → Workflow 4 Tahap + Ledger
+  │   ├── TarifService           → CRUD Tarif
+  │   ├── UserService            → CRUD User
+  │   └── KaryawanService        → CRUD Karyawan
+  │
+  ├── Controller Layer           → Parse HTTP Request
+  │   ├── AuthController
+  │   ├── SppdController
+  │   ├── ApprovalController
+  │   ├── TarifController
+  │   ├── UserController
+  │   └── KaryawanController
+  │
+  └── routes.RegisterRoutes()    → Daftarkan semua endpoint
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║                        FOOTER                               ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="content-wrapper">
+  <hr class="divider">
+  <div class="footer-doc">
+    <p style="font-size: 12pt; font-weight: 700; color: var(--primary-dark); margin-bottom: 8px;">
+      ✈️ SIPADIN — Sistem Informasi Pengajuan Perjalanan Dinas
+    </p>
+    <p>PT Adiprima Suraprinta • Dokumentasi Teknis v2.0 Final</p>
+    <p>Dokumen ini dibuat sebagai bagian dari proyek PKL (Praktik Kerja Lapangan)</p>
+    <p style="margin-top: 16px; font-size: 8pt; color: #cbd5e1;">
+      © 2026 PT Adiprima Suraprinta. Hak cipta dilindungi. Dokumen ini bersifat internal dan rahasia.
+    </p>
+  </div>
+</div>
+
+<!-- Print Button -->
+<button class="print-btn" onclick="window.print()">
+  🖨️ Cetak / Simpan PDF
+</button>
+
+</body>
+</html>

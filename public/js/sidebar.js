@@ -43,61 +43,62 @@
 function renderSidebar(activePage) {
   const user = getCurrentUser();
   const role = user.role_sistem || '';
+  const BASE_PATH = window.location.pathname.startsWith('/perdin') ? '/perdin' : '';
 
   // Definisi menu sesuai PRD: semua menu tampil di sidebar, akses dikontrol oleh role
   const menus = [
     {
       label: 'Dashboard Saya',
-      href: '/dashboard.html',
+      href: `${BASE_PATH}/dashboard.html`,
       icon: 'ph-house',
       page: 'dashboard',
       roles: ['Karyawan', 'Manager', 'HRGA', 'Finance', 'Direksi'],
     },
     {
       label: 'Verifikasi Manager',
-      href: '/manager.html',
+      href: `${BASE_PATH}/manager.html`,
       icon: 'ph-user-check',
       page: 'manager',
       roles: ['Manager', 'HRGA', 'Finance', 'Direksi'],
     },
     {
       label: 'Verifikasi HRGA',
-      href: '/hrga.html',
+      href: `${BASE_PATH}/hrga.html`,
       icon: 'ph-shield-check',
       page: 'hrga',
       roles: ['HRGA', 'Manager', 'Finance', 'Direksi'],
     },
     {
       label: 'Verifikasi Finance',
-      href: '/finance.html',
+      href: `${BASE_PATH}/finance.html`,
       icon: 'ph-currency-dollar',
       page: 'finance',
       roles: ['Finance', 'Manager', 'HRGA', 'Direksi'],
     },
     {
       label: 'Laporan & Rekap',
-      href: '/laporan.html',
+      href: `${BASE_PATH}/laporan.html`,
       icon: 'ph-chart-bar',
       page: 'laporan',
       roles: ['Direksi', 'Manager', 'HRGA', 'Finance', 'Karyawan'],
     },
     {
       label: 'Direktori Karyawan',
-      href: '/karyawan.html',
+      href: `${BASE_PATH}/karyawan.html`,
       icon: 'ph-users',
       page: 'karyawan',
       roles: ['Manager', 'HRGA', 'Finance', 'Direksi'],
     },
     {
       label: 'Master Tarif',
-      href: '/tarif.html',
+      href: `${BASE_PATH}/tarif.html`,
       icon: 'ph-table',
       page: 'tarif',
       roles: ['HRGA', 'Manager', 'Finance', 'Direksi'],
     },
     {
       label: 'Manajemen User',
-      href: '/users.html',
+      href: `${BASE_PATH}/users.html`,
       icon: 'ph-users-three',
       page: 'users',
       roles: ['HRGA'],
@@ -110,13 +111,13 @@ function renderSidebar(activePage) {
       <div class="px-5 py-4 border-b border-slate-200 dark:border-white/10 flex items-center justify-center transition-colors duration-300">
         <!-- Logo Light Mode (Original corporate brand colors) -->
         <img 
-          src="/logo-light.png" 
+          src="${BASE_PATH}/logo-light.png" 
           alt="Logo PT Adiprima Suraprinta" 
           class="w-full max-w-[190px] h-auto object-contain block dark:hidden transition-all duration-300" 
         />
         <!-- Logo Dark Mode (Crisp white text with brand icon) -->
         <img 
-          src="/logo-dark.png" 
+          src="${BASE_PATH}/logo-dark.png" 
           alt="Logo PT Adiprima Suraprinta" 
           class="w-full max-w-[190px] h-auto object-contain hidden dark:block transition-all duration-300" 
         />

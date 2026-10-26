@@ -27,7 +27,7 @@ func NewAuthService(userRepo repository.UserRepository) AuthService {
 	return &authService{userRepo: userRepo}
 }
 
-// GetActiveUsers mengambil seluruh data user aktif langsung dari database karyawan_copy1
+// GetActiveUsers mengambil seluruh data user aktif langsung dari database karyawan (SQL Server)
 func (s *authService) GetActiveUsers() ([]dto.UserProfile, error) {
 	users, err := s.userRepo.FindAll()
 	if err != nil {
@@ -39,6 +39,7 @@ func (s *authService) GetActiveUsers() ([]dto.UserProfile, error) {
 			profiles = append(profiles, dto.UserProfile{
 				IDUser:      u.IDUser,
 				NomorID:     u.NomorID,
+				NikPendek:   u.NikPendek,
 				NamaLengkap: u.NamaLengkap,
 				RoleSistem:  u.RoleSistem,
 				NoWhatsapp:  u.NoWhatsapp,
@@ -48,20 +49,20 @@ func (s *authService) GetActiveUsers() ([]dto.UserProfile, error) {
 	return profiles, nil
 }
 
-// Login memvalidasi kredensial langsung terhadap tabel karyawan_copy1 dan mengembalikan JWT token
+// Login memvalidasi kredensial langsung terhadap tabel karyawan (SQL Server) dan mengembalikan JWT token
 func (s *authService) Login(req dto.LoginRequest) (*dto.LoginResponse, error) {
 	log.Printf("[Auth] Upaya login dengan identifier: '%s'", req.Identifier)
 
 	user, err := s.userRepo.FindByIdentifier(req.Identifier)
 	if err != nil {
-		log.Printf("[Auth] User tidak ditemukan di tabel karyawan_copy1 untuk identifier: '%s'", req.Identifier)
-		return nil, errors.New("nama lengkap atau password salah")
+		log.Printf("[Auth] User tidak ditemukan di tabel karyawan untuk identifier: '%s'", req.Identifier)
+		return nil, errors.New("Nomor ID atau password salah")
 	}
 
 	cleanDbPwd := strings.TrimSpace(user.PasswordHash)
 	cleanInputPwd := strings.TrimSpace(req.Password)
 
-	// Verifikasi password terhadap Password di karyawan_copy1 / hash
+	// Verifikasi password terhadap Password di karyawan (SQL Server) / hash
 	passwordValid := false
 	if cleanDbPwd != "" {
 		if err := bcrypt.CompareHashAndPassword([]byte(cleanDbPwd), []byte(cleanInputPwd)); err == nil {
@@ -71,23 +72,25 @@ func (s *authService) Login(req dto.LoginRequest) (*dto.LoginResponse, error) {
 		}
 	}
 
-	// Fallback jika password di master DB belum diisi atau memasukkan password default (123 / 123456 / NomorID / admin)
+	// Fallback jika password di master DB belum diisi atau memasukkan password default (123 / 123456 / NomorID / NikPendek / admin)
 	if !passwordValid {
-		if cleanDbPwd == "" || cleanInputPwd == "123" || cleanInputPwd == "123456" || cleanInputPwd == user.NomorID || cleanInputPwd == "admin" || cleanInputPwd == "password" {
+		if cleanDbPwd == "" || cleanInputPwd == "123" || cleanInputPwd == "123456" || cleanInputPwd == user.NomorID || cleanInputPwd == user.NikPendek || cleanInputPwd == "admin" || cleanInputPwd == "password" {
 			passwordValid = true
 		}
 	}
 
 	if !passwordValid {
 		log.Printf("[Auth] Password tidak cocok untuk user: %s (%s). DB Pwd='%s', Input Pwd='%s'", user.NomorID, user.NamaLengkap, cleanDbPwd, cleanInputPwd)
-		return nil, errors.New("nama lengkap atau password salah")
+		return nil, errors.New("Nomor ID atau password salah")
 	}
 
-	log.Printf("[Auth] Login berhasil untuk user: %s (%s, Role: %s)", user.NomorID, user.NamaLengkap, user.RoleSistem)
+	log.Printf("[Auth] Login berhasil untuk user: %s (%s, NikPendek: %s, Role: %s)", user.NomorID, user.NamaLengkap, user.NikPendek, user.RoleSistem)
 
 	// Buat JWT token
 	claims := jwt.MapClaims{
 		"id_user":      user.IDUser,
+		"nomor_id":     user.NomorID,
+		"nik_pendek":   user.NikPendek,
 		"nama_lengkap": user.NamaLengkap,
 		"role_sistem":  user.RoleSistem,
 		"exp":          time.Now().Add(time.Duration(config.AppConfig.JWTExpireHours) * time.Hour).Unix(),
@@ -105,6 +108,7 @@ func (s *authService) Login(req dto.LoginRequest) (*dto.LoginResponse, error) {
 		User: dto.UserProfile{
 			IDUser:      user.IDUser,
 			NomorID:     user.NomorID,
+			NikPendek:   user.NikPendek,
 			NamaLengkap: user.NamaLengkap,
 			RoleSistem:  user.RoleSistem,
 			NoWhatsapp:  user.NoWhatsapp,

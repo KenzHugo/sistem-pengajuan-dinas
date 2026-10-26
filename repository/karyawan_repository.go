@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// KaryawanRepository mendefinisikan kontrak akses data untuk tabel karyawan_copy1
+// KaryawanRepository mendefinisikan kontrak akses data untuk tabel karyawan (adi_persons.dbo.karyawan)
 type KaryawanRepository interface {
 	FindAll(filter dto.KaryawanQuery) ([]models.Karyawan, int64, error)
 	FindByID(nomorID string) (*models.Karyawan, error)
@@ -30,7 +30,7 @@ func NewKaryawanRepository(db *gorm.DB) KaryawanRepository {
 }
 
 // cleanIDQuery ekspresi SQL untuk membersihkan spasi dan karakter newline \r \n pada kolom NomorID
-const cleanIDQuery = "TRIM(REPLACE(REPLACE(NomorID, '\r', ''), '\n', ''))"
+const cleanIDQuery = "LTRIM(RTRIM(REPLACE(REPLACE(NomorID, CHAR(13), ''), CHAR(10), '')))"
 
 // FindAll mengambil daftar data karyawan dengan filter pencarian, departemen, status aktif, dan pagination
 func (r *karyawanRepository) FindAll(filter dto.KaryawanQuery) ([]models.Karyawan, int64, error) {

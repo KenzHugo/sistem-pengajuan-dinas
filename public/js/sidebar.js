@@ -42,62 +42,64 @@
 
 function renderSidebar(activePage) {
   const user = getCurrentUser();
-  const role = user.role_sistem || '';
+  const isSpecial = user && user.is_special_access === true;
+  const role = isSpecial ? 'Spesial Akses' : (user.role_sistem || '');
+  const BASE_PATH = window.location.pathname.startsWith('/perdin') ? '/perdin' : '';
 
-  // Definisi menu sesuai PRD: semua menu tampil di sidebar, akses dikontrol oleh role
+  // Definisi menu: jika user memiliki SpesialAkses, semua menu tampil di sidebar
   const menus = [
     {
       label: 'Dashboard Saya',
-      href: '/dashboard.html',
+      href: `${BASE_PATH}/dashboard.html`,
       icon: 'ph-house',
       page: 'dashboard',
       roles: ['Karyawan', 'Manager', 'HRGA', 'Finance', 'Direksi'],
     },
     {
       label: 'Verifikasi Manager',
-      href: '/manager.html',
+      href: `${BASE_PATH}/manager.html`,
       icon: 'ph-user-check',
       page: 'manager',
       roles: ['Manager', 'HRGA', 'Finance', 'Direksi'],
     },
     {
       label: 'Verifikasi HRGA',
-      href: '/hrga.html',
+      href: `${BASE_PATH}/hrga.html`,
       icon: 'ph-shield-check',
       page: 'hrga',
       roles: ['HRGA', 'Manager', 'Finance', 'Direksi'],
     },
     {
       label: 'Verifikasi Finance',
-      href: '/finance.html',
+      href: `${BASE_PATH}/finance.html`,
       icon: 'ph-currency-dollar',
       page: 'finance',
       roles: ['Finance', 'Manager', 'HRGA', 'Direksi'],
     },
     {
       label: 'Laporan & Rekap',
-      href: '/laporan.html',
+      href: `${BASE_PATH}/laporan.html`,
       icon: 'ph-chart-bar',
       page: 'laporan',
       roles: ['Direksi', 'Manager', 'HRGA', 'Finance', 'Karyawan'],
     },
     {
       label: 'Direktori Karyawan',
-      href: '/karyawan.html',
+      href: `${BASE_PATH}/karyawan.html`,
       icon: 'ph-users',
       page: 'karyawan',
       roles: ['Manager', 'HRGA', 'Finance', 'Direksi'],
     },
     {
       label: 'Master Tarif',
-      href: '/tarif.html',
+      href: `${BASE_PATH}/tarif.html`,
       icon: 'ph-table',
       page: 'tarif',
       roles: ['HRGA', 'Manager', 'Finance', 'Direksi'],
     },
     {
       label: 'Manajemen User',
-      href: '/users.html',
+      href: `${BASE_PATH}/users.html`,
       icon: 'ph-users-three',
       page: 'users',
       roles: ['HRGA'],
@@ -106,17 +108,15 @@ function renderSidebar(activePage) {
 
   const sidebarHTML = `
     <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-[#151c2c] border-r border-slate-200 dark:border-white/5 z-40 flex flex-col transition-all duration-300 lg:translate-x-0 -translate-x-full shadow-lg lg:shadow-none">
-      <!-- Logo Container (No white background wrapper, responsive and clear in both light & dark modes) -->
+      <!-- Logo Container -->
       <div class="px-5 py-4 border-b border-slate-200 dark:border-white/10 flex items-center justify-center transition-colors duration-300">
-        <!-- Logo Light Mode (Original corporate brand colors) -->
         <img 
-          src="/logo-light.png" 
+          src="${BASE_PATH}/logo-light.png" 
           alt="Logo PT Adiprima Suraprinta" 
           class="w-full max-w-[190px] h-auto object-contain block dark:hidden transition-all duration-300" 
         />
-        <!-- Logo Dark Mode (Crisp white text with brand icon) -->
         <img 
-          src="/logo-dark.png" 
+          src="${BASE_PATH}/logo-dark.png" 
           alt="Logo PT Adiprima Suraprinta" 
           class="w-full max-w-[190px] h-auto object-contain hidden dark:block transition-all duration-300" 
         />
@@ -125,22 +125,26 @@ function renderSidebar(activePage) {
       <!-- User Info -->
       <div class="px-4 py-3 border-b border-slate-200 dark:border-white/10 transition-colors duration-300">
         <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-100/80 dark:bg-white/5 transition-colors duration-300">
-          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300 flex items-center justify-center flex-shrink-0">
-            <i class="ph-bold ph-user text-sm"></i>
+          <div class="w-8 h-8 rounded-lg ${isSpecial ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400' : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300'} flex items-center justify-center flex-shrink-0">
+            <i class="ph-bold ${isSpecial ? 'ph-crown' : 'ph-user'} text-sm"></i>
           </div>
-          <div class="min-w-0">
+          <div class="min-w-0 flex-1">
             <p class="text-slate-800 dark:text-white text-xs font-semibold truncate">${user.nama_lengkap || 'User'}</p>
-            <p class="text-slate-500 dark:text-slate-400 text-xs">${role}</p>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              ${isSpecial 
+                ? '<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">★ Spesial Akses</span>' 
+                : `<p class="text-slate-500 dark:text-slate-400 text-xs">${role}</p>`}
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Navigation -->
       <nav class="flex-1 overflow-y-auto p-3 space-y-1">
-        ${menus.filter(m => m.roles.includes(role)).map(m => {
+        ${menus.filter(m => isSpecial || m.roles.includes(user.role_sistem)).map(m => {
           const isActive = m.page === activePage;
-          const isFullAccess = isFullAccessPage(m.page, role);
-          const isViewOnly = m.roles.includes(role) && !isFullAccess && m.page !== 'dashboard';
+          const isFullAccess = isSpecial || isFullAccessPage(m.page, user.role_sistem);
+          const isViewOnly = !isSpecial && m.roles.includes(user.role_sistem) && !isFullAccess && m.page !== 'dashboard';
           return `
             <a href="${m.href}"
                class="flex items-center gap-3 px-3.5 py-2.5 rounded-r-xl text-sm font-medium transition-all duration-300 group
@@ -184,16 +188,19 @@ function renderSidebar(activePage) {
 
 // Tentukan apakah role punya Full Access ke halaman tertentu
 function isFullAccessPage(page, role) {
+  const user = getCurrentUser();
+  if (user && user.is_special_access === true) return true;
+
   const r = (role || '').trim().toLowerCase();
   const fullAccessMap = {
-    'dashboard' : ['karyawan', 'manager', 'hrga', 'finance', 'direksi'],
-    'manager'   : ['manager', 'direksi'],
-    'hrga'      : ['hrga', 'direksi'],
-    'finance'   : ['finance', 'direksi'],
-    'karyawan'  : ['hrga', 'manager', 'direksi'],
-    'tarif'     : ['hrga', 'direksi'],
-    'users'     : ['hrga', 'direksi'],
-    'laporan'   : ['direksi', 'manager', 'hrga', 'finance', 'karyawan'],
+    'dashboard' : ['karyawan', 'manager', 'hrga', 'finance', 'direksi', 'superadmin'],
+    'manager'   : ['manager', 'direksi', 'superadmin'],
+    'hrga'      : ['hrga', 'direksi', 'superadmin'],
+    'finance'   : ['finance', 'direksi', 'superadmin'],
+    'karyawan'  : ['hrga', 'manager', 'direksi', 'superadmin'],
+    'tarif'     : ['hrga', 'direksi', 'superadmin'],
+    'users'     : ['hrga', 'direksi', 'superadmin'],
+    'laporan'   : ['direksi', 'manager', 'hrga', 'finance', 'karyawan', 'superadmin'],
   };
   return (fullAccessMap[page] || []).includes(r);
 }
@@ -219,111 +226,23 @@ function showToast(msg, type = 'info') {
   if (!el) {
     el = document.createElement('div');
     el.id = 'globalToast';
-    el.className = 'fixed bottom-6 right-6 z-[9999] px-5 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white shadow-xl text-sm font-medium flex items-center gap-2.5 min-w-64 transition-all duration-400';
-    el.style.transform = 'translateY(80px)';
-    el.style.opacity = '0';
+    el.className = 'fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-none';
     document.body.appendChild(el);
   }
   const colors = {
-    success: { border: 'rgba(34,197,94,0.4)',   icon: 'ph-check-circle',   txt: 'text-emerald-500' },
-    error:   { border: 'rgba(239,68,68,0.4)',   icon: 'ph-x-circle',       txt: 'text-red-500' },
-    info:    { border: 'rgba(99,102,241,0.4)',  icon: 'ph-info',           txt: 'text-indigo-500' },
-    warning: { border: 'rgba(234,179,8,0.4)',   icon: 'ph-warning-circle', txt: 'text-amber-500' },
+    success: 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/80 dark:border-emerald-800 dark:text-emerald-200',
+    error:   'bg-red-50 border-red-200 text-red-800 dark:bg-red-950/80 dark:border-red-800 dark:text-red-200',
+    info:    'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950/80 dark:border-blue-800 dark:text-blue-200',
   };
-  const c = colors[type] || colors.info;
-  el.style.borderColor = c.border;
-  el.innerHTML = `<i class="ph-bold ${c.icon} text-lg ${c.txt}"></i><span class="text-slate-800 dark:text-white font-medium">${msg}</span>`;
-  setTimeout(() => { el.style.transform = 'translateY(0)'; el.style.opacity = '1'; }, 10);
-  setTimeout(() => { el.style.transform = 'translateY(80px)'; el.style.opacity = '0'; }, 3500);
+  const icons = {
+    success: 'ph-check-circle text-emerald-600',
+    error:   'ph-x-circle text-red-600',
+    info:    'ph-info text-blue-600',
+  };
+  el.className = `fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium transition-all duration-300 transform ${colors[type] || colors.info}`;
+  el.innerHTML = `<i class="ph-bold ${icons[type] || icons.info} text-lg"></i><span>${msg}</span>`;
+  setTimeout(() => el.classList.remove('translate-y-2', 'opacity-0', 'pointer-events-none'), 10);
+  setTimeout(() => {
+    el.classList.add('translate-y-2', 'opacity-0', 'pointer-events-none');
+  }, 3500);
 }
-
-// ── Modal Konfirmasi ──────────────────────────────────────────────────────────
-function showConfirm(msg, onConfirm) {
-  const overlay = document.createElement('div');
-  overlay.className = 'fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4';
-  overlay.innerHTML = `
-    <div class="bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl transition-colors duration-300">
-      <div class="flex items-start gap-4">
-        <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-          <i class="ph-bold ph-warning text-amber-500 text-xl"></i>
-        </div>
-        <div>
-          <h3 class="text-slate-800 dark:text-white font-semibold mb-1">Konfirmasi</h3>
-          <p class="text-slate-600 dark:text-slate-400 text-sm">${msg}</p>
-        </div>
-      </div>
-      <div class="flex gap-3 mt-6">
-        <button id="cancelBtn" class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-white/5 transition">Batal</button>
-        <button id="confirmBtn" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition shadow-lg shadow-red-600/20">Ya, Lanjutkan</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-  overlay.querySelector('#cancelBtn').onclick  = () => overlay.remove();
-  overlay.querySelector('#confirmBtn').onclick = () => { overlay.remove(); onConfirm(); };
-}
-
-// ── Theme Manager (Light / Dark Mode) ─────────────────────────────────────────
-(function setupTheme() {
-  const THEME_KEY = 'sipadin_theme';
-  const saved = localStorage.getItem(THEME_KEY);
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  if (saved === 'dark' || (!saved && prefersDark)) {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
-})();
-
-function toggleGlobalTheme() {
-  const isDark = document.documentElement.classList.toggle('dark');
-  localStorage.setItem('sipadin_theme', isDark ? 'dark' : 'light');
-  syncThemeIcons();
-}
-
-function syncThemeIcons() {
-  const isDark = document.documentElement.classList.contains('dark');
-  const btns = document.querySelectorAll('#themeToggleBtn, .theme-toggle-btn');
-  btns.forEach(btn => {
-    btn.setAttribute('title', isDark ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap');
-    const sun = btn.querySelector('.theme-icon-sun');
-    const moon = btn.querySelector('.theme-icon-moon');
-    if (sun && moon) {
-      if (isDark) {
-        sun.classList.remove('hidden');
-        moon.classList.add('hidden');
-      } else {
-        sun.classList.add('hidden');
-        moon.classList.remove('hidden');
-      }
-    }
-  });
-}
-
-// Sinkronisasi antar-tab browser secara real-time
-window.addEventListener('storage', (e) => {
-  if (e.key === 'sipadin_theme') {
-    const isDark = e.newValue === 'dark';
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    syncThemeIcons();
-  }
-});
-
-// Jalankan sinkronisasi ikon saat script dimuat & saat DOM siap
-syncThemeIcons();
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', syncThemeIcons);
-}
-
-// Event delegation agar selalu aktif meski elemen di-render ulang
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('#themeToggleBtn, .theme-toggle-btn');
-  if (btn) {
-    e.preventDefault();
-    toggleGlobalTheme();
-  }
-});
-

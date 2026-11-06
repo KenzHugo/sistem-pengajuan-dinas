@@ -3,6 +3,7 @@ package routes
 import (
 	"sipadin/controller"
 	"sipadin/middleware"
+	"sipadin/service"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -16,16 +17,19 @@ func RegisterRoutes(
 	tarifCtrl *controller.TarifController,
 	userCtrl *controller.UserController,
 	karyawanCtrl *controller.KaryawanController,
+	operasionalSvc service.OperasionalService,
 ) {
 	api := app.Group("/api")
 
 	// ─── Auth Routes (public) ──────────────────────────────────────────────────
 	auth := api.Group("/auth")
 	auth.Post("/login", authCtrl.Login)
+	auth.Get("/operational-status", authCtrl.GetOperationalStatus)
+	auth.Get("/status-operasional", authCtrl.GetOperationalStatus)
 	auth.Get("/users", authCtrl.GetDBUsers)
 
-	// ─── Protected Routes (JWT Required) ──────────────────────────────────────
-	protected := api.Group("", middleware.Protected())
+	// ─── Protected Routes (JWT Required & Jam Operasional) ─────────────────────
+	protected := api.Group("", middleware.Protected(), middleware.RequireOperationalHours(operasionalSvc))
 
 	// ─── SPPD Routes ──────────────────────────────────────────────────────────
 	sppd := protected.Group("/sppd")
@@ -102,7 +106,7 @@ func RegisterRoutes(
 	users.Put("/:id", middleware.RequireRole(middleware.RoleHRGA), userCtrl.Update)
 	users.Delete("/:id", middleware.RequireRole(middleware.RoleHRGA), userCtrl.Delete)
 
-	// ─── Karyawan Routes (karyawan_copy1) ─────────────────────────────────────
+	// ─── Karyawan Routes (SQL Server adi_persons.dbo.karyawan) ─────────────────
 	karyawan := protected.Group("/karyawan", middleware.RequireRole(
 		middleware.RoleManager,
 		middleware.RoleHRGA,

@@ -1,0 +1,21 @@
+#<IfModule mod_rewrite.c>
+#    RewriteEngine On
+
+#    # Arahkan semua request ke server Go Fiber yang berjalan di port 3000
+#    RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+#</IfModule>
+
+RewriteEngine On
+RewriteBase /perdin/
+
+# 1. Serve Static Files Langsung (Super Cepat)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# 2. Semua Request Lain Dibalik ke Go di Port 3000
+RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+
+# Opsional: Tambahkan header X-Forwarded-For agar Go tahu IP asli user
+<IfModule mod_proxy.c>
+    RequestHeader set X-Forwarded-For %{REMOTE_ADDR}s
+

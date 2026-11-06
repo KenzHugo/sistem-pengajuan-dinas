@@ -46,24 +46,26 @@ func main() {
 
 	// ── 6. Dependency Injection (Wire semua layer) ────────────────────────────
 	// Repositories
-	userRepo     := repository.NewUserRepository(config.DB)
-	sppdRepo     := repository.NewSppdRepository(config.DB)
-	approvalRepo := repository.NewApprovalRepository(config.DB)
-	anggotaRepo  := repository.NewAnggotaRepository(config.DB)
-	tarifRepo    := repository.NewTarifRepository(config.DB)
-	karyawanRepo := repository.NewKaryawanRepository(config.DB)
+	userRepo        := repository.NewUserRepository(config.DB)
+	sppdRepo        := repository.NewSppdRepository(config.DB)
+	approvalRepo    := repository.NewApprovalRepository(config.DB)
+	anggotaRepo     := repository.NewAnggotaRepository(config.DB)
+	tarifRepo       := repository.NewTarifRepository(config.DB)
+	karyawanRepo    := repository.NewKaryawanRepository(config.DB)
+	operasionalRepo := repository.NewOperasionalRepository(config.DB)
 
 	// Services
-	notifSvc    := service.NewNotificationService(sppdRepo, userRepo)
-	authSvc     := service.NewAuthService(userRepo)
-	sppdSvc     := service.NewSppdService(sppdRepo, anggotaRepo, tarifRepo, userRepo, notifSvc)
-	approvalSvc := service.NewApprovalService(sppdRepo, approvalRepo, userRepo, notifSvc, sppdSvc)
-	tarifSvc    := service.NewTarifService(tarifRepo)
-	userSvc     := service.NewUserService(userRepo)
-	karyawanSvc := service.NewKaryawanService(karyawanRepo)
+	operasionalSvc := service.NewOperasionalService(operasionalRepo)
+	notifSvc       := service.NewNotificationService(sppdRepo, userRepo)
+	authSvc        := service.NewAuthService(userRepo, operasionalRepo, operasionalSvc)
+	sppdSvc        := service.NewSppdService(sppdRepo, anggotaRepo, tarifRepo, userRepo, notifSvc)
+	approvalSvc    := service.NewApprovalService(sppdRepo, approvalRepo, userRepo, notifSvc, sppdSvc)
+	tarifSvc       := service.NewTarifService(tarifRepo)
+	userSvc        := service.NewUserService(userRepo)
+	karyawanSvc    := service.NewKaryawanService(karyawanRepo)
 
 	// Controllers
-	authCtrl     := controller.NewAuthController(authSvc)
+	authCtrl     := controller.NewAuthController(authSvc, operasionalSvc)
 	sppdCtrl     := controller.NewSppdController(sppdSvc)
 	approvalCtrl := controller.NewApprovalController(approvalSvc)
 	tarifCtrl    := controller.NewTarifController(tarifSvc)
@@ -73,7 +75,7 @@ func main() {
 	// ── 7. Register API Routes (HARUS sebelum Static) ─────────────────────────
 	// PENTING: routes didaftarkan lebih dulu agar POST /api/* tidak dicegat
 	// oleh static middleware yang hanya mengizinkan method GET.
-	routes.RegisterRoutes(app, authCtrl, sppdCtrl, approvalCtrl, tarifCtrl, userCtrl, karyawanCtrl)
+	routes.RegisterRoutes(app, authCtrl, sppdCtrl, approvalCtrl, tarifCtrl, userCtrl, karyawanCtrl, operasionalSvc)
 
 	// ── 8. Static Files (Frontend) — didaftarkan TERAKHIR ──────────────────────
 	app.Static("/", "./public", fiber.Static{

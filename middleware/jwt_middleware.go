@@ -23,9 +23,10 @@ func jwtErrorHandler(ctx *fiber.Ctx, err error) error {
 
 // UserClaims adalah struktur data yang diekstrak dari JWT
 type UserClaims struct {
-	IDUser      int
-	NamaLengkap string
-	RoleSistem  string
+	IDUser          int
+	NamaLengkap     string
+	RoleSistem      string
+	IsSpecialAccess bool
 }
 
 // GetClaims mengekstrak data user dari JWT token yang sudah divalidasi
@@ -38,9 +39,25 @@ func GetClaims(ctx *fiber.Ctx) *UserClaims {
 		idUser = int(v)
 	}
 
+	nama := ""
+	if v, ok := claims["nama_lengkap"].(string); ok {
+		nama = v
+	}
+
+	role := ""
+	if v, ok := claims["role_sistem"].(string); ok {
+		role = v
+	}
+
+	isSpecial := false
+	if v, ok := claims["is_special_access"].(bool); ok {
+		isSpecial = v
+	}
+
 	return &UserClaims{
-		IDUser:      idUser,
-		NamaLengkap: claims["nama_lengkap"].(string),
-		RoleSistem:  claims["role_sistem"].(string),
+		IDUser:          idUser,
+		NamaLengkap:     nama,
+		RoleSistem:      role,
+		IsSpecialAccess: isSpecial,
 	}
 }

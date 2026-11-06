@@ -3,8 +3,9 @@ package config
 import (
 	"fmt"
 	"log"
+	"net/url"
 
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -12,23 +13,23 @@ import (
 // DB adalah instance global koneksi database GORM
 var DB *gorm.DB
 
-// InitDatabase menginisialisasi koneksi ke MySQL menggunakan GORM
+// InitDatabase menginisialisasi koneksi ke SQL Server menggunakan GORM
 func InitDatabase() {
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		AppConfig.DBUser,
-		AppConfig.DBPassword,
+		"sqlserver://%s:%s@%s:%s?database=%s&encrypt=disable&trustServerCertificate=true",
+		url.QueryEscape(AppConfig.DBUser),
+		url.QueryEscape(AppConfig.DBPassword),
 		AppConfig.DBHost,
 		AppConfig.DBPort,
 		AppConfig.DBName,
 	)
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+	db, err := gorm.Open(sqlserver.Open(dsn), &gorm.Config{
 		Logger:                                   logger.Default.LogMode(logger.Warn),
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
-		log.Fatalf("[Database] Gagal koneksi ke database: %v", err)
+		log.Fatalf("[Database] Gagal koneksi ke SQL Server: %v", err)
 	}
 
 	sqlDB, err := db.DB()
@@ -41,5 +42,5 @@ func InitDatabase() {
 	sqlDB.SetMaxOpenConns(100)
 
 	DB = db
-	log.Println("[Database] Koneksi berhasil ke database:", AppConfig.DBName)
+	log.Println("[Database] Koneksi berhasil ke SQL Server database:", AppConfig.DBName)
 }

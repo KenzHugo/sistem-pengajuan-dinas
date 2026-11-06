@@ -244,7 +244,7 @@
               <label class="text-xs font-bold text-white flex items-center gap-1.5">
                 <i class="ph-bold ph-users-three text-emerald-400 text-sm"></i> Rincian Hak Biaya Per Orang
               </label>
-              <p class="text-[11px] text-slate-400">Dihitung otomatis oleh sistem berdasarkan Plafon Jabatan & Master Tarif MySQL.</p>
+              <p class="text-[11px] text-slate-400">Dihitung otomatis oleh sistem berdasarkan Plafon Jabatan & Master Tarif SQL Server.</p>
             </div>
             <span id="badgeJumlahOrang" class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold border border-emerald-500/30">
               1 Orang
@@ -308,13 +308,12 @@
             placeholder="Jelaskan keperluan perjalanan dinas..." required></textarea>
         </div>
 
-        <!-- Lampiran Dokumen / Surat Undangan (Opsional) -->
+        <!-- Lampiran Dokumen / Surat Undangan -->
         <div class="sm:col-span-2">
           <div class="flex items-center justify-between mb-1.5">
             <label class="text-xs font-medium text-slate-300 flex items-center gap-1.5">
               <i class="ph-bold ph-paperclip text-indigo-400 text-sm"></i>
               Lampiran Dokumen / Surat Undangan
-              <span class="text-slate-500 font-normal text-[11px]">(Opsional)</span>
             </label>
             <span class="text-[11px] text-slate-500">PDF, JPG, PNG, DOC (Maks. 5MB)</span>
           </div>
@@ -399,8 +398,8 @@
   <i id="toastIcon" class="ph-bold text-lg"></i><span id="toastMsg"></span>
 </div>
 
-<script src="/js/api.js?v=3"></script>
-<script src="/js/sidebar.js?v=3"></script>
+<script src="js/api.js?v=3"></script>
+<script src="js/sidebar.js?v=3"></script>
 <script>
   requireAuth();
   const user = getCurrentUser();

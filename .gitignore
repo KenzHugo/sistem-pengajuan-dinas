@@ -1,0 +1,23 @@
+# Environment variables (JANGAN di-commit ke Git)
+.env
+.env.*
+!.env.example
+
+# Binaries and executables
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+sipadin
+
+# Test and scratch artifacts
+*.log
+C:UsersNOLAH.gemini*
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+

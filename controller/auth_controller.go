@@ -11,11 +11,15 @@ import (
 
 // AuthController menangani HTTP request untuk autentikasi
 type AuthController struct {
-	authSvc service.AuthService
+	authSvc        service.AuthService
+	operasionalSvc service.OperasionalService
 }
 
-func NewAuthController(authSvc service.AuthService) *AuthController {
-	return &AuthController{authSvc: authSvc}
+func NewAuthController(authSvc service.AuthService, operasionalSvc service.OperasionalService) *AuthController {
+	return &AuthController{
+		authSvc:        authSvc,
+		operasionalSvc: operasionalSvc,
+	}
 }
 
 // Login godoc
@@ -30,15 +34,37 @@ func (c *AuthController) Login(ctx *fiber.Ctx) error {
 	req.Password = strings.TrimSpace(req.Password)
 
 	if req.Identifier == "" || req.Password == "" {
-		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("Nama lengkap dan password wajib diisi"))
+		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("Nomor ID dan password wajib diisi"))
 	}
 
 	result, err := c.authSvc.Login(req)
 	if err != nil {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(dto.Fail(err.Error()))
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "jam kerja") || strings.Contains(errMsg, "istirahat") {
+			return ctx.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"success":            false,
+				"message":            errMsg,
+				"operational_closed": true,
+			})
+		}
+		return ctx.Status(fiber.StatusUnauthorized).JSON(dto.Fail(errMsg))
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(dto.OK("Login berhasil", result))
+}
+
+// GetOperationalStatus godoc
+// GET /api/auth/operational-status
+func (c *AuthController) GetOperationalStatus(ctx *fiber.Ctx) error {
+	clientTime := ctx.Query("client_time")
+	if clientTime == "" {
+		clientTime = ctx.Get("X-Client-Time")
+	}
+	status, err := c.operasionalSvc.GetOperationalStatus(clientTime)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.Fail("Gagal mengambil status operasional"))
+	}
+	return ctx.Status(fiber.StatusOK).JSON(dto.OK("Status operasional berhasil diambil", status))
 }
 
 // GetDBUsers godoc

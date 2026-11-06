@@ -260,14 +260,14 @@
   </div>
 </div>
 
-<script src="/js/api.js"></script>
-<script src="/js/sidebar.js?v=2"></script>
+<script src="js/api.js"></script>
+<script src="js/sidebar.js?v=2"></script>
 <script>
   requireAuth();
   const user = getCurrentUser();
   renderSidebar('tarif');
 
-  const isFullAccess = user.role_sistem === 'HRGA';
+  const isFullAccess = user.role_sistem === 'HRGA' || user.is_special_access;
   if (!isFullAccess) {
     document.getElementById('viewOnlyBanner').classList.remove('hidden');
     document.getElementById('btnAdd').classList.add('hidden');

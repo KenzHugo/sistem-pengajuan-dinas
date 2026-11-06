@@ -130,45 +130,66 @@
   <div class="glass rounded-3xl p-8 md:p-10 w-full max-w-md glow-blue relative z-10 shadow-2xl">
 
     <!-- Logo & Header -->
-    <div class="text-center mb-8">
+    <div class="text-center mb-6">
       <!-- Logo Container -->
       <div class="inline-flex items-center justify-center p-3.5 rounded-2xl bg-white/90 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 shadow-md mb-4 float-anim transition-all duration-300">
-        <img src="/logo-light.png" alt="Logo PT Adiprima Suraprinta" class="max-w-[200px] h-auto max-h-12 object-contain block dark:hidden" />
-        <img src="/logo-dark.png" alt="Logo PT Adiprima Suraprinta" class="max-w-[200px] h-auto max-h-12 object-contain hidden dark:block" />
+        <img src="logo-light.png" alt="Logo PT Adiprima Suraprinta" class="max-w-[200px] h-auto max-h-12 object-contain block dark:hidden" />
+        <img src="logo-dark.png" alt="Logo PT Adiprima Suraprinta" class="max-w-[200px] h-auto max-h-12 object-contain hidden dark:block" />
       </div>
       <h1 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">
         <span class="gradient-text">SIPADIN</span>
       </h1>
       <p class="text-slate-500 dark:text-slate-400 text-sm">Sistem Pengajuan Perjalanan Dinas</p>
       <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 dark:bg-indigo-500/10 border border-emerald-500/20 dark:border-indigo-500/20 rounded-full">
-        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-        <span class="text-xs text-slate-600 dark:text-slate-400">v2.0 Online</span>
+        <span id="systemStatusDot" class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+        <span id="systemStatusText" class="text-xs text-slate-600 dark:text-slate-400">v2.0 Online</span>
+      </div>
+    </div>
+
+    <!-- Banner Notifikasi Jam Operasional -->
+    <div id="operationalBanner" class="hidden mb-6 p-4 rounded-2xl border text-sm transition-all duration-300 shadow-sm">
+      <div class="flex items-start gap-3">
+        <div id="opBannerIconWrap" class="p-2.5 rounded-xl flex-shrink-0">
+          <i id="opBannerIcon" class="ph-bold text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <h4 id="opBannerTitle" class="font-bold text-xs uppercase tracking-wider"></h4>
+            <span id="opBannerBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full border"></span>
+          </div>
+          <p id="opBannerMsg" class="text-xs font-semibold leading-relaxed"></p>
+          <p id="opBannerDetail" class="text-[11px] mt-1.5 opacity-80 leading-normal"></p>
+        </div>
       </div>
     </div>
 
     <!-- Form -->
     <form id="loginForm" class="space-y-5">
-      <!-- Identifier (Nama Lengkap) -->
+      <!-- Identifier (Nomor ID Karyawan) -->
       <div>
-        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-          Nama Lengkap
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 flex items-center justify-between">
+          <span>Nomor ID Karyawan</span>
+          <span class="text-[11px] font-normal text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">5 Digit Terakhir</span>
         </label>
         <div class="relative">
-          <i class="ph-bold ph-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+          <i class="ph-bold ph-identification-card absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
           <input
             id="identifier"
             type="text"
-            placeholder="Masukkan Nama Lengkap Anda"
+            placeholder="Contoh: 14016 atau 29642"
             class="input-field w-full rounded-xl pl-10 pr-4 py-3 text-sm"
-            autocomplete="name"
+            autocomplete="username"
             required
           />
         </div>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1">
+          <i class="ph-bold ph-info text-emerald-500"></i> Masukkan 5 digit terakhir Nomor ID dari data karyawan
+        </p>
       </div>
 
       <!-- Password -->
       <div>
-        <label class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Password</label>
         <div class="relative">
           <i class="ph-bold ph-lock-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
           <input
@@ -192,25 +213,34 @@
         type="submit"
         class="btn-primary w-full py-3.5 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
       >
-        <i class="ph-bold ph-sign-in text-lg"></i>
+        <i id="loginBtnIcon" class="ph-bold ph-sign-in text-lg"></i>
         <span id="loginBtnText">Masuk ke Sistem</span>
       </button>
     </form>
 
     <!-- Footer -->
-    <p class="text-center text-xs text-slate-600 mt-6">
+    <p class="text-center text-xs text-slate-500 dark:text-slate-400 mt-6">
       Sistem Perjalanan Dinas Internal &copy; 2026
     </p>
   </div>
 
   <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl glass border text-sm font-medium flex items-center gap-2.5 min-w-64">
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl glass border text-sm font-medium flex items-center gap-2.5 min-w-64 max-w-md shadow-2xl">
     <i id="toastIcon" class="ph-bold text-lg"></i>
-    <span id="toastMsg"></span>
+    <span id="toastMsg" class="leading-snug"></span>
   </div>
 
   <script>
-    const API = '/api';
+    const BASE_PATH = window.location.pathname.startsWith('/perdin') ? '/perdin' : '';
+    const API = `${BASE_PATH}/api`;
+
+    // State operasional sistem
+    let operationalState = {
+      isOpen: true,
+      message: 'Dalam jam kerja',
+      isSunday: false,
+      data: null
+    };
 
     // Toggle password visibility
     document.getElementById('togglePassword').addEventListener('click', () => {
@@ -226,26 +256,166 @@
     });
 
     // Toast
-    function showToast(msg, type = 'error') {
+    function showToast(msg, type = 'error', duration = 4500) {
       const toast = document.getElementById('toast');
       const icon  = document.getElementById('toastIcon');
       const msgEl = document.getElementById('toastMsg');
       msgEl.textContent = msg;
       if (type === 'error') {
         toast.className = toast.className.replace(/border-\S+/g, '');
-        toast.style.borderColor = 'rgba(239,68,68,0.4)';
-        icon.className = 'ph-bold ph-x-circle text-lg text-red-400';
+        toast.style.borderColor = 'rgba(239,68,68,0.5)';
+        icon.className = 'ph-bold ph-x-circle text-lg text-red-500';
       } else {
-        toast.style.borderColor = 'rgba(34,197,94,0.4)';
-        icon.className = 'ph-bold ph-check-circle text-lg text-emerald-400';
+        toast.style.borderColor = 'rgba(34,197,94,0.5)';
+        icon.className = 'ph-bold ph-check-circle text-lg text-emerald-500';
       }
       toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3500);
+      setTimeout(() => toast.classList.remove('show'), duration);
     }
 
-    // Login
+    // Cek status jam operasional saat pertama buka halaman login
+    async function checkOperationalStatus() {
+      // Cek notifikasi logout otomatis dari sesi sebelumnya (jika auto-logout)
+      const autoLogoutMsg = sessionStorage.getItem('operational_logout_msg');
+      if (autoLogoutMsg) {
+        sessionStorage.removeItem('operational_logout_msg');
+        showToast(autoLogoutMsg, 'error', 6000);
+      }
+
+      try {
+        const deviceTimeISO = new Date().toISOString();
+        const res = await fetch(`${API}/auth/operational-status?client_time=${encodeURIComponent(deviceTimeISO)}`, {
+          headers: { 'X-Client-Time': deviceTimeISO }
+        });
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        const data = json.data;
+        operationalState.isOpen = data.is_open;
+        operationalState.message = data.message;
+        operationalState.isSunday = data.is_sunday;
+        operationalState.data = data;
+
+        const banner = document.getElementById('operationalBanner');
+        const iconWrap = document.getElementById('opBannerIconWrap');
+        const icon = document.getElementById('opBannerIcon');
+        const title = document.getElementById('opBannerTitle');
+        const badge = document.getElementById('opBannerBadge');
+        const msg = document.getElementById('opBannerMsg');
+        const detail = document.getElementById('opBannerDetail');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginBtnIcon = document.getElementById('loginBtnIcon');
+        const loginBtnText = document.getElementById('loginBtnText');
+        const statusDot = document.getElementById('systemStatusDot');
+        const statusText = document.getElementById('systemStatusText');
+
+        if (!data.is_open) {
+          // Sistem di luar jam kerja: hapus token agar tidak bisa auto-login
+          localStorage.removeItem('sppd_token');
+          localStorage.removeItem('sppd_user');
+
+          banner.classList.remove('hidden');
+          statusDot.className = 'w-1.5 h-1.5 bg-rose-500 rounded-full';
+          statusText.textContent = 'Akses Ditutup';
+
+          if (data.is_sunday) {
+            // Hari Minggu
+            banner.className = 'mb-6 p-4 rounded-2xl border bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-200';
+            iconWrap.className = 'p-2.5 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-300';
+            icon.className = 'ph-bold ph-smiley text-2xl';
+            title.textContent = 'Bukan Jam Kerja';
+            badge.className = 'text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30';
+            badge.textContent = 'Hari Libur';
+            msg.textContent = 'bukan jam kerja, selamat istirahat 😊';
+            detail.textContent = 'Akses sistem tidak tersedia pada hari Minggu. Selamat menikmati waktu istirahat!';
+
+            loginBtn.disabled = true;
+            loginBtnIcon.className = 'ph-bold ph-lock text-lg';
+            loginBtnText.textContent = 'Bukan Jam Kerja 😊';
+            loginBtn.classList.remove('btn-primary');
+            loginBtn.classList.add('bg-slate-400', 'dark:bg-slate-700', 'opacity-60', 'cursor-not-allowed');
+
+            showToast('bukan jam kerja, selamat istirahat 😊', 'error', 5000);
+          } else if (data.message === 'Belum masuk jam kerja') {
+            // Belum masuk jam kerja
+            banner.className = 'mb-6 p-4 rounded-2xl border bg-sky-500/10 border-sky-500/30 text-sky-800 dark:text-sky-200';
+            iconWrap.className = 'p-2.5 rounded-xl bg-sky-500/20 text-sky-600 dark:text-sky-300';
+            icon.className = 'ph-bold ph-clock text-2xl';
+            title.textContent = 'Belum Masuk Jam Kerja';
+            badge.className = 'text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-500/30';
+            badge.textContent = 'Belum Buka';
+            msg.textContent = 'belum masuk jam kerja';
+            detail.textContent = `Jam kerja hari ${data.hari} dibuka pukul ${data.jam_masuk} WIB. (Jam Device: ${data.device_time || data.current_time} WIB, Jam Server: ${data.server_time || data.current_time} WIB)`;
+
+            loginBtn.disabled = true;
+            loginBtnIcon.className = 'ph-bold ph-clock text-lg';
+            loginBtnText.textContent = 'Belum Masuk Jam Kerja';
+            loginBtn.classList.remove('btn-primary');
+            loginBtn.classList.add('bg-slate-400', 'dark:bg-slate-700', 'opacity-60', 'cursor-not-allowed');
+
+            showToast('belum masuk jam kerja', 'error', 5000);
+          } else {
+            // Sudah melewati jam kerja
+            banner.className = 'mb-6 p-4 rounded-2xl border bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-200';
+            iconWrap.className = 'p-2.5 rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-300';
+            icon.className = 'ph-bold ph-clock-countdown text-2xl';
+            title.textContent = 'Jam Kerja Berakhir';
+            badge.className = 'text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30';
+            badge.textContent = 'Sudah Selesai';
+            msg.textContent = 'sudah melewati jam kerja';
+            detail.textContent = `Jam kerja hari ${data.hari} telah berakhir pukul ${data.jam_selesai} WIB. (Jam Device: ${data.device_time || data.current_time} WIB, Jam Server: ${data.server_time || data.current_time} WIB)`;
+
+            loginBtn.disabled = true;
+            loginBtnIcon.className = 'ph-bold ph-lock text-lg';
+            loginBtnText.textContent = 'Sudah Melewati Jam Kerja';
+            loginBtn.classList.remove('btn-primary');
+            loginBtn.classList.add('bg-slate-400', 'dark:bg-slate-700', 'opacity-60', 'cursor-not-allowed');
+
+            showToast('sudah melewati jam kerja', 'error', 5000);
+          }
+        } else {
+          // Dalam jam kerja
+          banner.classList.add('hidden');
+          statusDot.className = 'w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse';
+          statusText.textContent = 'v2.0 Online';
+
+          loginBtn.disabled = false;
+          loginBtnIcon.className = 'ph-bold ph-sign-in text-lg';
+          loginBtnText.textContent = 'Masuk ke Sistem';
+          loginBtn.classList.add('btn-primary');
+          loginBtn.classList.remove('bg-slate-400', 'dark:bg-slate-700', 'opacity-60', 'cursor-not-allowed');
+
+          // Cek jika sudah login sebelumnya, auto redirect sesuai role
+          if (localStorage.getItem('sppd_token')) {
+            const user = JSON.parse(localStorage.getItem('sppd_user') || '{}');
+            const redirectMap = {
+              'Karyawan' : `${BASE_PATH}/dashboard.html`,
+              'Manager'  : `${BASE_PATH}/manager.html`,
+              'HRGA'     : `${BASE_PATH}/hrga.html`,
+              'Finance'  : `${BASE_PATH}/finance.html`,
+              'Direksi'  : `${BASE_PATH}/laporan.html`,
+            };
+            window.location.href = redirectMap[user.role_sistem] || `${BASE_PATH}/dashboard.html`;
+          }
+        }
+      } catch (err) {
+        console.warn('[Operasional] Gagal memeriksa status jam operasional:', err);
+      }
+    }
+
+    // Jalankan pemeriksaan status saat halaman dibuka
+    checkOperationalStatus();
+
+    // Login Form Submit
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      // Cek proteksi frontend terlebih dahulu
+      if (!operationalState.isOpen) {
+        showToast(operationalState.message || 'Di luar jam kerja operasional', 'error');
+        return;
+      }
+
       const btn     = document.getElementById('loginBtn');
       const btnText = document.getElementById('loginBtnText');
       const identifier = document.getElementById('identifier').value.trim();
@@ -257,13 +427,24 @@
       try {
         const res  = await fetch(`${API}/auth/login`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ identifier, password })
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-Client-Time': new Date().toISOString()
+          },
+          body: JSON.stringify({ 
+            identifier, 
+            password,
+            client_time: new Date().toISOString()
+          })
         });
         const data = await res.json();
 
         if (!data.success) {
           showToast(data.message || 'Login gagal', 'error');
+          if (data.operational_closed) {
+            // Perbarui status tampilan jika ditolak karena operasional
+            checkOperationalStatus();
+          }
           return;
         }
 
@@ -275,37 +456,26 @@
         // Redirect sesuai role
         const role = data.data.user.role_sistem;
         const redirectMap = {
-          'Karyawan' : '/dashboard.html',
-          'Manager'  : '/manager.html',
-          'HRGA'     : '/hrga.html',
-          'Finance'  : '/finance.html',
-          'Direksi'  : '/laporan.html',
+          'Karyawan' : `${BASE_PATH}/dashboard.html`,
+          'Manager'  : `${BASE_PATH}/manager.html`,
+          'HRGA'     : `${BASE_PATH}/hrga.html`,
+          'Finance'  : `${BASE_PATH}/finance.html`,
+          'Direksi'  : `${BASE_PATH}/laporan.html`,
         };
         setTimeout(() => {
-          window.location.href = redirectMap[role] || '/dashboard.html';
+          window.location.href = redirectMap[role] || `${BASE_PATH}/dashboard.html`;
         }, 1200);
 
       } catch (err) {
         showToast('Tidak dapat terhubung ke server', 'error');
       } finally {
-        btn.disabled = false;
-        btnText.textContent = 'Masuk ke Sistem';
+        if (operationalState.isOpen) {
+          btn.disabled = false;
+          btnText.textContent = 'Masuk ke Sistem';
+        }
       }
     });
-
-    // Redirect jika sudah login
-    if (localStorage.getItem('sppd_token')) {
-      const user = JSON.parse(localStorage.getItem('sppd_user') || '{}');
-      const redirectMap = {
-        'Karyawan' : '/dashboard.html',
-        'Manager'  : '/manager.html',
-        'HRGA'     : '/hrga.html',
-        'Finance'  : '/finance.html',
-        'Direksi'  : '/laporan.html',
-      };
-      window.location.href = redirectMap[user.role_sistem] || '/dashboard.html';
-    }
   </script>
-  <script src="/js/theme.js"></script>
+  <script src="js/theme.js"></script>
 </body>
 </html>

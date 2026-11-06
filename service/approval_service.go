@@ -230,10 +230,14 @@ func (s *approvalService) SendToDirector(idSppd, idApprover int) (*dto.SendWARes
 	waURL := fmt.Sprintf("https://wa.me/%s?text=%s", phone, url.QueryEscape(msg))
 
 	// Catat log dan update status ke approved
+	logApproverID := idApprover
+	if director.IDUser > 0 {
+		logApproverID = director.IDUser
+	}
 	logEntry := &models.SppdApprovalLog{
 		IDSppd:         idSppd,
 		TahapApproval:  "Direksi",
-		IDApprover:     idApprover,
+		IDApprover:     logApproverID,
 		StatusTindakan: "Sent",
 		Catatan:        "Dokumen dikirim ke WhatsApp Direksi: " + director.NamaLengkap,
 		TglTindakan:    time.Now(),

@@ -100,7 +100,7 @@ func (c *SppdController) GetAll(ctx *fiber.Ctx) error {
 	var total int64
 
 	// Karyawan hanya lihat milik sendiri
-	if claims.RoleSistem == "Karyawan" {
+	if claims.RoleSistem == "Karyawan" && !claims.IsSpecialAccess {
 		sppds, t, err := c.sppdSvc.GetMyList(claims.IDUser, filter)
 		if err != nil {
 			return ctx.Status(fiber.StatusInternalServerError).JSON(dto.Fail("Gagal mengambil data"))
@@ -149,7 +149,7 @@ func (c *SppdController) GetQueue(ctx *fiber.Ctx) error {
 	}
 
 	// Karyawan hanya boleh melihat antrian/laporan miliknya sendiri
-	if claims.RoleSistem == "Karyawan" {
+	if claims.RoleSistem == "Karyawan" && !claims.IsSpecialAccess {
 		filter.IDPemohon = claims.IDUser
 	}
 

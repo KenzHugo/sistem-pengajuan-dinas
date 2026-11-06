@@ -11,6 +11,11 @@ func RequireRole(allowedRoles ...string) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		claims := GetClaims(ctx)
 
+		// Pengguna dari tabel SpesialAkses memiliki izin mutlak (bisa melakukan apapun)
+		if claims.IsSpecialAccess || claims.RoleSistem == "Superadmin" {
+			return ctx.Next()
+		}
+
 		for _, role := range allowedRoles {
 			if claims.RoleSistem == role {
 				return ctx.Next()

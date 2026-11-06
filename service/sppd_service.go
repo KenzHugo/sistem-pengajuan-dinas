@@ -16,13 +16,13 @@ import (
 // SppdService mendefinisikan business logic pengajuan SPPD
 type SppdService interface {
 	Create(idPemohon int, req dto.CreateSppdRequest) (*models.SppdPengajuan, error)
-	Submit(idSppd, idPemohon int) (*models.SppdPengajuan, error)
+	Submit(idSppd, idPemohon int, isSpecialAccess ...bool) (*models.SppdPengajuan, error)
 	GetByID(id int) (*models.SppdPengajuan, error)
 	GetMyList(idPemohon int, filter dto.SppdListFilter) ([]models.SppdPengajuan, int64, error)
 	GetAllList(filter dto.SppdListFilter) ([]models.SppdPengajuan, int64, error)
 	GetByStatus(statuses []string, filter dto.SppdListFilter) ([]models.SppdPengajuan, int64, error)
-	Update(idSppd, idPemohon int, req dto.UpdateSppdRequest) (*models.SppdPengajuan, error)
-	Delete(idSppd, idPemohon int) error
+	Update(idSppd, idPemohon int, req dto.UpdateSppdRequest, isSpecialAccess ...bool) (*models.SppdPengajuan, error)
+	Delete(idSppd, idPemohon int, isSpecialAccess ...bool) error
 	HitungEstimasiBiaya(idPemohon int, req dto.KalkulasiBiayaRequest) (*dto.KalkulasiBiayaResponse, error)
 	HitungRincianBiayaSPPD(nomorID string, jarak float64, jamBerangkat, jamKembali, tglBerangkat, tglKembali, kotaTujuan, transportasi, akomodasi string, rekanKerja []string) (*dto.KalkulasiBiayaResponse, error)
 }
@@ -279,15 +279,16 @@ func (s *sppdService) Create(idPemohon int, req dto.CreateSppdRequest) (*models.
 }
 
 // Submit mengubah status SPPD dari draft menjadi pending_manager (mengajukan ke Manager)
-func (s *sppdService) Submit(idSppd, idPemohon int) (*models.SppdPengajuan, error) {
+func (s *sppdService) Submit(idSppd, idPemohon int, isSpecialAccess ...bool) (*models.SppdPengajuan, error) {
+	special := len(isSpecialAccess) > 0 && isSpecialAccess[0]
 	sppd, err := s.sppdRepo.FindByID(idSppd)
 	if err != nil {
 		return nil, errors.New("pengajuan tidak ditemukan")
 	}
-	if sppd.IDPemohon != idPemohon {
+	if sppd.IDPemohon != idPemohon && !special {
 		return nil, errors.New("anda tidak memiliki akses ke pengajuan ini")
 	}
-	if sppd.StatusDokumen != "draft" {
+	if sppd.StatusDokumen != "draft" && !special {
 		return nil, errors.New("hanya pengajuan berstatus draft yang bisa diajukan")
 	}
 	if sppd.NoSppd == "" {
@@ -380,15 +381,16 @@ func (s *sppdService) GetByStatus(statuses []string, filter dto.SppdListFilter) 
 }
 
 // Update mengedit pengajuan yang masih berstatus draft
-func (s *sppdService) Update(idSppd, idPemohon int, req dto.UpdateSppdRequest) (*models.SppdPengajuan, error) {
+func (s *sppdService) Update(idSppd, idPemohon int, req dto.UpdateSppdRequest, isSpecialAccess ...bool) (*models.SppdPengajuan, error) {
+	special := len(isSpecialAccess) > 0 && isSpecialAccess[0]
 	sppd, err := s.sppdRepo.FindByID(idSppd)
 	if err != nil {
 		return nil, errors.New("pengajuan tidak ditemukan")
 	}
-	if sppd.IDPemohon != idPemohon {
+	if sppd.IDPemohon != idPemohon && !special {
 		return nil, errors.New("anda tidak memiliki akses ke pengajuan ini")
 	}
-	if sppd.StatusDokumen != "draft" {
+	if sppd.StatusDokumen != "draft" && !special {
 		return nil, errors.New("hanya pengajuan berstatus draft yang bisa diedit")
 	}
 
@@ -519,15 +521,16 @@ func (s *sppdService) Update(idSppd, idPemohon int, req dto.UpdateSppdRequest) (
 }
 
 // Delete menghapus pengajuan yang masih berstatus draft
-func (s *sppdService) Delete(idSppd, idPemohon int) error {
+func (s *sppdService) Delete(idSppd, idPemohon int, isSpecialAccess ...bool) error {
+	special := len(isSpecialAccess) > 0 && isSpecialAccess[0]
 	sppd, err := s.sppdRepo.FindByID(idSppd)
 	if err != nil {
 		return errors.New("pengajuan tidak ditemukan")
 	}
-	if sppd.IDPemohon != idPemohon {
+	if sppd.IDPemohon != idPemohon && !special {
 		return errors.New("anda tidak memiliki akses ke pengajuan ini")
 	}
-	if sppd.StatusDokumen != "draft" {
+	if sppd.StatusDokumen != "draft" && !special {
 		return errors.New("hanya pengajuan berstatus draft yang bisa dihapus")
 	}
 

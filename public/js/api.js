@@ -36,8 +36,13 @@ function requireAuth() {
 async function checkOperationalGuard() {
   const token = getToken();
   const user = getCurrentUser();
-  // Jika user belum login atau memiliki hak spesial akses, skip
-  if (!token || user.is_special_access) return;
+  if (!token) return;
+
+  // Jika user memiliki hak spesial akses, bebas akses 24 jam (tidak di-logout)
+  if (user && user.is_special_access) {
+    console.info('[Operasional] User terdaftar di SpesialAkses (bebas akses 24 jam). Auto-logout dilewati.');
+    return;
+  }
 
   try {
     const devTime = new Date().toISOString();
@@ -58,8 +63,12 @@ async function checkOperationalGuard() {
 
 // Jalankan guard operasional saat user berada di halaman internal
 if (typeof window !== 'undefined' && getToken()) {
-  setTimeout(checkOperationalGuard, 1200);
-  setInterval(checkOperationalGuard, 30000);
+  setTimeout(checkOperationalGuard, 1000);
+  setInterval(checkOperationalGuard, 10000); // Cek setiap 10 detik agar lebih responsif
+  window.addEventListener('focus', checkOperationalGuard); // Cek langsung saat tab browser aktif kembali
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) checkOperationalGuard();
+  });
 }
 
 // Wrapper fetch dengan auth header otomatis dan penanganan error/expired token

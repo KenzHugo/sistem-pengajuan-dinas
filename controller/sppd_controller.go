@@ -46,7 +46,7 @@ func (c *SppdController) Submit(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("ID tidak valid"))
 	}
 
-	result, err := c.sppdSvc.Submit(id, claims.IDUser)
+	result, err := c.sppdSvc.Submit(id, claims.IDUser, claims.IsSpecialAccess)
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail(err.Error()))
 	}
@@ -178,7 +178,7 @@ func (c *SppdController) Update(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("Format request tidak valid"))
 	}
 
-	result, err := c.sppdSvc.Update(id, claims.IDUser, req)
+	result, err := c.sppdSvc.Update(id, claims.IDUser, req, claims.IsSpecialAccess)
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail(err.Error()))
 	}
@@ -193,7 +193,7 @@ func (c *SppdController) Delete(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail("ID tidak valid"))
 	}
 
-	if err := c.sppdSvc.Delete(id, claims.IDUser); err != nil {
+	if err := c.sppdSvc.Delete(id, claims.IDUser, claims.IsSpecialAccess); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.Fail(err.Error()))
 	}
 	return ctx.Status(fiber.StatusOK).JSON(dto.OK("Pengajuan berhasil dihapus", nil))

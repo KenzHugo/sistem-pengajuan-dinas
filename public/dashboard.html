@@ -398,15 +398,15 @@
   <i id="toastIcon" class="ph-bold text-lg"></i><span id="toastMsg"></span>
 </div>
 
-<script src="js/api.js?v=3"></script>
-<script src="js/sidebar.js?v=3"></script>
+<script src="js/api.js?v=4"></script>
+<script src="js/sidebar.js?v=4"></script>
 <script>
   requireAuth();
   const user = getCurrentUser();
   renderSidebar('dashboard');
 
-  // Sembunyikan tombol buat untuk Direksi
-  if (user.role_sistem === 'Direksi') {
+  // Sembunyikan tombol buat untuk Direksi (kecuali Spesial Akses)
+  if (user.role_sistem === 'Direksi' && !user.is_special_access) {
     document.getElementById('btnCreate').classList.add('hidden');
   }
 
@@ -495,7 +495,7 @@
               class="p-2 rounded-lg text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-sky-300 dark:hover:bg-sky-500/20 transition">
               <i class="ph-bold ph-eye text-base"></i>
             </button>
-            ${s.status_dokumen === 'draft' ? `
+            ${(s.status_dokumen === 'draft' || user.is_special_access) ? `
             <button onclick="openEdit(${s.id_sppd})" title="Edit"
               class="p-2 rounded-lg text-amber-600 hover:bg-amber-50 dark:text-slate-400 dark:hover:text-amber-300 dark:hover:bg-amber-500/20 transition">
               <i class="ph-bold ph-pencil text-base"></i>
